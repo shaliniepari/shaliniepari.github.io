@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Research — Shalini Epari</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { background: #010c1e; color: #fff; font-family: 'Segoe UI', system-ui, sans-serif; min-height: 100%; }
+a { color: inherit; text-decoration: none; }
+
+nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 24px 48px;
+  background: rgba(1,12,30,0.85); backdrop-filter: blur(10px);
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+}
+.nav-home { font-size: 13px; color: rgba(255,255,255,0.25); letter-spacing: 0.02em; transition: color 0.15s; }
+.nav-home:hover { color: #fff; }
+.nav-links { display: flex; gap: 28px; }
+.nav-links a { font-size: 12px; letter-spacing: 0.04em; color: #5aadff; transition: opacity 0.15s; }
+.nav-links a:hover { opacity: 0.65; }
+.nav-links a.active { color: rgba(255,255,255,0.55); }
+
+main { max-width: 720px; margin: 0 auto; padding: 140px 24px 100px; }
+
+.page-label { font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase; color: rgba(100,160,255,0.4); margin-bottom: 14px; }
+
+h1 { font-size: 44px; font-weight: 200; letter-spacing: -0.02em; color: #fff; margin-bottom: 24px; line-height: 1.1; }
+
+.description { font-size: 15px; color: rgba(255,255,255,0.42); line-height: 1.85; max-width: 580px; margin-bottom: 64px; font-weight: 300; }
+
+.divider { width: 32px; height: 1px; background: rgba(255,255,255,0.08); margin-bottom: 40px; }
+.section-label { font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase; color: rgba(255,255,255,0.2); margin-bottom: 28px; }
+
+.project {
+  padding: 32px 0;
+  border-top: 1px solid rgba(255,255,255,0.06);
+  display: grid; grid-template-columns: 1fr auto; gap: 24px; align-items: start;
+  transition: border-color 0.2s;
+}
+.project:last-child { border-bottom: 1px solid rgba(255,255,255,0.06); }
+.project:hover { border-top-color: rgba(255,255,255,0.12); }
+
+.project-num { font-size: 11px; color: rgba(255,255,255,0.15); letter-spacing: 0.08em; margin-bottom: 10px; }
+.project-title { font-size: 19px; font-weight: 300; color: #fff; margin-bottom: 10px; letter-spacing: -0.01em; }
+.project-desc { font-size: 14px; color: rgba(255,255,255,0.4); line-height: 1.75; max-width: 520px; }
+.project-tag {
+  font-size: 10px; text-transform: uppercase; letter-spacing: 0.08em;
+  color: #5aadff; background: rgba(90,173,255,0.08);
+  padding: 3px 10px; border-radius: 4px; border: 1px solid rgba(90,173,255,0.15);
+  white-space: nowrap; align-self: flex-start; margin-top: 4px;
+}
+.project-tag.purple { color: #a090ff; background: rgba(160,144,255,0.08); border-color: rgba(160,144,255,0.15); }
+.project-link {
+  display: inline-flex; align-items: center; gap: 6px;
+  margin-top: 16px; font-size: 12px; color: rgba(255,255,255,0.2);
+  letter-spacing: 0.04em;
+}
+.project-link svg { width: 12px; height: 12px; stroke: currentColor; stroke-width: 1.5; fill: none; }
+
+footer { text-align: center; padding: 40px 24px; font-size: 11px; color: rgba(255,255,255,0.12); border-top: 1px solid rgba(255,255,255,0.05); margin-top: 40px; }
+
+@media (max-width: 600px) {
+  nav { padding: 20px; }
+  main { padding: 120px 20px 80px; }
+  h1 { font-size: 34px; }
+  .project { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+<nav>
+  <a class="nav-home" href="index.html">Shalini Epari</a>
+  <div class="nav-links">
+    <a href="research.html" class="active">Research</a>
+    <a href="students.html">Student Projects</a>
+    <a href="blog.html">Blog</a>
+    <a href="cv.pdf">CV</a>
+    <a href="mailto:shalini.epari@cern.ch">Contact</a>
+  </div>
+</nav>
+
+<main>
+  <div class="page-label">ATLAS · CERN</div>
+  <h1>Research</h1>
+  <p class="description">
+    I work on the ATLAS experiment at the Large Hadron Collider at CERN,
+    searching for new fundamental particles beyond the Standard Model.
+    My work combines data analysis and machine learning with hands-on detector
+    development — building and commissioning the hardware that will power
+    the next generation of high-energy collisions.
+  </p>
+
+  <div class="divider"></div>
+  <div class="section-label">Current &amp; recent projects</div>
+
+  <div class="project">
+    <div>
+      <div class="project-num">01</div>
+      <div class="project-title">Vector-Like Leptons</div>
+      <div class="project-desc">
+        Searching for vector-like leptons — exotic heavy particles predicted by
+        several beyond-Standard-Model theories. Using proton–proton collision data
+        from ATLAS and machine learning classifiers to distinguish rare signal
+        events from overwhelming Standard Model backgrounds.
+      </div>
+      <div class="project-link">
+        <svg viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        Paper coming soon
+      </div>
+    </div>
+    <span class="project-tag">BSM Physics</span>
+  </div>
+
+  <div class="project">
+    <div>
+      <div class="project-num">02</div>
+      <div class="project-title">ITk Interlock System</div>
+      <div class="project-desc">
+        Working on the safety interlock system for the ATLAS Inner Tracker (ITk),
+        the next-generation silicon detector being built for the High-Luminosity LHC.
+        The interlock system protects the detector from damage during operation —
+        critical infrastructure for a piece of equipment that cannot be easily
+        accessed once installed.
+      </div>
+      <div class="project-link">
+        <svg viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        More soon
+      </div>
+    </div>
+    <span class="project-tag purple">Detector R&amp;D</span>
+  </div>
+
+</main>
+
+<footer>Shalini Epari · ATLAS, CERN</footer>
+</body>
+</html>
