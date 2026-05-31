@@ -92,35 +92,56 @@ function project(wx,wy,wz){
   const f=H*0.88;
   return {x:W*0.5+(wx/wz)*f, y:H*0.5+(wy/wz)*f};
 }
-const R=1.0,NSLICES=40,NSEGS=36,Lx=-0.6,Ly=-0.8;
+const R=1.0,NSEGS=36,Lx=-0.6,Ly=-0.8;
 function drawCylinder(camZ,alpha){
   if(alpha<=0)return;
-  const zNear=0.18,zFar=3.2,dz=(zFar-zNear)/NSLICES;
-  for(let si=NSLICES-1;si>=0;si--){
-    let wz=zNear+si*dz-(camZ%dz);
-    if(wz<=0.05)wz+=zFar; if(wz>zFar)continue;
-    const depthT=1-(wz-zNear)/(zFar-zNear);
-    const fogA=Math.pow(depthT,0.5);
+  const spacing = 0.12;  // world units between rings
+  const zNear   = 0.15;  // closest ring to draw
+  const zFar    = 4.0;   // furthest ring to draw
+
+  // Find which ring indices are currently visible
+  // Ring i sits at world position i*spacing
+  // In camera space: wz = i*spacing - camZ
+  // Visible when zNear <= wz <= zFar
+  // So i ranges from ceil((camZ+zNear)/spacing) to floor((camZ+zFar)/spacing)
+  const iMin = Math.ceil((camZ + zNear) / spacing);
+  const iMax = Math.floor((camZ + zFar) / spacing);
+
+  // Draw back to front
+  for(let i=iMax; i>=iMin; i--){
+    const wz = i * spacing - camZ;  // camera-relative depth, always smooth
+    if(wz < zNear || wz > zFar) continue;
+
+    const depthT = 1 - (wz - zNear) / (zFar - zNear);
+    const fogA   = Math.pow(depthT, 0.5);
+
+    // fade near/far edges
+    const fadeIn  = Math.min(1, (wz - zNear) / (spacing * 3));
+    const fadeOut = Math.min(1, (zFar - wz)  / (spacing * 3));
+    const ringA   = fadeIn * fadeOut;
+    if(ringA < 0.005) continue;
+
+    const wz2 = Math.max(0.05, wz - spacing);
+
     for(let ai=0;ai<NSEGS;ai++){
-      const a0=(ai/NSEGS)*Math.PI*2,a1=((ai+1)/NSEGS)*Math.PI*2,aMid=(a0+a1)*0.5;
-      const nx=-Math.cos(aMid),ny=-Math.sin(aMid);
-      const diffuse=Math.max(0,nx*Lx+ny*Ly);
+      const a0=(ai/NSEGS)*Math.PI*2, a1=((ai+1)/NSEGS)*Math.PI*2, aMid=(a0+a1)*0.5;
+      const nx=-Math.cos(aMid), ny=-Math.sin(aMid);
+      const diffuse=Math.max(0, nx*Lx + ny*Ly);
       const l=0.04+diffuse*0.28+fogA*0.05;
-      const rr=Math.round(l*15+fogA*4),gg=Math.round(l*55+fogA*10),bb=Math.round(l*220+fogA*30);
-      const wz2=Math.max(0.05,wz-dz);
+      const rr=Math.round(l*15+fogA*4), gg=Math.round(l*55+fogA*10), bb=Math.round(l*220+fogA*30);
       const p00=project(Math.cos(a0)*R,Math.sin(a0)*R,wz);
       const p10=project(Math.cos(a1)*R,Math.sin(a1)*R,wz);
       const p01=project(Math.cos(a0)*R,Math.sin(a0)*R,wz2);
       const p11=project(Math.cos(a1)*R,Math.sin(a1)*R,wz2);
       ctx.beginPath();
-      ctx.moveTo(p00.x,p00.y);ctx.lineTo(p10.x,p10.y);
-      ctx.lineTo(p11.x,p11.y);ctx.lineTo(p01.x,p01.y);
+      ctx.moveTo(p00.x,p00.y); ctx.lineTo(p10.x,p10.y);
+      ctx.lineTo(p11.x,p11.y); ctx.lineTo(p01.x,p01.y);
       ctx.closePath();
-      ctx.fillStyle=`rgba(${rr},${gg},${bb},${alpha*(0.6+fogA*0.35)})`;
+      ctx.fillStyle=`rgba(${rr},${gg},${bb},${alpha*(0.6+fogA*0.35)*ringA})`;
       ctx.fill();
-      if(si%8===0){
-        ctx.beginPath();ctx.moveTo(p00.x,p00.y);ctx.lineTo(p10.x,p10.y);
-        ctx.strokeStyle=`rgba(60,120,255,${alpha*fogA*0.18})`;ctx.lineWidth=0.6;ctx.stroke();
+      if(i%8===0){
+        ctx.beginPath(); ctx.moveTo(p00.x,p00.y); ctx.lineTo(p10.x,p10.y);
+        ctx.strokeStyle=`rgba(60,120,255,${alpha*fogA*0.18*ringA})`; ctx.lineWidth=0.6; ctx.stroke();
       }
     }
   }
@@ -192,22 +213,50 @@ function draw(ts){
   // Cylinder
   drawCylinder(phTravel*2.0, phTube*(1-Math.max(0,phBoom*2.2)));
 
-  // Particles
-  const wR=Math.min(W,H)*0.072;
-  let p1x,p1y,p2x,p2y;
-  if(phWaltz>0||phBoom>0){
-    const orbit=wR*(1-Math.min(phWaltz+phBoom*0.5,1)*0.9);
-    const ang=phWaltz*Math.PI*2*2.6;
-    p1x=cx+Math.cos(ang)*orbit;          p1y=cy+Math.sin(ang)*orbit*0.42;
-    p2x=cx+Math.cos(ang+Math.PI)*orbit;  p2y=cy+Math.sin(ang+Math.PI)*orbit*0.42;
+  // Three phases — particles always separated until boom
+  // p1 starts left, p2 starts right. They never meet until the collision.
+
+  const startX  = W * 0.28;   // starting offset from centre
+  const circleR = W * 0.13;   // large orbit radius
+  const waltzR  = W * 0.04;   // tight waltz radius
+
+  const pStr  = tband(ms, T.travel[0], T.waltz[0]);       // straight travel
+  const pCirc = tband(ms, T.waltz[0],  T.waltz[0]+700);   // large circle
+  const pWltz = tband(ms, T.waltz[0]+700, T.boom[0]);     // tight waltz
+
+  let p1x, p1y, p2x, p2y;
+
+  if (pWltz > 0) {
+    // Tight waltz: orbit shrinks from waltzR → 0 at collision
+    const orbit = waltzR * (1 - ease(pWltz));
+    const ang   = pWltz * Math.PI * 2 * 3.0;
+    p1x = cx + Math.cos(ang)           * orbit;
+    p1y = cy + Math.sin(ang)           * orbit * 0.45;
+    p2x = cx + Math.cos(ang + Math.PI) * orbit;
+    p2y = cy + Math.sin(ang + Math.PI) * orbit * 0.45;
+
+  } else if (pCirc > 0) {
+    // Large circle: orbit grows from circleR (smooth in) stays at circleR
+    // At pCirc=0 the orbit is circleR — which matches where straight travel ends
+    const orbit = circleR;
+    const ang   = pCirc * Math.PI * 4; // two full rotations
+    p1x = cx + Math.cos(ang)           * orbit;
+    p1y = cy + Math.sin(ang)           * orbit * 0.45;
+    p2x = cx + Math.cos(ang + Math.PI) * orbit;
+    p2y = cy + Math.sin(ang + Math.PI) * orbit * 0.45;
+
   } else {
-    const t=phTravel;
-    p1x=cx-W*0.26+t*W*0.26+Math.sin(phTravel*Math.PI*2.2)*W*0.006;
-    p1y=cy+Math.sin(phTravel*Math.PI*3.2)*H*0.022;
-    p2x=cx+W*0.26-t*W*0.26-Math.sin(phTravel*Math.PI*2.2)*W*0.006;
-    p2y=cy-Math.sin(phTravel*Math.PI*3.2)*H*0.022;
+    // Straight travel: p1 left→(cx-circleR), p2 right→(cx+circleR)
+    // They end at circleR apart — exactly where the circle phase starts
+    const t  = ease(pStr);
+    const ex = circleR; // end x offset from centre
+    p1x = cx - startX + t * (startX - ex);
+    p1y = cy;
+    p2x = cx + startX - t * (startX - ex);
+    p2y = cy;
   }
-  const pAlpha=Math.min(1,phTravel*4)*(1-Math.min(1,phBoom*7));
+
+  const pAlpha = Math.min(1, tband(ms, T.travel[0], T.travel[0]+400)) * (1 - Math.min(1, phBoom * 7));
   drawParticle(p1x,p1y,pAlpha);
   drawParticle(p2x,p2y,pAlpha);
 
