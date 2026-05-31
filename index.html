@@ -43,6 +43,295 @@ body { background: #000; color: #fff; font-family: 'Segoe UI', system-ui, sans-s
 #top-nav a:hover { opacity: 0.7; }
 
 #hint {
+  position: absolute; bottom: 36px; left: 50%; transform: translateX(-50%);
+  text-align: center; pointer-events: none;
+}
+#hint p { font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase; color: rgba(140,190,255,0.65); margin-bottom: 8px; }
+.hl { width: 1px; height: 28px; background: linear-gradient(to bottom, rgba(120,170,255,0.55), transparent); margin: 0 auto; animation: drip 2s ease-in-out infinite; }
+@keyframes drip {
+  0%   { transform: scaleY(0); transform-origin: top; }
+  49%  { transform: scaleY(1); transform-origin: top; }
+  50%  { transform-origin: bottom; }
+  100% { transform: scaleY(0); transform-origin: bottom; }
+}
+</style>
+</head>
+<body>
+
+<div id="scroll-driver">
+  <div id="sticky-stage">
+    <nav id="top-nav">
+      <a href="cv.pdf">CV</a>
+      <a href="research.html">Research</a>
+      <a href="students.html">Student Projects</a>
+      <a href="blog.html">Blog</a>
+      <a href="mailto:shalini.epari@cern.ch">Contact</a>
+    </nav>
+
+    <canvas id="c"></canvas>
+
+    <div id="intro-overlay">
+      <div class="big-hi">Hi, I'm <em>Shalini Epari.</em></div>
+      <div class="role">Experimental Particle Physicist</div>
+      <p class="intro-p">
+        I work for the ATLAS Experiment at CERN. My research focuses on searching
+        for new fundamental particles, using machine learning,
+        upgrading the detector for the next generation of collisions, and scientific outreach.
+      </p>
+    </div>
+
+    <div id="hint"><p>scroll</p><div class="hl"></div></div>
+  </div>
+</div>
+
+<script>
+const canvas  = document.getElementById('c');
+const ctx     = canvas.getContext('2d');
+const overlay = document.getElementById('intro-overlay');
+const topNav  = document.getElementById('top-nav');
+const hint    = document.getElementById('hint');
+let W, H;
+function resize() { W = canvas.width = window.innerWidth; H = canvas.height = window.innerHeight; }
+resize();
+window.addEventListener('resize', resize);
+
+function band(p,a,b){ return Math.max(0,Math.min(1,(p-a)/(b-a))); }
+function ease(t){ return t<0.5?2*t*t:-1+(4-2*t)*t; }
+
+// ── 3D cylinder ──
+function project(wx,wy,wz) {
+  const f=H*0.88;
+  return {x:W*0.5+(wx/wz)*f, y:H*0.5+(wy/wz)*f};
+}
+const R=1.0,NSLICES=40,NSEGS=36,Lx=-0.6,Ly=-0.8;
+function drawCylinder(camZ,alpha) {
+  if(alpha<=0) return;
+  const zNear=0.18,zFar=3.2,dz=(zFar-zNear)/NSLICES;
+  for (let si=NSLICES-1;si>=0;si--) {
+    let wz=zNear+si*dz-(camZ%dz);
+    if(wz<=0.05)wz+=zFar; if(wz>zFar)continue;
+    const depthT=1-(wz-zNear)/(zFar-zNear);
+    const fogA=Math.pow(depthT,0.5);
+    for (let ai=0;ai<NSEGS;ai++) {
+      const a0=(ai/NSEGS)*Math.PI*2,a1=((ai+1)/NSEGS)*Math.PI*2,aMid=(a0+a1)*0.5;
+      const nx=-Math.cos(aMid),ny=-Math.sin(aMid);
+      const diffuse=Math.max(0,nx*Lx+ny*Ly);
+      const l=0.04+diffuse*0.28+fogA*0.05;
+      const rr=Math.round(l*15+fogA*4),gg=Math.round(l*55+fogA*10),bb=Math.round(l*220+fogA*30);
+      const wz2=Math.max(0.05,wz-dz);
+      const p00=project(Math.cos(a0)*R,Math.sin(a0)*R,wz);
+      const p10=project(Math.cos(a1)*R,Math.sin(a1)*R,wz);
+      const p01=project(Math.cos(a0)*R,Math.sin(a0)*R,wz2);
+      const p11=project(Math.cos(a1)*R,Math.sin(a1)*R,wz2);
+      ctx.beginPath();
+      ctx.moveTo(p00.x,p00.y);ctx.lineTo(p10.x,p10.y);
+      ctx.lineTo(p11.x,p11.y);ctx.lineTo(p01.x,p01.y);
+      ctx.closePath();
+      ctx.fillStyle=`rgba(${rr},${gg},${bb},${alpha*(0.6+fogA*0.35)})`;
+      ctx.fill();
+      if(si%8===0){
+        ctx.beginPath();ctx.moveTo(p00.x,p00.y);ctx.lineTo(p10.x,p10.y);
+        ctx.strokeStyle=`rgba(60,120,255,${alpha*fogA*0.18})`;ctx.lineWidth=0.6;ctx.stroke();
+      }
+    }
+  }
+  const vg=ctx.createRadialGradient(W*.5,H*.5,0,W*.5,H*.5,H*0.25);
+  vg.addColorStop(0,`rgba(8,35,130,${alpha*0.6})`);
+  vg.addColorStop(0.6,`rgba(3,12,50,${alpha*0.25})`);
+  vg.addColorStop(1,'rgba(0,0,0,0)');
+  ctx.fillStyle=vg;ctx.beginPath();ctx.arc(W*.5,H*.5,H*0.25,0,Math.PI*2);ctx.fill();
+}
+
+// ── Particle (no persistent trail — recomputed each frame from progress) ──
+function drawParticle(x,y,alpha) {
+  if(alpha<=0) return;
+  const g=ctx.createRadialGradient(x,y,0,x,y,22);
+  g.addColorStop(0,`rgba(100,180,255,${alpha*0.65})`);
+  g.addColorStop(0.45,`rgba(40,100,220,${alpha*0.25})`);
+  g.addColorStop(1,'rgba(0,0,0,0)');
+  ctx.fillStyle=g;ctx.beginPath();ctx.arc(x,y,22,0,Math.PI*2);ctx.fill();
+  ctx.beginPath();ctx.arc(x,y,3,0,Math.PI*2);
+  ctx.fillStyle=`rgba(190,220,255,${alpha})`;ctx.fill();
+}
+
+// Precomputed track angles (stable across frames)
+const TRACK_ANGLES = Array.from({length:12},(_,i)=>(i/12)*Math.PI*2+i*0.4);
+const TRACK_LENS   = Array.from({length:12},(_,i)=>0.55+((i*5)%6)*0.08);
+
+const dust=Array.from({length:35},()=>({
+  x:Math.random(),y:Math.random(),r:0.35+Math.random()*0.9,
+  vy:0.00007+Math.random()*0.00011,vx:(Math.random()-.5)*0.00004,
+}));
+function stepDust(dt){
+  for(const d of dust){
+    d.x+=d.vx*dt;d.y+=d.vy*dt;
+    if(d.y>1.05){d.y=-0.05;d.x=Math.random();}
+    if(d.x<0)d.x+=1;if(d.x>1)d.x-=1;
+  }
+}
+
+let progress=0;
+
+function draw(dt) {
+  stepDust(dt);
+  ctx.clearRect(0,0,W,H);
+  const cx=W*0.5, cy=H*0.5;
+
+  const phTube   = band(progress,0.08,0.30);
+  const phTravel = band(progress,0.08,0.56);
+  const phWaltz  = band(progress,0.56,0.70);
+  const phBoom   = band(progress,0.68,1.00);
+
+  // Background
+  const postBoom = Math.min(1,phBoom*3);
+  const bgTube   = phTube*(1-Math.min(phBoom*1.5,1));
+  ctx.fillStyle=`rgb(${Math.round(bgTube*4+postBoom*1)},${Math.round(bgTube*9+postBoom*10)},${Math.round(bgTube*22+postBoom*26)})`;
+  ctx.fillRect(0,0,W,H);
+
+  // Dust
+  if(phBoom<0.15&&phTube<0.5){
+    const da=0.05*(1-phTube*2)*(1-phBoom*6);
+    if(da>0)for(const d of dust){
+      ctx.beginPath();ctx.arc(d.x*W,d.y*H,d.r,0,Math.PI*2);
+      ctx.fillStyle=`rgba(80,130,255,${da})`;ctx.fill();
+    }
+  }
+
+  // Cylinder
+  drawCylinder(phTravel*2.0, phTube*(1-Math.max(0,phBoom*2.2)));
+
+  // Particles
+  const wR=Math.min(W,H)*0.072;
+  let p1x,p1y,p2x,p2y;
+  if(phWaltz>0||phBoom>0){
+    const orbit=wR*(1-Math.min(phWaltz+phBoom*0.5,1)*0.9);
+    const ang=phWaltz*Math.PI*2*2.6;
+    p1x=cx+Math.cos(ang)*orbit;          p1y=cy+Math.sin(ang)*orbit*0.42;
+    p2x=cx+Math.cos(ang+Math.PI)*orbit;  p2y=cy+Math.sin(ang+Math.PI)*orbit*0.42;
+  } else {
+    const t=ease(phTravel);
+    p1x=cx-W*0.26+t*W*0.26+Math.sin(phTravel*Math.PI*2.2)*W*0.006;
+    p1y=cy+Math.sin(phTravel*Math.PI*3.2)*H*0.022;
+    p2x=cx+W*0.26-t*W*0.26-Math.sin(phTravel*Math.PI*2.2)*W*0.006;
+    p2y=cy-Math.sin(phTravel*Math.PI*3.2)*H*0.022;
+  }
+  const pAlpha=Math.min(1,phTravel*6)*(1-Math.min(1,phBoom*7));
+  drawParticle(p1x,p1y,pAlpha);
+  drawParticle(p2x,p2y,pAlpha);
+
+  // ── Boom — fully progress-driven, no state ──
+  if(phBoom>0){
+    // Two rings — radius driven by phBoom directly (no animation loop)
+    const ring1r = phBoom * 200;
+    const ring1a = Math.max(0, 0.45 - phBoom * 0.45);
+    if(ring1a>0){
+      ctx.beginPath();ctx.arc(cx,cy,ring1r,0,Math.PI*2);
+      ctx.strokeStyle=`rgba(45,110,230,${ring1a})`;ctx.lineWidth=1.0;ctx.stroke();
+    }
+    const ring2r = phBoom * 340;
+    const ring2a = Math.max(0, 0.18 - phBoom * 0.18);
+    if(ring2a>0){
+      ctx.beginPath();ctx.arc(cx,cy,ring2r,0,Math.PI*2);
+      ctx.strokeStyle=`rgba(45,110,230,${ring2a})`;ctx.lineWidth=1.0;ctx.stroke();
+    }
+
+    // Tracks — grow with phBoom, fade later
+    const trkGrow = band(phBoom,0.0,0.40);
+    const trkFade = band(phBoom,0.55,0.85);
+    const trkAlpha = (1-trkFade)*0.55;
+    if(trkAlpha>0){
+      const bR=Math.min(W,H)*0.28;
+      for(let i=0;i<12;i++){
+        const len=bR*TRACK_LENS[i]*trkGrow;
+        ctx.beginPath();ctx.moveTo(cx,cy);
+        ctx.lineTo(cx+Math.cos(TRACK_ANGLES[i])*len, cy+Math.sin(TRACK_ANGLES[i])*len);
+        ctx.strokeStyle=`rgba(55,120,240,${trkAlpha})`;ctx.lineWidth=0.8;ctx.stroke();
+      }
+    }
+
+    // Central glow
+    const glowA=Math.max(0,1-phBoom*2.0);
+    if(glowA>0){
+      const fg=ctx.createRadialGradient(cx,cy,0,cx,cy,Math.min(W,H)*0.26);
+      fg.addColorStop(0,`rgba(55,125,255,${glowA*0.48})`);
+      fg.addColorStop(0.4,`rgba(20,65,200,${glowA*0.2})`);
+      fg.addColorStop(1,'rgba(0,0,0,0)');
+      ctx.fillStyle=fg;ctx.fillRect(0,0,W,H);
+    }
+
+    // Intro text + nav opacity — driven by progress, fully reversible
+    const textAlpha = ease(band(phBoom,0.36,0.70));
+    overlay.style.opacity = textAlpha;
+    overlay.style.pointerEvents = textAlpha > 0.5 ? 'auto' : 'none';
+    topNav.style.opacity  = textAlpha;
+    topNav.style.pointerEvents = textAlpha > 0.5 ? 'auto' : 'none';
+  } else {
+    overlay.style.opacity = '0';
+    overlay.style.pointerEvents = 'none';
+    topNav.style.opacity  = '0';
+    topNav.style.pointerEvents = 'none';
+  }
+
+  hint.style.opacity = progress < 0.05 ? '1' : '0';
+}
+
+let lastT=0;
+function loop(ts){draw(ts-lastT);lastT=ts;requestAnimationFrame(loop);}
+requestAnimationFrame(loop);
+
+function onScroll(){
+  const sec=document.getElementById('scroll-driver');
+  const rect=sec.getBoundingClientRect();
+  progress=Math.max(0,Math.min(1,-rect.top/(sec.offsetHeight-window.innerHeight)));
+}
+window.addEventListener('scroll',onScroll,{passive:true});
+</script>
+</body>
+</html><!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Shalini Epari</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: #000; color: #fff; font-family: 'Segoe UI', system-ui, sans-serif; overflow-x: hidden; }
+#scroll-driver { height: 350vh; position: relative; }
+#sticky-stage { position: sticky; top: 0; height: 100vh; overflow: hidden; }
+#c { display: block; width: 100%; height: 100%; position: absolute; inset: 0; }
+
+#intro-overlay {
+  position: absolute; inset: 0;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  padding: 24px; pointer-events: none; opacity: 0;
+}
+.big-hi {
+  font-size: 68px; font-weight: 200; letter-spacing: -0.04em;
+  line-height: 1.05; color: #fff; margin-bottom: 8px; text-align: center;
+  white-space: nowrap;
+}
+.big-hi em { font-style: normal; font-weight: 500; color: #5aadff; }
+.role {
+  font-size: 13px; letter-spacing: 0.08em;
+  color: rgba(255,255,255,0.28); margin-bottom: 28px; text-align: center;
+}
+.intro-p {
+  font-size: 15px; color: rgba(255,255,255,0.42); line-height: 1.85;
+  max-width: 400px; text-align: justify; font-weight: 300;
+}
+
+#top-nav {
+  position: absolute; top: 28px; right: 36px;
+  display: flex; gap: 24px; z-index: 10;
+  pointer-events: none; opacity: 0;
+}
+#top-nav a {
+  font-size: 12px; letter-spacing: 0.04em; color: #5aadff;
+  text-decoration: none; transition: opacity 0.15s;
+}
+#top-nav a:hover { opacity: 0.7; }
+
+#hint {
   position: absolute; bottom: 36px; right: 40px; text-align: right;
   pointer-events: none;
 }
