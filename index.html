@@ -14,50 +14,37 @@ body { background: #000; color: #fff; font-family: 'Segoe UI', system-ui, sans-s
 #intro-overlay {
   position: absolute; inset: 0;
   display: flex; flex-direction: column; align-items: center; justify-content: center;
-  padding: 24px; opacity: 0; pointer-events: none;
-  transition: opacity 1.8s ease;
-}
-#intro-overlay.visible { opacity: 1; pointer-events: auto; }
-
-.eyebrow {
-  font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase;
-  color: rgba(100,160,255,0.5); margin-bottom: 18px;
+  padding: 24px; pointer-events: none; opacity: 0;
 }
 .big-hi {
   font-size: 68px; font-weight: 200; letter-spacing: -0.04em;
   line-height: 1.05; color: #fff; margin-bottom: 8px; text-align: center;
+  white-space: nowrap;
 }
 .big-hi em { font-style: normal; font-weight: 500; color: #5aadff; }
 .role {
   font-size: 13px; letter-spacing: 0.08em;
-  color: rgba(255,255,255,0.28); margin-bottom: 32px; text-align: center;
+  color: rgba(255,255,255,0.28); margin-bottom: 28px; text-align: center;
 }
 .intro-p {
   font-size: 15px; color: rgba(255,255,255,0.42); line-height: 1.85;
-  max-width: 440px; text-align: center; margin-bottom: 40px; font-weight: 300;
+  max-width: 400px; text-align: justify; font-weight: 300;
 }
-.intro-p strong { color: rgba(255,255,255,0.75); font-weight: 400; }
-.cta {
-  display: inline-flex; align-items: center; gap: 10px;
-  background: rgba(26,80,255,0.85); color: #fff; font-size: 13px; letter-spacing: 0.04em;
-  padding: 12px 28px; border-radius: 10px; margin-bottom: 44px;
-  text-decoration: none; border: 1px solid rgba(100,160,255,0.2);
-  transition: background 0.2s, transform 0.15s; backdrop-filter: blur(8px);
+
+#top-nav {
+  position: absolute; top: 28px; right: 36px;
+  display: flex; gap: 24px; z-index: 10;
+  pointer-events: none; opacity: 0;
 }
-.cta:hover { background: rgba(42,98,255,0.95); transform: translateY(-2px); }
-.cta svg { width: 14px; height: 14px; stroke: #fff; stroke-width: 2; fill: none; }
-.nav-row { display: flex; justify-content: center; gap: 8px; flex-wrap: wrap; }
-.nav-pill {
-  font-size: 12px; color: rgba(255,255,255,0.32); padding: 8px 16px;
-  border: 1px solid rgba(255,255,255,0.07); border-radius: 8px;
-  text-decoration: none; letter-spacing: 0.02em; backdrop-filter: blur(4px);
-  transition: color 0.15s, border-color 0.15s, background 0.15s;
+#top-nav a {
+  font-size: 12px; letter-spacing: 0.04em; color: #5aadff;
+  text-decoration: none; transition: opacity 0.15s;
 }
-.nav-pill:hover { color: #fff; border-color: rgba(90,173,255,0.35); background: rgba(90,173,255,0.07); }
+#top-nav a:hover { opacity: 0.7; }
 
 #hint {
   position: absolute; bottom: 36px; right: 40px; text-align: right;
-  pointer-events: none; transition: opacity 1s;
+  pointer-events: none;
 }
 #hint p { font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase; color: rgba(140,190,255,0.65); margin-bottom: 8px; }
 .hl { width: 1px; height: 28px; background: linear-gradient(to bottom, rgba(120,170,255,0.55), transparent); margin-left: auto; animation: drip 2s ease-in-out infinite; }
@@ -73,28 +60,24 @@ body { background: #000; color: #fff; font-family: 'Segoe UI', system-ui, sans-s
 
 <div id="scroll-driver">
   <div id="sticky-stage">
+    <nav id="top-nav">
+      <a href="cv.pdf">CV</a>
+      <a href="main.html#research">Research</a>
+      <a href="main.html#students">Student Projects</a>
+      <a href="blog.html">Blog</a>
+      <a href="mailto:shalini.epari@cern.ch">Contact</a>
+    </nav>
+
     <canvas id="c"></canvas>
 
     <div id="intro-overlay">
-      <div class="eyebrow">ATLAS · CERN · Geneva, Switzerland</div>
-      <div class="big-hi">Hi, I'm<br><em>Shalini.</em></div>
-      <div class="role">Postdoctoral Researcher &nbsp;·&nbsp; Experimental Particle Physics</div>
+      <div class="big-hi">Hi, I'm <em>Shalini Epari.</em></div>
+      <div class="role">Experimental Particle Physicist</div>
       <p class="intro-p">
-        I work on the ATLAS experiment at CERN, looking for particles that don't fit the theory we have.
-        Day to day: a lot of data, a lot of debugging, and occasionally a result that makes you
-        <strong>stop and stare.</strong>
+        I work for the ATLAS Experiment at CERN. My research focuses on searching
+        for new fundamental particles, using machine learning,
+        upgrading the detector for the next generation of collisions, and scientific outreach.
       </p>
-      <a class="cta" href="mailto:shalini.epari@cern.ch">
-        Collaborate with me
-        <svg viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-      </a>
-      <div class="nav-row">
-        <a class="nav-pill" href="main.html#about">About me</a>
-        <a class="nav-pill" href="main.html#research">Research</a>
-        <a class="nav-pill" href="main.html#outreach">Outreach</a>
-        <a class="nav-pill" href="main.html#students">Student projects</a>
-        <a class="nav-pill" href="main.html#publications">Publications</a>
-      </div>
     </div>
 
     <div id="hint"><p>scroll</p><div class="hl"></div></div>
@@ -105,6 +88,8 @@ body { background: #000; color: #fff; font-family: 'Segoe UI', system-ui, sans-s
 const canvas  = document.getElementById('c');
 const ctx     = canvas.getContext('2d');
 const overlay = document.getElementById('intro-overlay');
+const topNav  = document.getElementById('top-nav');
+const hint    = document.getElementById('hint');
 let W, H;
 function resize() { W = canvas.width = window.innerWidth; H = canvas.height = window.innerHeight; }
 resize();
@@ -120,6 +105,7 @@ function project(wx,wy,wz) {
 }
 const R=1.0,NSLICES=40,NSEGS=36,Lx=-0.6,Ly=-0.8;
 function drawCylinder(camZ,alpha) {
+  if(alpha<=0) return;
   const zNear=0.18,zFar=3.2,dz=(zFar-zNear)/NSLICES;
   for (let si=NSLICES-1;si>=0;si--) {
     let wz=zNear+si*dz-(camZ%dz);
@@ -156,15 +142,9 @@ function drawCylinder(camZ,alpha) {
   ctx.fillStyle=vg;ctx.beginPath();ctx.arc(W*.5,H*.5,H*0.25,0,Math.PI*2);ctx.fill();
 }
 
-// ── Particles ──
-const TLEN=50;
-const trail1=[],trail2=[];
-function drawParticle(x,y,trail,alpha) {
-  for (let i=1;i<trail.length;i++) {
-    const tf=i/trail.length;
-    ctx.beginPath();ctx.moveTo(trail[i-1].x,trail[i-1].y);ctx.lineTo(trail[i].x,trail[i].y);
-    ctx.strokeStyle=`rgba(60,120,255,${tf*0.28*alpha})`;ctx.lineWidth=tf*1.6;ctx.stroke();
-  }
+// ── Particle (no persistent trail — recomputed each frame from progress) ──
+function drawParticle(x,y,alpha) {
+  if(alpha<=0) return;
   const g=ctx.createRadialGradient(x,y,0,x,y,22);
   g.addColorStop(0,`rgba(100,180,255,${alpha*0.65})`);
   g.addColorStop(0.45,`rgba(40,100,220,${alpha*0.25})`);
@@ -174,33 +154,9 @@ function drawParticle(x,y,trail,alpha) {
   ctx.fillStyle=`rgba(190,220,255,${alpha})`;ctx.fill();
 }
 
-// ── Boom rings (persistent, drawn on canvas every frame) ──
-let boomDone=false, introShown=false;
-const boomRings=[];
-// Tracks are stored as snapshots — positions at 90% of their length
-// We draw them fading out then cross-dissolve into text
-const tracks=[];
-let tracksFormed=false;
-
-function spawnBoom(cx,cy) {
-  boomRings.push({x:cx,y:cy,r:0,maxR:180,a:0.45,spd:2.2});
-  boomRings.push({x:cx,y:cy,r:0,maxR:340,a:0.18,spd:1.2});
-  // Generate 12 track endpoints (fixed, so they stay stable)
-  for (let i=0;i<12;i++) {
-    const ang=(i/12)*Math.PI*2+i*0.4;
-    const len=Math.min(W,H)*0.28*(0.55+((i*5)%6)*0.08);
-    tracks.push({
-      ang, len,
-      x1: cx+Math.cos(ang)*len,
-      y1: cy+Math.sin(ang)*len,
-    });
-  }
-}
-
-function stepRings() {
-  for (const r of boomRings){r.r+=r.spd;r.a=Math.max(0,r.a-0.005);}
-  boomRings.splice(0,boomRings.length,...boomRings.filter(r=>r.a>0.004));
-}
+// Precomputed track angles (stable across frames)
+const TRACK_ANGLES = Array.from({length:12},(_,i)=>(i/12)*Math.PI*2+i*0.4);
+const TRACK_LENS   = Array.from({length:12},(_,i)=>0.55+((i*5)%6)*0.08);
 
 const dust=Array.from({length:35},()=>({
   x:Math.random(),y:Math.random(),r:0.35+Math.random()*0.9,
@@ -217,7 +173,7 @@ function stepDust(dt){
 let progress=0;
 
 function draw(dt) {
-  stepDust(dt); stepRings();
+  stepDust(dt);
   ctx.clearRect(0,0,W,H);
   const cx=W*0.5, cy=H*0.5;
 
@@ -226,8 +182,8 @@ function draw(dt) {
   const phWaltz  = band(progress,0.56,0.70);
   const phBoom   = band(progress,0.68,1.00);
 
-  // Background: dark blue after boom, never black
-  const postBoom = Math.min(1, phBoom * 3);
+  // Background
+  const postBoom = Math.min(1,phBoom*3);
   const bgTube   = phTube*(1-Math.min(phBoom*1.5,1));
   ctx.fillStyle=`rgb(${Math.round(bgTube*4+postBoom*1)},${Math.round(bgTube*9+postBoom*10)},${Math.round(bgTube*22+postBoom*26)})`;
   ctx.fillRect(0,0,W,H);
@@ -242,18 +198,16 @@ function draw(dt) {
   }
 
   // Cylinder
-  if(phTube>0&&phBoom<0.8)
-    drawCylinder(phTravel*2.0, phTube*(1-phBoom*2.2));
+  drawCylinder(phTravel*2.0, phTube*(1-Math.max(0,phBoom*2.2)));
 
-  // ── Particles — both from the start, symmetric ──
+  // Particles
   const wR=Math.min(W,H)*0.072;
   let p1x,p1y,p2x,p2y;
-
   if(phWaltz>0||phBoom>0){
     const orbit=wR*(1-Math.min(phWaltz+phBoom*0.5,1)*0.9);
-    const ang=(phWaltz+(phBoom>0?phWaltz:0))*Math.PI*2*2.6;
-    p1x=cx+Math.cos(ang)*orbit;         p1y=cy+Math.sin(ang)*orbit*0.42;
-    p2x=cx+Math.cos(ang+Math.PI)*orbit; p2y=cy+Math.sin(ang+Math.PI)*orbit*0.42;
+    const ang=phWaltz*Math.PI*2*2.6;
+    p1x=cx+Math.cos(ang)*orbit;          p1y=cy+Math.sin(ang)*orbit*0.42;
+    p2x=cx+Math.cos(ang+Math.PI)*orbit;  p2y=cy+Math.sin(ang+Math.PI)*orbit*0.42;
   } else {
     const t=ease(phTravel);
     p1x=cx-W*0.26+t*W*0.26+Math.sin(phTravel*Math.PI*2.2)*W*0.006;
@@ -261,41 +215,41 @@ function draw(dt) {
     p2x=cx+W*0.26-t*W*0.26-Math.sin(phTravel*Math.PI*2.2)*W*0.006;
     p2y=cy-Math.sin(phTravel*Math.PI*3.2)*H*0.022;
   }
+  const pAlpha=Math.min(1,phTravel*6)*(1-Math.min(1,phBoom*7));
+  drawParticle(p1x,p1y,pAlpha);
+  drawParticle(p2x,p2y,pAlpha);
 
-  const showP=phBoom<0.14;
-  const pAlpha=Math.min(1,phTravel*6);
-  if(showP){
-    trail1.push({x:p1x,y:p1y});if(trail1.length>TLEN)trail1.shift();
-    trail2.push({x:p2x,y:p2y});if(trail2.length>TLEN)trail2.shift();
-    drawParticle(p1x,p1y,trail1,pAlpha);
-    drawParticle(p2x,p2y,trail2,pAlpha);
-  } else { trail1.length=0; trail2.length=0; }
-
-  // ── Boom ──
+  // ── Boom — fully progress-driven, no state ──
   if(phBoom>0){
-    if(!boomDone){ boomDone=true; spawnBoom(cx,cy); }
-
-    // expanding rings
-    for(const ring of boomRings){
-      ctx.beginPath();ctx.arc(ring.x,ring.y,ring.r,0,Math.PI*2);
-      ctx.strokeStyle=`rgba(45,110,230,${ring.a})`;ctx.lineWidth=1.0;ctx.stroke();
+    // Two rings — radius driven by phBoom directly (no animation loop)
+    const ring1r = phBoom * 200;
+    const ring1a = Math.max(0, 0.45 - phBoom * 0.45);
+    if(ring1a>0){
+      ctx.beginPath();ctx.arc(cx,cy,ring1r,0,Math.PI*2);
+      ctx.strokeStyle=`rgba(45,110,230,${ring1a})`;ctx.lineWidth=1.0;ctx.stroke();
+    }
+    const ring2r = phBoom * 340;
+    const ring2a = Math.max(0, 0.18 - phBoom * 0.18);
+    if(ring2a>0){
+      ctx.beginPath();ctx.arc(cx,cy,ring2r,0,Math.PI*2);
+      ctx.strokeStyle=`rgba(45,110,230,${ring2a})`;ctx.lineWidth=1.0;ctx.stroke();
     }
 
-    // tracks: grow 0→1 in first 40% of boom, then fade 60%→90%, text appears at 90%
-    const trkGrow  = band(phBoom,0.0,0.40); // 0→1: tracks extend
-    const trkFade  = band(phBoom,0.60,0.90); // 0→1: tracks dissolve into text
-
-    if(tracks.length>0 && trkFade<1){
-      const trkAlpha=(1-trkFade)*0.55;
-      for(const t of tracks){
-        const ex=cx+Math.cos(t.ang)*t.len*trkGrow;
-        const ey=cy+Math.sin(t.ang)*t.len*trkGrow;
-        ctx.beginPath();ctx.moveTo(cx,cy);ctx.lineTo(ex,ey);
+    // Tracks — grow with phBoom, fade later
+    const trkGrow = band(phBoom,0.0,0.40);
+    const trkFade = band(phBoom,0.55,0.85);
+    const trkAlpha = (1-trkFade)*0.55;
+    if(trkAlpha>0){
+      const bR=Math.min(W,H)*0.28;
+      for(let i=0;i<12;i++){
+        const len=bR*TRACK_LENS[i]*trkGrow;
+        ctx.beginPath();ctx.moveTo(cx,cy);
+        ctx.lineTo(cx+Math.cos(TRACK_ANGLES[i])*len, cy+Math.sin(TRACK_ANGLES[i])*len);
         ctx.strokeStyle=`rgba(55,120,240,${trkAlpha})`;ctx.lineWidth=0.8;ctx.stroke();
       }
     }
 
-    // soft blue glow at centre — fades quickly
+    // Central glow
     const glowA=Math.max(0,1-phBoom*2.0);
     if(glowA>0){
       const fg=ctx.createRadialGradient(cx,cy,0,cx,cy,Math.min(W,H)*0.26);
@@ -305,15 +259,20 @@ function draw(dt) {
       ctx.fillStyle=fg;ctx.fillRect(0,0,W,H);
     }
 
-    // reveal text overlay exactly when tracks are 90% formed
-    // trkGrow hits 1.0 at phBoom=0.40, so "90% formed" = phBoom ≈ 0.36
-    if(phBoom>=0.36 && !introShown){
-      introShown=true;
-      overlay.classList.add('visible');
-    }
+    // Intro text + nav opacity — driven by progress, fully reversible
+    const textAlpha = ease(band(phBoom,0.36,0.70));
+    overlay.style.opacity = textAlpha;
+    overlay.style.pointerEvents = textAlpha > 0.5 ? 'auto' : 'none';
+    topNav.style.opacity  = textAlpha;
+    topNav.style.pointerEvents = textAlpha > 0.5 ? 'auto' : 'none';
+  } else {
+    overlay.style.opacity = '0';
+    overlay.style.pointerEvents = 'none';
+    topNav.style.opacity  = '0';
+    topNav.style.pointerEvents = 'none';
   }
 
-  document.getElementById('hint').style.opacity=progress<0.05?'1':'0';
+  hint.style.opacity = progress < 0.05 ? '1' : '0';
 }
 
 let lastT=0;
