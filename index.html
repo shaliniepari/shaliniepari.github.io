@@ -6,637 +6,326 @@
 <title>Shalini Epari</title>
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
-body { font-family: 'Segoe UI', system-ui, sans-serif; background: #fafaf8; color: #111; line-height: 1.6; }
-a { color: inherit; text-decoration: none; }
+body { background: #000; color: #fff; font-family: 'Segoe UI', system-ui, sans-serif; overflow-x: hidden; }
+#scroll-driver { height: 350vh; position: relative; }
+#sticky-stage { position: sticky; top: 0; height: 100vh; overflow: hidden; }
+#c { display: block; width: 100%; height: 100%; position: absolute; inset: 0; }
 
-/* NAV */
-nav {
-  padding: 0 48px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  height: 56px;
-  position: sticky;
-  top: 0;
-  z-index: 100;
-  background: rgba(250,250,248,0.92);
-  backdrop-filter: blur(8px);
-  border-bottom: 1px solid #ebebea;
+#intro-overlay {
+  position: absolute; inset: 0;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  padding: 24px; opacity: 0; pointer-events: none;
+  transition: opacity 1.8s ease;
 }
-.nav-name { font-size: 14px; font-weight: 500; letter-spacing: 0.01em; }
-.nav-links { display: flex; gap: 24px; list-style: none; }
-.nav-links a { font-size: 13px; color: #888; transition: color 0.15s; }
-.nav-links a:hover { color: #111; }
+#intro-overlay.visible { opacity: 1; pointer-events: auto; }
 
-/* HERO */
-.hero {
-  max-width: 880px;
-  margin: 0 auto;
-  padding: 80px 24px 72px;
+.eyebrow {
+  font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase;
+  color: rgba(100,160,255,0.5); margin-bottom: 18px;
 }
-.hero-eyebrow {
-  font-size: 12px;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  color: #bbb;
-  margin-bottom: 16px;
+.big-hi {
+  font-size: 68px; font-weight: 200; letter-spacing: -0.04em;
+  line-height: 1.05; color: #fff; margin-bottom: 8px; text-align: center;
 }
-.hero-name {
-  font-size: 52px;
-  font-weight: 300;
-  line-height: 1.1;
-  letter-spacing: -0.02em;
-  color: #111;
-  margin-bottom: 22px;
+.big-hi em { font-style: normal; font-weight: 500; color: #5aadff; }
+.role {
+  font-size: 13px; letter-spacing: 0.08em;
+  color: rgba(255,255,255,0.28); margin-bottom: 32px; text-align: center;
 }
-.hero-name em { font-style: normal; color: #0f1b35; font-weight: 500; }
-.hero-intro {
-  font-size: 17px;
-  color: #555;
-  line-height: 1.8;
-  max-width: 600px;
-  margin-bottom: 32px;
+.intro-p {
+  font-size: 15px; color: rgba(255,255,255,0.42); line-height: 1.85;
+  max-width: 440px; text-align: center; margin-bottom: 40px; font-weight: 300;
 }
-.hero-intro strong { color: #111; font-weight: 500; }
-.hero-actions { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
-.hero-cta {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 13px;
-  color: #fff;
-  background: #0f1b35;
-  padding: 10px 20px;
-  border-radius: 8px;
-  transition: background 0.15s;
+.intro-p strong { color: rgba(255,255,255,0.75); font-weight: 400; }
+.cta {
+  display: inline-flex; align-items: center; gap: 10px;
+  background: rgba(26,80,255,0.85); color: #fff; font-size: 13px; letter-spacing: 0.04em;
+  padding: 12px 28px; border-radius: 10px; margin-bottom: 44px;
+  text-decoration: none; border: 1px solid rgba(100,160,255,0.2);
+  transition: background 0.2s, transform 0.15s; backdrop-filter: blur(8px);
 }
-.hero-cta:hover { background: #1e3060; }
-.hero-cta svg { width: 13px; height: 13px; stroke: currentColor; stroke-width: 2; fill: none; }
-.hero-secondary {
-  font-size: 13px;
-  color: #888;
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 10px 4px;
+.cta:hover { background: rgba(42,98,255,0.95); transform: translateY(-2px); }
+.cta svg { width: 14px; height: 14px; stroke: #fff; stroke-width: 2; fill: none; }
+.nav-row { display: flex; justify-content: center; gap: 8px; flex-wrap: wrap; }
+.nav-pill {
+  font-size: 12px; color: rgba(255,255,255,0.32); padding: 8px 16px;
+  border: 1px solid rgba(255,255,255,0.07); border-radius: 8px;
+  text-decoration: none; letter-spacing: 0.02em; backdrop-filter: blur(4px);
+  transition: color 0.15s, border-color 0.15s, background 0.15s;
 }
-.hero-secondary:hover { color: #111; }
-.hero-secondary svg { width: 13px; height: 13px; stroke: currentColor; stroke-width: 1.5; fill: none; }
+.nav-pill:hover { color: #fff; border-color: rgba(90,173,255,0.35); background: rgba(90,173,255,0.07); }
 
-/* MAIN */
-main { max-width: 880px; margin: 0 auto; padding: 0 24px 80px; display: flex; flex-direction: column; gap: 72px; }
-
-section { scroll-margin-top: 72px; }
-.section-header {
-  display: flex;
-  align-items: baseline;
-  gap: 12px;
-  margin-bottom: 24px;
+#hint {
+  position: absolute; bottom: 36px; right: 40px; text-align: right;
+  pointer-events: none; transition: opacity 1s;
 }
-.section-num { font-size: 11px; color: #ccc; letter-spacing: 0.05em; }
-.section-title { font-size: 20px; font-weight: 500; color: #111; }
-
-/* ABOUT */
-.about-text p { font-size: 15px; color: #444; line-height: 1.85; margin-bottom: 16px; }
-.about-text p:last-child { margin-bottom: 0; }
-
-/* RESEARCH */
-.research-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 14px; margin-bottom: 32px; }
-.research-card {
-  background: #fff;
-  border: 1px solid #e8e8e6;
-  border-radius: 12px;
-  padding: 22px;
-  display: flex;
-  flex-direction: column;
-  transition: border-color 0.15s;
-}
-.research-card:hover { border-color: #aaa; }
-.rc-tag {
-  font-size: 10px;
-  text-transform: uppercase;
-  letter-spacing: 0.07em;
-  color: #185fa5;
-  background: #e6f1fb;
-  display: inline-block;
-  padding: 2px 8px;
-  border-radius: 4px;
-  margin-bottom: 12px;
-  align-self: flex-start;
-}
-.rc-tag.purple { color: #3c3489; background: #eeedfe; }
-.rc-title { font-size: 15px; font-weight: 500; color: #111; margin-bottom: 8px; }
-.rc-desc { font-size: 13px; color: #666; line-height: 1.65; flex: 1; }
-.rc-link {
-  margin-top: 14px;
-  font-size: 12px;
-  color: #185fa5;
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-}
-.rc-link.muted { color: #ccc; cursor: default; }
-.rc-link svg { width: 12px; height: 12px; stroke: currentColor; stroke-width: 2; fill: none; }
-
-/* LHC STATUS */
-.lhc-block {
-  border: 1px solid #e8e8e6;
-  border-radius: 12px;
-  overflow: hidden;
-  background: #fff;
-}
-.lhc-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 14px 18px;
-  border-bottom: 1px solid #f0f0ee;
-}
-.lhc-header-left { display: flex; align-items: center; gap: 10px; }
-.lhc-pulse {
-  width: 8px; height: 8px;
-  border-radius: 50%;
-  background: #22c55e;
-  box-shadow: 0 0 0 0 rgba(34,197,94,0.4);
-  animation: pulse 2s infinite;
-}
-@keyframes pulse {
-  0%   { box-shadow: 0 0 0 0 rgba(34,197,94,0.4); }
-  70%  { box-shadow: 0 0 0 6px rgba(34,197,94,0); }
-  100% { box-shadow: 0 0 0 0 rgba(34,197,94,0); }
-}
-.lhc-title { font-size: 13px; font-weight: 500; color: #111; }
-.lhc-sub { font-size: 11px; color: #bbb; }
-.lhc-source {
-  font-size: 11px;
-  color: #bbb;
-  display: flex;
-  align-items: center;
-  gap: 4px;
-}
-.lhc-source a { color: #bbb; text-decoration: underline; text-underline-offset: 2px; }
-.lhc-source a:hover { color: #888; }
-.lhc-source svg { width: 11px; height: 11px; stroke: currentColor; stroke-width: 1.5; fill: none; }
-.lhc-embed {
-  width: 100%;
-  height: 420px;
-  border: none;
-  display: block;
-  background: #0a0a14;
-}
-
-/* PLAYGROUNDS */
-.playgrounds-intro {
-  font-size: 15px;
-  color: #555;
-  line-height: 1.8;
-  max-width: 620px;
-  margin-bottom: 28px;
-}
-.playgrounds-intro strong { color: #111; font-weight: 500; }
-
-.feature-card {
-  background: #fff;
-  border: 1px solid #e8e8e6;
-  border-radius: 14px;
-  padding: 28px 32px;
-  display: grid;
-  grid-template-columns: 1fr auto;
-  gap: 24px;
-  align-items: center;
-  margin-bottom: 14px;
-  transition: border-color 0.15s;
-}
-.feature-card:hover { border-color: #aaa; }
-.feature-tag {
-  font-size: 10px;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: #854f0b;
-  background: #faeeda;
-  display: inline-block;
-  padding: 3px 9px;
-  border-radius: 4px;
-  margin-bottom: 10px;
-}
-.feature-title { font-size: 17px; font-weight: 500; color: #111; margin-bottom: 8px; }
-.feature-desc { font-size: 14px; color: #666; line-height: 1.7; }
-.feature-link {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  margin-top: 14px;
-  font-size: 13px;
-  color: #185fa5;
-}
-.feature-link svg { width: 13px; height: 13px; stroke: currentColor; stroke-width: 2; fill: none; }
-.feature-visual {
-  width: 76px; height: 76px;
-  border-radius: 12px;
-  background: #fdf3e3;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  font-size: 30px;
-}
-
-.card-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 14px; }
-.card {
-  background: #fafaf8;
-  border: 1px dashed #ddd;
-  border-radius: 12px;
-  padding: 22px;
-  display: flex;
-  flex-direction: column;
-}
-.card-tag {
-  font-size: 10px;
-  text-transform: uppercase;
-  letter-spacing: 0.07em;
-  color: #854f0b;
-  background: #faeeda;
-  display: inline-block;
-  padding: 2px 8px;
-  border-radius: 4px;
-  margin-bottom: 12px;
-  align-self: flex-start;
-}
-.card-tag.teal { color: #0f6e56; background: #e1f5ee; }
-.card-title { font-size: 14px; font-weight: 500; color: #333; margin-bottom: 8px; }
-.card-desc { font-size: 13px; color: #888; line-height: 1.65; }
-
-/* STUDENTS */
-.students-intro { font-size: 15px; color: #555; line-height: 1.8; max-width: 580px; margin-bottom: 24px; }
-
-/* OUTREACH */
-.outreach-list { display: flex; flex-direction: column; gap: 20px; }
-.outreach-item { display: flex; gap: 18px; align-items: flex-start; }
-.outreach-dot {
-  width: 36px; height: 36px;
-  border-radius: 8px;
-  background: #f0f0ee;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  margin-top: 2px;
-}
-.outreach-dot svg { width: 18px; height: 18px; stroke: #888; stroke-width: 1.5; fill: none; }
-.outreach-title { font-size: 14px; font-weight: 500; color: #111; margin-bottom: 4px; }
-.outreach-desc { font-size: 13px; color: #666; line-height: 1.65; }
-
-/* PUBLICATIONS */
-.pub-list { display: flex; flex-direction: column; }
-.pub-item {
-  display: flex;
-  gap: 20px;
-  padding: 16px 0;
-  border-bottom: 1px solid #f0f0ee;
-  align-items: flex-start;
-}
-.pub-item:last-child { border-bottom: none; }
-.pub-year { font-size: 12px; color: #ccc; min-width: 36px; padding-top: 2px; flex-shrink: 0; }
-.pub-title { font-size: 14px; font-weight: 500; color: #111; margin-bottom: 4px; }
-.pub-authors { font-size: 12px; color: #999; margin-bottom: 3px; }
-.pub-journal { font-size: 12px; color: #185fa5; }
-.pub-note { font-size: 11px; color: #bbb; margin-top: 3px; font-style: italic; }
-
-/* CONTACT */
-.contact-intro { font-size: 15px; color: #555; line-height: 1.8; margin-bottom: 24px; max-width: 540px; }
-.contact-intro strong { color: #111; font-weight: 500; }
-.contact-row { display: flex; gap: 10px; flex-wrap: wrap; }
-.contact-card {
-  background: #fff;
-  border: 1px solid #e8e8e6;
-  border-radius: 8px;
-  padding: 11px 18px;
-  display: flex;
-  align-items: center;
-  gap: 9px;
-  font-size: 13px;
-  color: #333;
-  transition: border-color 0.15s;
-}
-.contact-card:hover { border-color: #999; }
-.contact-card svg { width: 15px; height: 15px; stroke: #999; stroke-width: 1.5; fill: none; flex-shrink: 0; }
-
-footer {
-  text-align: center;
-  padding: 32px 24px;
-  font-size: 12px;
-  color: #ccc;
-  border-top: 1px solid #ebebea;
-}
-.footer-note { font-size: 11px; color: #ddd; margin-top: 6px; }
-
-@media (max-width: 680px) {
-  nav { padding: 0 20px; }
-  .nav-links { gap: 14px; }
-  .hero { padding: 48px 20px 52px; }
-  .hero-name { font-size: 38px; }
-  .feature-card { grid-template-columns: 1fr; }
-  .feature-visual { display: none; }
+#hint p { font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase; color: rgba(140,190,255,0.65); margin-bottom: 8px; }
+.hl { width: 1px; height: 28px; background: linear-gradient(to bottom, rgba(120,170,255,0.55), transparent); margin-left: auto; animation: drip 2s ease-in-out infinite; }
+@keyframes drip {
+  0%   { transform: scaleY(0); transform-origin: top; }
+  49%  { transform: scaleY(1); transform-origin: top; }
+  50%  { transform-origin: bottom; }
+  100% { transform: scaleY(0); transform-origin: bottom; }
 }
 </style>
 </head>
 <body>
 
-<nav>
-  <span class="nav-name">Shalini Epari</span>
-  <ul class="nav-links">
-    <li><a href="#about">About</a></li>
-    <li><a href="#research">Research</a></li>
-    <li><a href="#playgrounds">Playgrounds</a></li>
-    <li><a href="#students">Students</a></li>
-    <li><a href="#outreach">Outreach</a></li>
-    <li><a href="#publications">Publications</a></li>
-    <li><a href="#contact">Contact</a></li>
-  </ul>
-</nav>
+<div id="scroll-driver">
+  <div id="sticky-stage">
+    <canvas id="c"></canvas>
 
-<!-- HERO -->
-<div class="hero">
-  <div class="hero-eyebrow">ATLAS · CERN · Geneva</div>
-  <h1 class="hero-name">Hi, I'm<br><em>Shalini.</em></h1>
-  <p class="hero-intro">
-    I work on the ATLAS experiment at CERN, looking for particles that don't fit the theory we have.
-    Day to day that means a lot of data, a lot of debugging, and occasionally a result that makes you
-    stop and stare. I'm based in Geneva and always up for a good physics conversation.
-  </p>
-  <div class="hero-actions">
-    <a class="hero-cta" href="#contact">
-      Let's work together
-      <svg viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-    </a>
-    <a class="hero-secondary" href="#research">
-      See my research
-      <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12l7 7 7-7"/></svg>
-    </a>
+    <div id="intro-overlay">
+      <div class="eyebrow">ATLAS · CERN · Geneva, Switzerland</div>
+      <div class="big-hi">Hi, I'm<br><em>Shalini.</em></div>
+      <div class="role">Postdoctoral Researcher &nbsp;·&nbsp; Experimental Particle Physics</div>
+      <p class="intro-p">
+        I work on the ATLAS experiment at CERN, looking for particles that don't fit the theory we have.
+        Day to day: a lot of data, a lot of debugging, and occasionally a result that makes you
+        <strong>stop and stare.</strong>
+      </p>
+      <a class="cta" href="mailto:shalini.epari@cern.ch">
+        Collaborate with me
+        <svg viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </a>
+      <div class="nav-row">
+        <a class="nav-pill" href="main.html#about">About me</a>
+        <a class="nav-pill" href="main.html#research">Research</a>
+        <a class="nav-pill" href="main.html#outreach">Outreach</a>
+        <a class="nav-pill" href="main.html#students">Student projects</a>
+        <a class="nav-pill" href="main.html#publications">Publications</a>
+      </div>
+    </div>
+
+    <div id="hint"><p>scroll</p><div class="hl"></div></div>
   </div>
 </div>
 
-<main>
+<script>
+const canvas  = document.getElementById('c');
+const ctx     = canvas.getContext('2d');
+const overlay = document.getElementById('intro-overlay');
+let W, H;
+function resize() { W = canvas.width = window.innerWidth; H = canvas.height = window.innerHeight; }
+resize();
+window.addEventListener('resize', resize);
 
-  <!-- ABOUT -->
-  <section id="about">
-    <div class="section-header">
-      <span class="section-num">01</span>
-      <span class="section-title">About me</span>
-    </div>
-    <div class="about-text">
-      <p>
-        I'm a postdoctoral researcher on the ATLAS experiment at CERN, searching for
-        new particles predicted by theories beyond the Standard Model — specifically
-        <strong>vector-like leptons</strong>. The Standard Model is a spectacular theory,
-        but it leaves too many questions unanswered.
-      </p>
-      <p>
-        Most of my work is a mix of <strong>experimental physics, statistics, and machine learning</strong>:
-        building classifiers to pick signals out of enormous backgrounds, designing analysis strategies,
-        and asking uncomfortable questions about whether the answer is real.
-      </p>
-      <p>
-        I did my PhD at [Your University], where I worked on [your thesis topic].
-        Before that, [a sentence about your background — make it human!].
-        Outside of physics I'm into [something personal — travel, climbing, music, cooking — whatever makes you real].
-      </p>
-    </div>
-  </section>
+function band(p,a,b){ return Math.max(0,Math.min(1,(p-a)/(b-a))); }
+function ease(t){ return t<0.5?2*t*t:-1+(4-2*t)*t; }
 
-  <!-- RESEARCH -->
-  <section id="research">
-    <div class="section-header">
-      <span class="section-num">02</span>
-      <span class="section-title">My research</span>
-    </div>
-    <div class="research-grid">
+// ── 3D cylinder ──
+function project(wx,wy,wz) {
+  const f=H*0.88;
+  return {x:W*0.5+(wx/wz)*f, y:H*0.5+(wy/wz)*f};
+}
+const R=1.0,NSLICES=40,NSEGS=36,Lx=-0.6,Ly=-0.8;
+function drawCylinder(camZ,alpha) {
+  const zNear=0.18,zFar=3.2,dz=(zFar-zNear)/NSLICES;
+  for (let si=NSLICES-1;si>=0;si--) {
+    let wz=zNear+si*dz-(camZ%dz);
+    if(wz<=0.05)wz+=zFar; if(wz>zFar)continue;
+    const depthT=1-(wz-zNear)/(zFar-zNear);
+    const fogA=Math.pow(depthT,0.5);
+    for (let ai=0;ai<NSEGS;ai++) {
+      const a0=(ai/NSEGS)*Math.PI*2,a1=((ai+1)/NSEGS)*Math.PI*2,aMid=(a0+a1)*0.5;
+      const nx=-Math.cos(aMid),ny=-Math.sin(aMid);
+      const diffuse=Math.max(0,nx*Lx+ny*Ly);
+      const l=0.04+diffuse*0.28+fogA*0.05;
+      const rr=Math.round(l*15+fogA*4),gg=Math.round(l*55+fogA*10),bb=Math.round(l*220+fogA*30);
+      const wz2=Math.max(0.05,wz-dz);
+      const p00=project(Math.cos(a0)*R,Math.sin(a0)*R,wz);
+      const p10=project(Math.cos(a1)*R,Math.sin(a1)*R,wz);
+      const p01=project(Math.cos(a0)*R,Math.sin(a0)*R,wz2);
+      const p11=project(Math.cos(a1)*R,Math.sin(a1)*R,wz2);
+      ctx.beginPath();
+      ctx.moveTo(p00.x,p00.y);ctx.lineTo(p10.x,p10.y);
+      ctx.lineTo(p11.x,p11.y);ctx.lineTo(p01.x,p01.y);
+      ctx.closePath();
+      ctx.fillStyle=`rgba(${rr},${gg},${bb},${alpha*(0.6+fogA*0.35)})`;
+      ctx.fill();
+      if(si%8===0){
+        ctx.beginPath();ctx.moveTo(p00.x,p00.y);ctx.lineTo(p10.x,p10.y);
+        ctx.strokeStyle=`rgba(60,120,255,${alpha*fogA*0.18})`;ctx.lineWidth=0.6;ctx.stroke();
+      }
+    }
+  }
+  const vg=ctx.createRadialGradient(W*.5,H*.5,0,W*.5,H*.5,H*0.25);
+  vg.addColorStop(0,`rgba(8,35,130,${alpha*0.6})`);
+  vg.addColorStop(0.6,`rgba(3,12,50,${alpha*0.25})`);
+  vg.addColorStop(1,'rgba(0,0,0,0)');
+  ctx.fillStyle=vg;ctx.beginPath();ctx.arc(W*.5,H*.5,H*0.25,0,Math.PI*2);ctx.fill();
+}
 
-      <div class="research-card">
-        <span class="rc-tag">BSM Physics</span>
-        <div class="rc-title">Vector-Like Leptons</div>
-        <div class="rc-desc">
-          Searching for vector-like leptons — exotic particles predicted by several
-          beyond-Standard-Model theories — in proton–proton collision data from the
-          ATLAS detector. These would be among the first signs of new physics at the LHC.
-        </div>
-        <span class="rc-link muted">
-          Paper link TBD
-        </span>
-      </div>
+// ── Particles ──
+const TLEN=50;
+const trail1=[],trail2=[];
+function drawParticle(x,y,trail,alpha) {
+  for (let i=1;i<trail.length;i++) {
+    const tf=i/trail.length;
+    ctx.beginPath();ctx.moveTo(trail[i-1].x,trail[i-1].y);ctx.lineTo(trail[i].x,trail[i].y);
+    ctx.strokeStyle=`rgba(60,120,255,${tf*0.28*alpha})`;ctx.lineWidth=tf*1.6;ctx.stroke();
+  }
+  const g=ctx.createRadialGradient(x,y,0,x,y,22);
+  g.addColorStop(0,`rgba(100,180,255,${alpha*0.65})`);
+  g.addColorStop(0.45,`rgba(40,100,220,${alpha*0.25})`);
+  g.addColorStop(1,'rgba(0,0,0,0)');
+  ctx.fillStyle=g;ctx.beginPath();ctx.arc(x,y,22,0,Math.PI*2);ctx.fill();
+  ctx.beginPath();ctx.arc(x,y,3,0,Math.PI*2);
+  ctx.fillStyle=`rgba(190,220,255,${alpha})`;ctx.fill();
+}
 
-      <div class="research-card">
-        <span class="rc-tag purple">Detector R&amp;D</span>
-        <div class="rc-title">ITk Interlock System</div>
-        <div class="rc-desc">
-          Working on the safety interlock system for the ATLAS Inner Tracker (ITk),
-          CERN's next-generation silicon strip and pixel detector being built for
-          the High-Luminosity LHC upgrade.
-        </div>
-        <span class="rc-link muted">
-          Link TBD
-        </span>
-      </div>
+// ── Boom rings (persistent, drawn on canvas every frame) ──
+let boomDone=false, introShown=false;
+const boomRings=[];
+// Tracks are stored as snapshots — positions at 90% of their length
+// We draw them fading out then cross-dissolve into text
+const tracks=[];
+let tracksFormed=false;
 
-    </div>
+function spawnBoom(cx,cy) {
+  boomRings.push({x:cx,y:cy,r:0,maxR:180,a:0.45,spd:2.2});
+  boomRings.push({x:cx,y:cy,r:0,maxR:340,a:0.18,spd:1.2});
+  // Generate 12 track endpoints (fixed, so they stay stable)
+  for (let i=0;i<12;i++) {
+    const ang=(i/12)*Math.PI*2+i*0.4;
+    const len=Math.min(W,H)*0.28*(0.55+((i*5)%6)*0.08);
+    tracks.push({
+      ang, len,
+      x1: cx+Math.cos(ang)*len,
+      y1: cy+Math.sin(ang)*len,
+    });
+  }
+}
 
-    <!-- LHC STATUS -->
-    <div class="lhc-block">
-      <div class="lhc-header">
-        <div class="lhc-header-left">
-          <div class="lhc-pulse"></div>
-          <div>
-            <div class="lhc-title">LHC live status</div>
-            <div class="lhc-sub">Updated in real time from CERN operations</div>
-          </div>
-        </div>
-        <div class="lhc-source">
-          <svg viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6M15 3h6v6M10 14L21 3"/></svg>
-          <a href="https://op-webtools.web.cern.ch/vistar/" target="_blank">op-webtools.web.cern.ch</a>
-        </div>
-      </div>
-      <iframe
-        class="lhc-embed"
-        src="https://op-webtools.web.cern.ch/vistar/vistars.php?usr=LHC1"
-        title="LHC Page 1 — live status"
-        scrolling="no"
-        loading="lazy">
-      </iframe>
-    </div>
-  </section>
+function stepRings() {
+  for (const r of boomRings){r.r+=r.spd;r.a=Math.max(0,r.a-0.005);}
+  boomRings.splice(0,boomRings.length,...boomRings.filter(r=>r.a>0.004));
+}
 
-  <!-- PLAYGROUNDS -->
-  <section id="playgrounds">
-    <div class="section-header">
-      <span class="section-num">03</span>
-      <span class="section-title">Playgrounds</span>
-    </div>
-    <p class="playgrounds-intro">
-      Physics gets a reputation for being impenetrable. I don't think it has to be.
-      These are tools I've built to make some of the ideas tangible —
-      the kind of thing I wish I'd had earlier. More are always in the works.
-    </p>
+const dust=Array.from({length:35},()=>({
+  x:Math.random(),y:Math.random(),r:0.35+Math.random()*0.9,
+  vy:0.00007+Math.random()*0.00011,vx:(Math.random()-.5)*0.00004,
+}));
+function stepDust(dt){
+  for(const d of dust){
+    d.x+=d.vx*dt;d.y+=d.vy*dt;
+    if(d.y>1.05){d.y=-0.05;d.x=Math.random();}
+    if(d.x<0)d.x+=1;if(d.x>1)d.x-=1;
+  }
+}
 
-    <div class="feature-card">
-      <div>
-        <span class="feature-tag">Interactive · Machine learning</span>
-        <div class="feature-title">Neural network playground</div>
-        <div class="feature-desc">
-          A neural network classifier built entirely from scratch in JavaScript — no libraries, just the raw maths.
-          Paint signal and background points, dial up the layers and neurons, hit train, and watch the
-          decision boundary carve through your data in real time.
-        </div>
-        <a class="feature-link" href="projects/nn/">
-          Open playground
-          <svg viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-        </a>
-      </div>
-      <div class="feature-visual">🧠</div>
-    </div>
+let progress=0;
 
-    <div class="card-grid">
-      <div class="card">
-        <span class="card-tag">Coming soon</span>
-        <div class="card-title">More playgrounds</div>
-        <div class="card-desc">More interactive tools are in the works. Watch this space — or <a href="#contact" style="color:#185fa5;">get in touch</a> if you want to build something together.</div>
-      </div>
-    </div>
-  </section>
+function draw(dt) {
+  stepDust(dt); stepRings();
+  ctx.clearRect(0,0,W,H);
+  const cx=W*0.5, cy=H*0.5;
 
-  <!-- STUDENT PROJECTS -->
-  <section id="students">
-    <div class="section-header">
-      <span class="section-num">04</span>
-      <span class="section-title">Student projects</span>
-    </div>
-    <p class="students-intro">
-      I've worked across analysis, detector hardware, and software — so depending on what you're
-      curious about, there's probably something we could do together. I'd rather tailor a project
-      to what you actually want to learn than hand you a fixed brief.
-      Past student write-ups will live here as they come in.
-    </p>
-    <div class="card-grid">
-      <div class="card">
-        <span class="card-tag teal">Coming soon</span>
-        <div class="card-title">Student report</div>
-        <div class="card-desc">Reports from students I've supervised will appear here, linked directly to the full document.</div>
-      </div>
-      <div class="card">
-        <span class="card-tag teal">Coming soon</span>
-        <div class="card-title">More to follow</div>
-        <div class="card-desc">More reports will be added as projects are completed.</div>
-      </div>
-    </div>
-  </section>
+  const phTube   = band(progress,0.08,0.30);
+  const phTravel = band(progress,0.08,0.56);
+  const phWaltz  = band(progress,0.56,0.70);
+  const phBoom   = band(progress,0.68,1.00);
 
-  <!-- OUTREACH -->
-  <section id="outreach">
-    <div class="section-header">
-      <span class="section-num">05</span>
-      <span class="section-title">Outreach</span>
-    </div>
-    <div class="outreach-list">
-      <div class="outreach-item">
-        <div class="outreach-dot">
-          <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>
-        </div>
-        <div>
-          <div class="outreach-title">Public lectures &amp; school visits</div>
-          <div class="outreach-desc">Speaking at schools, science festivals, and public events — trying to make particle physics feel as exciting as it actually is, not as scary as it sounds.</div>
-        </div>
-      </div>
-      <div class="outreach-item">
-        <div class="outreach-dot">
-          <svg viewBox="0 0 24 24"><path d="M12 20h9M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
-        </div>
-        <div>
-          <div class="outreach-title">Science writing</div>
-          <div class="outreach-desc">Writing accessible pieces on particle physics and life at CERN.</div>
-        </div>
-      </div>
-      <div class="outreach-item">
-        <div class="outreach-dot">
-          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 010 20M12 2a15.3 15.3 0 000 20"/></svg>
-        </div>
-        <div>
-          <div class="outreach-title">International collaboration</div>
-          <div class="outreach-desc">Working across institutions and borders — CERN is one of the few places where that's genuinely the default, and I think it's worth protecting.</div>
-        </div>
-      </div>
-    </div>
-  </section>
+  // Background: dark blue after boom, never black
+  const postBoom = Math.min(1, phBoom * 3);
+  const bgTube   = phTube*(1-Math.min(phBoom*1.5,1));
+  ctx.fillStyle=`rgb(${Math.round(bgTube*4+postBoom*1)},${Math.round(bgTube*9+postBoom*10)},${Math.round(bgTube*22+postBoom*26)})`;
+  ctx.fillRect(0,0,W,H);
 
-  <!-- PUBLICATIONS -->
-  <section id="publications">
-    <div class="section-header">
-      <span class="section-num">06</span>
-      <span class="section-title">Publications</span>
-    </div>
-    <div class="pub-list">
-      <div class="pub-item">
-        <div class="pub-year">2024</div>
-        <div>
-          <div class="pub-title">Your most recent paper title goes here</div>
-          <div class="pub-authors">The ATLAS Collaboration (incl. S. Epari)</div>
-          <div class="pub-journal">Journal of High Energy Physics — arXiv:XXXX.XXXXX</div>
-        </div>
-      </div>
-      <div class="pub-item">
-        <div class="pub-year">2023</div>
-        <div>
-          <div class="pub-title">Another ATLAS publication title</div>
-          <div class="pub-authors">The ATLAS Collaboration (incl. S. Epari)</div>
-          <div class="pub-journal">Physical Review Letters — arXiv:XXXX.XXXXX</div>
-        </div>
-      </div>
-      <div class="pub-item">
-        <div class="pub-year">2022</div>
-        <div>
-          <div class="pub-title">PhD thesis or earlier paper</div>
-          <div class="pub-authors">S. Epari</div>
-          <div class="pub-journal">[Your University] — PhD Thesis</div>
-          <div class="pub-note">Full text available on request</div>
-        </div>
-      </div>
-    </div>
-  </section>
+  // Dust
+  if(phBoom<0.15&&phTube<0.5){
+    const da=0.05*(1-phTube*2)*(1-phBoom*6);
+    if(da>0)for(const d of dust){
+      ctx.beginPath();ctx.arc(d.x*W,d.y*H,d.r,0,Math.PI*2);
+      ctx.fillStyle=`rgba(80,130,255,${da})`;ctx.fill();
+    }
+  }
 
-  <!-- CONTACT -->
-  <section id="contact">
-    <div class="section-header">
-      <span class="section-num">07</span>
-      <span class="section-title">Let's talk</span>
-    </div>
-    <p class="contact-intro">
-      If you're a student thinking about a project, a physicist who wants to collaborate,
-      or just someone with a question — feel free to reach out. I reply.
-    </p>
-    <div class="contact-row">
-      <a class="contact-card" href="mailto:shalini.epari@cern.ch">
-        <svg viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M2 7l10 7 10-7"/></svg>
-        shalini.epari@cern.ch
-      </a>
-      <a class="contact-card" href="https://linkedin.com/in/your-profile" target="_blank">
-        <svg viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="20" rx="4"/><path d="M7 10v7M7 7v.01M11 17v-4a2 2 0 014 0v4M11 10v7"/></svg>
-        LinkedIn
-      </a>
-      <a class="contact-card" href="https://github.com/your-username" target="_blank">
-        <svg viewBox="0 0 24 24"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 00-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0020 4.77 5.07 5.07 0 0019.91 1S18.73.65 16 2.48a13.38 13.38 0 00-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 005 4.77a5.44 5.44 0 00-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 009 18.13V22"/></svg>
-        GitHub
-      </a>
-      <a class="contact-card" href="https://inspirehep.net/search?p=a+epari" target="_blank">
-        <svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" stroke-width="1.5" fill="none"/></svg>
-        INSPIRE HEP
-      </a>
-    </div>
-  </section>
+  // Cylinder
+  if(phTube>0&&phBoom<0.8)
+    drawCylinder(phTravel*2.0, phTube*(1-phBoom*2.2));
 
-</main>
+  // ── Particles — both from the start, symmetric ──
+  const wR=Math.min(W,H)*0.072;
+  let p1x,p1y,p2x,p2y;
 
-<footer>
-  Shalini Epari · ATLAS, CERN · Geneva
-  <div class="footer-note">shalini.epari@cern.ch</div>
-</footer>
+  if(phWaltz>0||phBoom>0){
+    const orbit=wR*(1-Math.min(phWaltz+phBoom*0.5,1)*0.9);
+    const ang=(phWaltz+(phBoom>0?phWaltz:0))*Math.PI*2*2.6;
+    p1x=cx+Math.cos(ang)*orbit;         p1y=cy+Math.sin(ang)*orbit*0.42;
+    p2x=cx+Math.cos(ang+Math.PI)*orbit; p2y=cy+Math.sin(ang+Math.PI)*orbit*0.42;
+  } else {
+    const t=ease(phTravel);
+    p1x=cx-W*0.26+t*W*0.26+Math.sin(phTravel*Math.PI*2.2)*W*0.006;
+    p1y=cy+Math.sin(phTravel*Math.PI*3.2)*H*0.022;
+    p2x=cx+W*0.26-t*W*0.26-Math.sin(phTravel*Math.PI*2.2)*W*0.006;
+    p2y=cy-Math.sin(phTravel*Math.PI*3.2)*H*0.022;
+  }
 
+  const showP=phBoom<0.14;
+  const pAlpha=Math.min(1,phTravel*6);
+  if(showP){
+    trail1.push({x:p1x,y:p1y});if(trail1.length>TLEN)trail1.shift();
+    trail2.push({x:p2x,y:p2y});if(trail2.length>TLEN)trail2.shift();
+    drawParticle(p1x,p1y,trail1,pAlpha);
+    drawParticle(p2x,p2y,trail2,pAlpha);
+  } else { trail1.length=0; trail2.length=0; }
+
+  // ── Boom ──
+  if(phBoom>0){
+    if(!boomDone){ boomDone=true; spawnBoom(cx,cy); }
+
+    // expanding rings
+    for(const ring of boomRings){
+      ctx.beginPath();ctx.arc(ring.x,ring.y,ring.r,0,Math.PI*2);
+      ctx.strokeStyle=`rgba(45,110,230,${ring.a})`;ctx.lineWidth=1.0;ctx.stroke();
+    }
+
+    // tracks: grow 0→1 in first 40% of boom, then fade 60%→90%, text appears at 90%
+    const trkGrow  = band(phBoom,0.0,0.40); // 0→1: tracks extend
+    const trkFade  = band(phBoom,0.60,0.90); // 0→1: tracks dissolve into text
+
+    if(tracks.length>0 && trkFade<1){
+      const trkAlpha=(1-trkFade)*0.55;
+      for(const t of tracks){
+        const ex=cx+Math.cos(t.ang)*t.len*trkGrow;
+        const ey=cy+Math.sin(t.ang)*t.len*trkGrow;
+        ctx.beginPath();ctx.moveTo(cx,cy);ctx.lineTo(ex,ey);
+        ctx.strokeStyle=`rgba(55,120,240,${trkAlpha})`;ctx.lineWidth=0.8;ctx.stroke();
+      }
+    }
+
+    // soft blue glow at centre — fades quickly
+    const glowA=Math.max(0,1-phBoom*2.0);
+    if(glowA>0){
+      const fg=ctx.createRadialGradient(cx,cy,0,cx,cy,Math.min(W,H)*0.26);
+      fg.addColorStop(0,`rgba(55,125,255,${glowA*0.48})`);
+      fg.addColorStop(0.4,`rgba(20,65,200,${glowA*0.2})`);
+      fg.addColorStop(1,'rgba(0,0,0,0)');
+      ctx.fillStyle=fg;ctx.fillRect(0,0,W,H);
+    }
+
+    // reveal text overlay exactly when tracks are 90% formed
+    // trkGrow hits 1.0 at phBoom=0.40, so "90% formed" = phBoom ≈ 0.36
+    if(phBoom>=0.36 && !introShown){
+      introShown=true;
+      overlay.classList.add('visible');
+    }
+  }
+
+  document.getElementById('hint').style.opacity=progress<0.05?'1':'0';
+}
+
+let lastT=0;
+function loop(ts){draw(ts-lastT);lastT=ts;requestAnimationFrame(loop);}
+requestAnimationFrame(loop);
+
+function onScroll(){
+  const sec=document.getElementById('scroll-driver');
+  const rect=sec.getBoundingClientRect();
+  progress=Math.max(0,Math.min(1,-rect.top/(sec.offsetHeight-window.innerHeight)));
+}
+window.addEventListener('scroll',onScroll,{passive:true});
+</script>
 </body>
 </html>
