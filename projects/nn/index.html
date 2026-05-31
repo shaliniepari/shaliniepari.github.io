@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Neural Network Playground</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: sans-serif; background: #f5f5f5; display: flex; justify-content: center; padding: 24px; }
+  .container { background: white; border-radius: 12px; padding: 24px; max-width: 820px; width: 100%; box-shadow: 0 1px 4px rgba(0,0,0,0.1); }
+  h2 { font-size: 18px; font-weight: 500; margin-bottom: 4px; }
+  p  { font-size: 13px; color: #666; margin-bottom: 16px; }
+  canvas { border: 1px solid #ddd; border-radius: 8px; cursor: crosshair; display: block; }
+  button { padding: 6px 14px; border: 1px solid #ccc; border-radius: 6px; background: white; font-size: 13px; cursor: pointer; margin: 0 4px 0 0; }
+  button:hover { background: #f0f0f0; }
+  button.active { background: #e8f0fe; border-color: #4a7fd4; font-weight: 500; }
+  label { font-size: 13px; color: #555; display: block; margin-bottom: 4px; }
+  input[type=range] { width: 100%; }
+  select { font-size: 13px; padding: 4px 8px; border: 1px solid #ccc; border-radius: 6px; }
+  .controls { display: flex; gap: 24px; flex-wrap: wrap; margin-top: 16px; }
+  .ctrl-group { min-width: 160px; flex: 1; }
+  #status { font-size: 13px; color: #666; margin-top: 8px; min-height: 20px; }
+  #progress-bar-wrap { height: 4px; background: #eee; border-radius: 2px; margin-top: 6px; display: none; }
+  #progress-bar { height: 4px; background: #4a7fd4; border-radius: 2px; width: 0%; }
+  .row { display: flex; gap: 8px; align-items: center; margin-top: 10px; flex-wrap: wrap; }
+  .badge { font-size: 12px; padding: 2px 10px; border-radius: 12px; }
+  .badge-sig { background: #fde8e8; color: #a32d2d; }
+  .badge-bkg { background: #e6f0fb; color: #185fa5; }
+  .canvases { display: flex; gap: 16px; flex-wrap: wrap; align-items: flex-start; }
+</style>
+</head>
+<body>
+<div class="container">
+  <h2>Neural network playground</h2>
+  <p>Paint signal (red) and background (blue) points, then train the network and watch the decision boundary appear.</p>
+
+  <div class="canvases">
+    <canvas id="c"    width="460" height="380"></canvas>
+    <div>
+      <canvas id="loss" width="260" height="180" style="cursor:default;"></canvas>
+      <div style="font-size:11px;color:#999;text-align:center;margin-top:2px;">Training loss</div>
+    </div>
+  </div>
+
+  <div class="row">
+    <button id="btn-sig" class="active" onclick="setMode('sig')">Draw signal</button>
+    <button id="btn-bkg" onclick="setMode('bkg')">Draw background</button>
+    <button onclick="clearAll()">Clear</button>
+    <button onclick="trainNet()" style="background:#4a7fd4;color:white;border-color:#4a7fd4;">Train network</button>
+    <span class="badge badge-sig" id="ns">Signal: 0</span>
+    <span class="badge badge-bkg" id="nb">Background: 0</span>
+  </div>
+
+  <div class="controls">
+    <div class="ctrl-group">
+      <label>Hidden neurons: <strong id="nout">6</strong></label>
+      <input type="range" min="1" max="16" value="6" step="1" id="neurons" oninput="document.getElementById('nout').textContent=this.value">
+    </div>
+    <div class="ctrl-group">
+      <label>Hidden layers: <strong id="lout">1</strong></label>
+      <input type="range" min="1" max="4" value="1" step="1" id="layers" oninput="document.getElementById('lout').textContent=this.value">
+    </div>
+    <div class="ctrl-group">
+      <label>Learning rate: <strong id="lrout">0.10</strong></label>
+      <input type="range" min="1" max="100" value="10" step="1" id="lr" oninput="document.getElementById('lrout').textContent=(this.value/100).toFixed(2)">
+    </div>
+    <div class="ctrl-group">
+      <label>Epochs: <strong id="epout">1000</strong></label>
+      <input type="range" min="50" max="3000" value="1000" step="50" id="epochs" oninput="document.getElementById('epout').textContent=this.value">
+    </div>
+    <div class="ctrl-group">
+      <label>Activation:</label>
+      <select id="act">
+        <option value="tanh">tanh</option>
+        <option value="relu">ReLU</option>
+        <option value="sigmoid">sigmoid</option>
+      </select>
+    </div>
+  </div>
+
+  <div id="status">Draw some points then click Train network</div>
+  <div id="progress-bar-wrap"><div id="progress-bar"></div></div>
+</div>
+
+<script>
+const canvas  = document.getElementById('c');
+const ctx     = canvas.getContext('2d');
+const lossC   = document.getElementById('loss');
+const lossCtx = lossC.getContext('2d');
+const CW = canvas.width, CH = canvas.height;
+let mode = 'sig', pts = [], lastBoundary = null, lossHistory = [];
+
+function setMode(m) {
+  mode = m;
+  document.getElementById('btn-sig').classList.toggle('active', m==='sig');
+  document.getElementById('btn-bkg').classList.toggle('active', m==='bkg');
+}
+
+canvas.addEventListener('mousedown', e => { addPt(e); canvas.addEventListener('mousemove', addPt); });
+canvas.addEventListener('mouseup',   ()  => canvas.removeEventListener('mousemove', addPt));
+canvas.addEventListener('mouseleave',()  => canvas.removeEventListener('mousemove', addPt));
+
+function addPt(e) {
+  const r = canvas.getBoundingClientRect();
+  pts.push({ x:(e.clientX-r.left)/r.width, y:(e.clientY-r.top)/r.height, label:mode==='sig'?1:0 });
+  document.getElementById('ns').textContent = 'Signal: '     + pts.filter(p=>p.label===1).length;
+  document.getElementById('nb').textContent = 'Background: ' + pts.filter(p=>p.label===0).length;
+  redraw(lastBoundary);
+}
+
+function clearAll() {
+  pts=[]; lastBoundary=null; lossHistory=[];
+  document.getElementById('ns').textContent = 'Signal: 0';
+  document.getElementById('nb').textContent = 'Background: 0';
+  document.getElementById('status').textContent = 'Draw some points then click Train network';
+  ctx.clearRect(0,0,CW,CH);
+  lossCtx.clearRect(0,0,lossC.width,lossC.height);
+}
+
+function redraw(boundary) {
+  ctx.clearRect(0,0,CW,CH);
+
+  if (boundary) {
+    // Soft background colour
+    const img = ctx.createImageData(CW, CH);
+    for (let i=0; i<CW*CH; i++) {
+      const v = boundary[i];
+      img.data[i*4]   = Math.round(v*240+(1-v)*56);
+      img.data[i*4+1] = Math.round(v*100+(1-v)*130);
+      img.data[i*4+2] = Math.round(v*100+(1-v)*240);
+      img.data[i*4+3] = 70;
+    }
+    ctx.putImageData(img,0,0);
+
+    // Dashed decision boundary: march squares to find 0.5 contour
+    const res = 3;
+    ctx.save();
+    ctx.strokeStyle = '#111';
+    ctx.lineWidth   = 2;
+    ctx.setLineDash([6,4]);
+    ctx.beginPath();
+    for (let py=0; py<CH-res; py+=res) {
+      for (let px=0; px<CW-res; px+=res) {
+        const v00 = boundary[ py      *CW + px    ];
+        const v10 = boundary[ py      *CW + px+res];
+        const v01 = boundary[(py+res) *CW + px    ];
+        const v11 = boundary[(py+res) *CW + px+res];
+        // horizontal crossing
+        if ((v00-0.5)*(v10-0.5) < 0) {
+          const t = (0.5-v00)/(v10-v00);
+          ctx.moveTo(px+t*res, py+res/2);
+          ctx.lineTo(px+t*res+0.5, py+res/2);
+        }
+        // vertical crossing
+        if ((v00-0.5)*(v01-0.5) < 0) {
+          const t = (0.5-v00)/(v01-v00);
+          ctx.moveTo(px+res/2, py+t*res);
+          ctx.lineTo(px+res/2, py+t*res+0.5);
+        }
+      }
+    }
+    ctx.stroke();
+    ctx.restore();
+  }
+
+  // Points on top
+  pts.forEach(p => {
+    ctx.beginPath();
+    ctx.arc(p.x*CW, p.y*CH, 7, 0, Math.PI*2);
+    ctx.fillStyle   = p.label===1 ? '#E24B4A' : '#378ADD';
+    ctx.strokeStyle = '#fff';
+    ctx.lineWidth   = 2;
+    ctx.fill(); ctx.stroke();
+  });
+}
+
+function drawLoss(history) {
+  const lw=lossC.width, lh=lossC.height;
+  lossCtx.clearRect(0,0,lw,lh);
+  lossCtx.fillStyle='#f9f9f9'; lossCtx.fillRect(0,0,lw,lh);
+  if (history.length<2) return;
+  const pad={t:12,r:10,b:24,l:38};
+  const W=lw-pad.l-pad.r, H=lh-pad.t-pad.b;
+  const maxL=Math.max(...history), minL=Math.min(...history);
+  lossCtx.strokeStyle='#ddd'; lossCtx.lineWidth=0.5;
+  lossCtx.strokeRect(pad.l,pad.t,W,H);
+  lossCtx.fillStyle='#999'; lossCtx.font='10px sans-serif'; lossCtx.textAlign='right';
+  lossCtx.fillText(maxL.toFixed(2), pad.l-4, pad.t+8);
+  lossCtx.fillText(minL.toFixed(2), pad.l-4, pad.t+H);
+  lossCtx.textAlign='center';
+  lossCtx.fillText('epoch', pad.l+W/2, lh-2);
+  lossCtx.beginPath();
+  lossCtx.strokeStyle='#4a7fd4'; lossCtx.lineWidth=1.5;
+  history.forEach((v,i)=>{
+    const x=pad.l+(i/(history.length-1))*W;
+    const y=pad.t+(1-(v-minL)/(maxL-minL+1e-9))*H;
+    i===0?lossCtx.moveTo(x,y):lossCtx.lineTo(x,y);
+  });
+  lossCtx.stroke();
+}
+
+const sigmoid = x => 1/(1+Math.exp(-Math.max(-50,Math.min(50,x))));
+const tanhF   = x => Math.tanh(x);
+const reluF   = x => Math.max(0,x);
+const sigD    = x => { const s=sigmoid(x); return s*(1-s); };
+const tanhD   = x => 1-Math.tanh(x)**2;
+const reluD   = x => x>0?1:0;
+const randn   = () => (Math.random()+Math.random()+Math.random()-1.5)*0.9;
+
+function getAct() {
+  const a=document.getElementById('act').value;
+  if (a==='tanh')    return [tanhF,tanhD];
+  if (a==='relu')    return [reluF,reluD];
+  return [sigmoid,sigD];
+}
+
+function trainNet() {
+  if (pts.length<4) { document.getElementById('status').textContent='Add more points first!'; return; }
+
+  const nNeurons = parseInt(document.getElementById('neurons').value);
+  const nLayers  = parseInt(document.getElementById('layers').value);
+  const lr       = parseFloat(document.getElementById('lr').value)/100;
+  const epochs   = parseInt(document.getElementById('epochs').value);
+  const [act,actD] = getAct();
+
+  const Xdata = pts.map(p=>[p.x,p.y]);
+  const Ydata = pts.map(p=>p.label);
+
+  // Build network
+  const sizes = [2,...Array(nLayers).fill(nNeurons),1];
+  const Wmat=[], Bmat=[];
+  for (let l=0; l<sizes.length-1; l++) {
+    const scale = Math.sqrt(2/sizes[l]);
+    Wmat.push(Array.from({length:sizes[l]}, ()=>Array.from({length:sizes[l+1]}, ()=>randn()*scale)));
+    Bmat.push(Array(sizes[l+1]).fill(0));
+  }
+
+  function forward(x) {
+    let a=x.slice();
+    const As=[a.slice()], Zs=[];
+    for (let l=0; l<Wmat.length; l++) {
+      const z=Bmat[l].map((b,j)=>b+a.reduce((s,ai,i)=>s+ai*Wmat[l][i][j],0));
+      Zs.push(z);
+      a = l<Wmat.length-1 ? z.map(act) : z.map(sigmoid);
+      As.push(a.slice());
+    }
+    return {As,Zs};
+  }
+
+  lossHistory=[];
+  const statusEl=document.getElementById('status');
+  const barWrap=document.getElementById('progress-bar-wrap');
+  const bar=document.getElementById('progress-bar');
+  barWrap.style.display='block';
+  bar.style.width='0%';
+
+  const CHUNK=50;
+  let ep=0;
+  const t0=performance.now();
+
+  function runChunk() {
+    const end=Math.min(ep+CHUNK,epochs);
+    let epochLoss=0;
+    for (; ep<end; ep++) {
+      epochLoss=0;
+      for (let n=0; n<Xdata.length; n++) {
+        const {As,Zs}=forward(Xdata[n]);
+        const yhat=As[As.length-1][0];
+        const y=Ydata[n];
+        const yc=Math.min(Math.max(yhat,1e-7),1-1e-7);
+        epochLoss -= y*Math.log(yc)+(1-y)*Math.log(1-yc);
+
+        let delta=[-(y/yc-(1-y)/(1-yc))*sigD(Zs[Zs.length-1][0])];
+        for (let l=Wmat.length-1; l>=0; l--) {
+          const dW=Wmat[l].map((row,i)=>row.map((_,j)=>As[l][i]*delta[j]));
+          const dB=delta.slice();
+          const nd=As[l].map((_,i)=>delta.reduce((s,d,j)=>s+d*Wmat[l][i][j],0)*(l>0?actD(Zs[l-1][i]):1));
+          for (let i=0;i<Wmat[l].length;i++)
+            for (let j=0;j<Wmat[l][i].length;j++)
+              Wmat[l][i][j]-=lr*dW[i][j];
+          for (let j=0;j<Bmat[l].length;j++)
+            Bmat[l][j]-=lr*dB[j];
+          delta=nd;
+        }
+      }
+      if (ep%10===0) lossHistory.push(epochLoss/Xdata.length);
+    }
+
+    const pct=ep/epochs;
+    bar.style.width=(pct*100).toFixed(1)+'%';
+    drawLoss(lossHistory);
+
+    if (ep<epochs) {
+      const elapsed=(performance.now()-t0)/1000;
+      const eta=elapsed/pct*(1-pct);
+      statusEl.textContent=`Training... epoch ${ep}/${epochs}  —  ETA ${eta.toFixed(1)}s`;
+      setTimeout(runChunk,0);
+    } else {
+      // Compute boundary grid
+      const res=3;
+      const boundary=new Float32Array(CW*CH);
+      for (let py=0; py<CH; py+=res)
+        for (let px=0; px<CW; px+=res) {
+          const {As}=forward([px/CW,py/CH]);
+          const v=As[As.length-1][0];
+          for (let dy=0;dy<res&&py+dy<CH;dy++)
+            for (let dx=0;dx<res&&px+dx<CW;dx++)
+              boundary[(py+dy)*CW+(px+dx)]=v;
+        }
+
+      lastBoundary=boundary;
+      const correct=pts.filter(p=>{
+        const {As}=forward([p.x,p.y]);
+        return (As[As.length-1][0]>0.5)===(p.label===1);
+      }).length;
+      const elapsed=((performance.now()-t0)/1000).toFixed(1);
+      statusEl.textContent=`Done in ${elapsed}s — Accuracy: ${Math.round(100*correct/pts.length)}%`;
+      barWrap.style.display='none';
+      redraw(boundary);
+    }
+  }
+  setTimeout(runChunk,10);
+}
+</script>
+</body>
+</html>
