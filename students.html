@@ -41,6 +41,121 @@ h1 { font-size: 44px; font-weight: 200; letter-spacing: -0.02em; color: #fff; ma
   padding: 3px 10px; border-radius: 4px; border: 1px solid rgba(100,180,120,0.12);
   white-space: nowrap; align-self: flex-start; margin-top: 4px;
 }
+.prog-item { padding: 14px 0; border-top: 1px solid rgba(255,255,255,0.06); }
+.prog-item:last-child { border-bottom: 1px solid rgba(255,255,255,0.06); }
+.prog-link {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-size: 14px; color: #5aadff; letter-spacing: 0.02em;
+  margin-bottom: 5px;
+  transition: opacity 0.15s;
+}
+.prog-link:hover { opacity: 0.7; }
+.prog-item-desc { font-size: 13px; color: rgba(255,255,255,0.28); line-height: 1.65; }
+.program-header { margin-bottom: 8px; padding-bottom: 20px; border-bottom: 1px solid rgba(255,255,255,0.06); }
+.program-title { font-size: 22px; font-weight: 300; color: #fff; letter-spacing: -0.01em; margin-bottom: 10px; }
+.program-desc { font-size: 14px; color: rgba(255,255,255,0.35); line-height: 1.75; max-width: 520px; }
+.project-link { color: #5aadff !important; }
+.contact-note { margin-top: 56px; padding-top: 40px; border-top: 1px solid rgba(255,255,255,0.06); }
+.contact-note p { font-size: 14px; color: rgba(255,255,255,0.35); line-height: 1.75; }
+.contact-note a { color: #5aadff; border-bottom: 1px solid rgba(90,173,255,0.2); padding-bottom: 1px; transition: border-color 0.15s; }
+.contact-note a:hover { border-color: #5aadff; }
+footer { text-align: center; padding: 40px 24px; font-size: 11px; color: rgba(255,255,255,0.12); border-top: 1px solid rgba(255,255,255,0.05); margin-top: 40px; }
+@media (max-width: 600px) { nav { padding: 20px; } main { padding: 120px 20px 80px; } h1 { font-size: 34px; } .project { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+<nav>
+  <a class="nav-home" href="index.html">Shalini Epari</a>
+  <div class="nav-links">
+    <a href="research.html">Research</a>
+    <a href="students.html" class="active">Student Projects</a>
+    <a href="blog.html">Blog</a>
+    <a href="cv.pdf">CV</a>
+    <a href="mailto:shalini.epari@cern.ch">Contact</a>
+  </div>
+</nav>
+<main>
+  <div class="page-label">Supervision</div>
+  <h1>Student Projects</h1>
+  <p class="description">
+    I supervise students at all levels — from summer placements to master's theses.
+    My background spans data analysis, machine learning, and detector hardware,
+    so projects can be tailored to what you actually want to learn.
+    Reports and write-ups from past students will appear here.
+  </p>
+  <div class="divider"></div>
+  <div class="section-label">Projects</div>
+
+  <div class="program">
+    <div class="program-header">
+      <div class="program-title">Solvay 2026</div>
+      <div class="program-desc">
+        A set of interactive tools developed for the Solvay 2026 programme,
+        designed to make core concepts in particle physics and machine learning
+        tangible for students encountering them for the first time.
+      </div>
+    </div>
+
+    <div class="prog-item">
+      <a href="projects/nn/" class="prog-link">
+        Neural network playground
+        <svg viewBox="0 0 24 24" width="12" height="12" stroke="currentColor" stroke-width="1.5" fill="none"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </a>
+      <div class="prog-item-desc">An interactive classifier built from scratch — paint data points, train, watch the boundary form.</div>
+    </div>
+
+    </div>
+  </div>
+
+  <div class="contact-note">
+    <p>Interested in doing a project? <a href="mailto:shalini.epari@cern.ch">Get in touch</a> — happy to discuss ideas.</p>
+  </div>
+</main>
+<footer>Shalini Epari · ATLAS, CERN</footer>
+</body>
+</html><!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Student Projects — Shalini Epari</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { background: #010c1e; color: #fff; font-family: 'Segoe UI', system-ui, sans-serif; min-height: 100%; }
+a { color: inherit; text-decoration: none; }
+nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 24px 48px;
+  background: rgba(1,12,30,0.85); backdrop-filter: blur(10px);
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+}
+.nav-home { font-size: 13px; color: rgba(255,255,255,0.25); letter-spacing: 0.02em; transition: color 0.15s; }
+.nav-home:hover { color: #fff; }
+.nav-links { display: flex; gap: 28px; }
+.nav-links a { font-size: 12px; letter-spacing: 0.04em; color: #5aadff; transition: opacity 0.15s; }
+.nav-links a:hover { opacity: 0.65; }
+.nav-links a.active { color: rgba(255,255,255,0.55); }
+main { max-width: 720px; margin: 0 auto; padding: 140px 24px 100px; }
+.page-label { font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase; color: rgba(100,160,255,0.4); margin-bottom: 14px; }
+h1 { font-size: 44px; font-weight: 200; letter-spacing: -0.02em; color: #fff; margin-bottom: 24px; line-height: 1.1; }
+.description { font-size: 15px; color: rgba(255,255,255,0.42); line-height: 1.85; max-width: 580px; margin-bottom: 64px; font-weight: 300; }
+.divider { width: 32px; height: 1px; background: rgba(255,255,255,0.08); margin-bottom: 40px; }
+.section-label { font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase; color: rgba(255,255,255,0.2); margin-bottom: 28px; }
+.project {
+  padding: 32px 0; border-top: 1px solid rgba(255,255,255,0.06);
+  display: grid; grid-template-columns: 1fr auto; gap: 24px; align-items: start;
+}
+.project:last-of-type { border-bottom: 1px solid rgba(255,255,255,0.06); }
+.project-num { font-size: 11px; color: rgba(255,255,255,0.15); letter-spacing: 0.08em; margin-bottom: 10px; }
+.project-title { font-size: 19px; font-weight: 300; color: rgba(255,255,255,0.3); margin-bottom: 10px; letter-spacing: -0.01em; }
+.project-desc { font-size: 14px; color: rgba(255,255,255,0.22); line-height: 1.75; }
+.project-tag {
+  font-size: 10px; text-transform: uppercase; letter-spacing: 0.08em;
+  color: rgba(100,180,120,0.7); background: rgba(100,180,120,0.06);
+  padding: 3px 10px; border-radius: 4px; border: 1px solid rgba(100,180,120,0.12);
+  white-space: nowrap; align-self: flex-start; margin-top: 4px;
+}
 .contact-note { margin-top: 56px; padding-top: 40px; border-top: 1px solid rgba(255,255,255,0.06); }
 .contact-note p { font-size: 14px; color: rgba(255,255,255,0.35); line-height: 1.75; }
 .contact-note a { color: #5aadff; border-bottom: 1px solid rgba(90,173,255,0.2); padding-bottom: 1px; transition: border-color 0.15s; }
