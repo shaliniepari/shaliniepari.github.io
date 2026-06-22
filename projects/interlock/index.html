@@ -1,0 +1,1960 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ITk Interlock — Level 1: Wire the LISSY</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@300;400;500;600&display=swap');
+
+:root {
+  --bg:        #07090d;
+  --bg-warm:   #0c0a0e;
+  --panel:     #0c1118;
+  --panel2:    #111820;
+  --panel-warm:#0e0b10;
+  --border:    #1a2433;
+  --border2:   #243040;
+  --text:      #bccad8;
+  --dim:       #445566;
+  --dim2:      #222e3c;
+  --green:     #3ddc6e;
+  --red:       #f06060;
+  --amber:     #f0b030;
+  --blue:      #4898f0;
+  --purple:    #b070f0;
+  --cyan:      #20c8e0;
+  --orange:    #f08030;
+  --pink:      #f472b6;
+  --green-d:   #031208;
+  --red-d:     #1e0404;
+  --amber-d:   #1e0e00;
+  --blue-d:    #031228;
+  --purple-d:  #0e0418;
+}
+
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;font-size:13px;font-weight:500;height:100vh;height:100dvh;max-height:100vh;max-height:100dvh;overflow:hidden;display:flex;flex-direction:column;}
+
+/* ── TOP BAR ── */
+#topbar{
+  height:46px;flex-shrink:0;
+  background:linear-gradient(to bottom,#111820,#0c1118);
+  border-bottom:1px solid var(--border);
+  display:flex;align-items:center;padding:0 16px;gap:12px;z-index:20;
+  box-shadow:0 1px 12px rgba(0,0,0,.4);
+}
+.badge{
+  font-family:'IBM Plex Mono',monospace;font-size:9px;font-weight:600;
+  letter-spacing:.14em;border:1px solid var(--blue);color:var(--blue);
+  background:linear-gradient(135deg,#031228,#062050);
+  border-radius:3px;padding:3px 8px;
+  box-shadow:0 0 8px rgba(72,152,240,.2);
+}
+#topbar h1{font-size:13px;font-weight:400;color:#c8dae8;letter-spacing:.02em;}
+.tb-sep{width:1px;height:20px;background:var(--border2);}
+
+/* ── STATUS STRIP ── */
+#status-strip{
+  font-family:'IBM Plex Mono',monospace;font-size:10px;
+  color:var(--dim);flex:1;padding:0 10px;
+  letter-spacing:.04em;
+}
+#status-strip.warn{color:var(--amber);}
+#status-strip.ok  {color:var(--green);}
+#status-strip.err {color:var(--red);}
+
+/* ── POWER ON BUTTON ── */
+#power-on-btn{
+  position:absolute;bottom:14px;left:14px;
+  font-family:'IBM Plex Mono',monospace;font-size:9px;font-weight:600;
+  padding:6px 16px;border-radius:3px;
+  border:1px solid var(--border2);
+  background:var(--panel2);color:var(--dim);
+  cursor:pointer;letter-spacing:.1em;
+  transition:all .2s;z-index:3;
+  text-transform:uppercase;
+}
+#power-on-btn.ready{
+  border-color:var(--green);color:var(--green);
+  background:var(--green-d);
+  box-shadow:0 0 12px rgba(61,220,110,.15);
+}
+#power-on-btn.ready:hover{background:#052a10;box-shadow:0 0 20px rgba(61,220,110,.25);}
+
+/* ── MAIN GRID ── */
+#main{display:grid;grid-template-columns:40% 60%;grid-template-rows:1fr 72px;flex:1;min-height:0;overflow:hidden;height:0;}
+
+/* ── DETECTOR PANEL ── */
+#det-panel{
+  position:relative;
+  background:radial-gradient(ellipse at 60% 40%,#0e0a14 0%,#07090d 70%);
+  border-right:1px solid var(--border);
+  border-bottom:1px solid var(--border);
+  overflow:hidden;min-height:0;height:100%;
+}
+/* scanline overlay */
+#det-panel::after{
+  content:'';position:absolute;inset:0;pointer-events:none;z-index:1;
+  background:repeating-linear-gradient(to bottom,transparent 0px,transparent 2px,rgba(0,0,0,.06) 2px,rgba(0,0,0,.06) 4px);
+}
+#det-label{
+  position:absolute;top:0;left:0;right:0;
+  font-family:'IBM Plex Mono',monospace;font-size:8px;
+  letter-spacing:.16em;color:var(--dim);
+  text-transform:uppercase;
+  padding:7px 12px 6px;
+  border-bottom:1px solid var(--border);
+  background:linear-gradient(to bottom,#0e1018,transparent);
+  pointer-events:none;z-index:2;
+}
+
+/* ── LISSY PANEL ── */
+#lissy-panel{
+  position:relative;
+  background:var(--panel);
+  border-bottom:1px solid var(--border);
+  overflow:hidden;min-height:0;height:100%;
+}
+#lissy-label{
+  position:absolute;top:0;left:0;right:0;
+  font-family:'IBM Plex Mono',monospace;font-size:8px;
+  letter-spacing:.16em;color:var(--dim);
+  text-transform:uppercase;
+  padding:7px 12px 6px;
+  border-bottom:1px solid var(--border);
+  background:linear-gradient(to bottom,#111820,transparent);
+  pointer-events:none;z-index:2;
+}
+
+/* ── WIRE TRAY ── */
+#wire-tray{
+  grid-column:1/3;
+  background:linear-gradient(to top,#080b10,#0c1118);
+  border-top:1px solid var(--border);
+  padding:0 16px;display:flex;align-items:center;gap:14px;
+  overflow:hidden;height:72px;flex-shrink:0;
+}
+#new-wire-btn{
+  font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:600;
+  padding:7px 20px;border-radius:3px;
+  border:1px solid var(--border2);
+  background:var(--panel2);color:var(--text);
+  cursor:pointer;letter-spacing:.08em;
+  transition:all .15s;flex-shrink:0;
+  text-transform:uppercase;
+}
+#new-wire-btn:hover{background:var(--border);border-color:var(--blue);color:var(--blue);}
+#new-wire-btn.active{
+  background:#061828;border-color:var(--blue);color:var(--blue);
+  box-shadow:0 0 10px rgba(72,152,240,.2);
+}
+#reset-btn{
+  font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:600;
+  padding:7px 16px;border-radius:3px;
+  border:1px solid #3a1010;
+  background:#160505;color:#804040;
+  cursor:pointer;letter-spacing:.08em;
+  transition:all .15s;flex-shrink:0;
+  text-transform:uppercase;
+}
+#reset-btn:hover{border-color:var(--red);color:var(--red);background:var(--red-d);}
+
+/* ── GLOBAL SVG ── */
+#global-svg{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:6;overflow:visible;}
+
+/* ── TOOLTIP ── */
+#tooltip{
+  position:fixed;
+  background:linear-gradient(135deg,#111e2e,#0c1420);
+  border:1px solid var(--border2);border-radius:6px;
+  padding:10px 14px;max-width:230px;
+  pointer-events:none;z-index:60;display:none;
+  box-shadow:0 4px 24px rgba(0,0,0,.6);
+}
+svg text{font-weight:600;}
+#tt-title{font-weight:600;font-size:12px;color:#d8eaf8;margin-bottom:4px;}
+#tt-body{font-size:11px;color:#506070;line-height:1.6;}
+
+/* ── OVERLAYS ── */
+.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:100;align-items:center;justify-content:center;backdrop-filter:blur(2px);}
+.overlay.active{display:flex;}
+.ov-card{border-radius:8px;padding:32px 36px;max-width:420px;text-align:center;box-shadow:0 8px 48px rgba(0,0,0,.7);}
+.ov-card h2{font-size:17px;font-weight:600;margin:10px 0 9px;letter-spacing:.01em;}
+.ov-card p{font-size:12px;line-height:1.75;margin-bottom:20px;color:#708090;}
+.ov-card .big{font-size:46px;display:block;margin-bottom:4px;}
+.fire-card{background:linear-gradient(135deg,#1a0505,#120303);border:1px solid #6a1818;}
+.fire-card h2{color:#f06060;}
+.ok-card{background:linear-gradient(135deg,#030f08,#041208);border:1px solid #1a5a30;}
+.ok-card h2{color:var(--green);}
+.ov-btn{
+  display:inline-block;padding:8px 26px;border-radius:3px;border:1px solid;
+  background:transparent;font-family:'IBM Plex Mono',monospace;font-size:10px;
+  font-weight:600;cursor:pointer;letter-spacing:.08em;transition:all .15s;
+  text-transform:uppercase;
+}
+.fire-btn{border-color:#6a1818;color:#f06060;}
+.fire-btn:hover{background:var(--red-d);}
+.ok-btn{border-color:#1a5a30;color:var(--green);}
+.ok-btn:hover{background:var(--green-d);}
+
+/* ── ANIMATIONS ── */
+@keyframes flicker{0%,100%{opacity:1}45%{opacity:.8}50%{opacity:.55}55%{opacity:.85}}
+.fire-anim{animation:flicker .4s infinite;}
+@keyframes ice-spread{0%{opacity:0;transform:scale(.85)}60%{opacity:1;transform:scale(1)}100%{opacity:1}}
+#ice-overlay{display:none;position:fixed;inset:0;z-index:99;pointer-events:none;}
+#ice-overlay.active{display:block;animation:ice-spread 2s ease-out forwards;}
+#ice-overlay canvas{position:absolute;inset:0;width:100%;height:100%;}
+#det-heat-overlay{position:absolute;inset:0;pointer-events:none;opacity:0;transition:background .5s;z-index:2;}
+
+/* ── SIGNAL TRACES ── */
+@keyframes signal-flow{to{stroke-dashoffset:-20;}}
+.sig-trace{stroke-dasharray:6 4;animation:signal-flow 1s linear infinite;opacity:0;transition:opacity 1.5s;}
+.sig-trace.active{opacity:1;}
+.sig-glow{stroke-dasharray:none;animation:none;filter:url(#glow-amber);}
+.sig-glow.active{opacity:0.18;}
+.sig-gss{stroke:#20c8e0;}
+.sig-gss-glow{stroke:#20c8e0;animation:none;stroke-dasharray:none;filter:url(#glow-blue);}
+.sig-gss-glow.active{opacity:0.18;}
+.sig-ilk-out-glow{stroke:#f472b6;animation:none;stroke-dasharray:none;filter:url(#glow-pink);}
+.sig-ilk-out-glow.active{opacity:0.18;}
+.sig-ilk-label{transition:opacity 1.5s;}
+.sig-ilk-label.active{opacity:1;}
+.sig-status-label{transition:opacity 1.5s;}
+.sig-status-label.active{opacity:1;}
+@keyframes glow-pulse{0%,100%{opacity:1}50%{opacity:.55}}
+</style>
+</head>
+<body>
+
+<!-- Intro Overlay -->
+<div class="overlay active" id="intro-ov" style="align-items:center;justify-content:center;">
+  <div style="background:linear-gradient(135deg,#0c1118,#0e1420);border:1px solid #1a2433;border-radius:10px;padding:40px 44px;max-width:560px;text-align:center;box-shadow:0 8px 48px rgba(0,0,0,.8);">
+    <div style="font-family:'IBM Plex Mono',monospace;font-size:9px;font-weight:600;letter-spacing:.18em;color:#4898f0;background:#031228;border:1px solid #4898f0;border-radius:3px;display:inline-block;padding:3px 10px;margin-bottom:20px;">ATLAS ITk — LISSY WIRING EXERCISE</div>
+    <div style="font-size:22px;font-weight:600;color:#c8dae8;margin-bottom:14px;line-height:1.3;">The ITk Detector needs protecting.</div>
+    <p style="font-size:13px;color:#506070;line-height:1.8;margin-bottom:20px;">
+      The LISSY — <em>Local Interlock &amp; Safety SYstem</em> — is the hardware guardian that automatically cuts power to the detector the moment something goes wrong: overtemperature, broken cable, loss of global safety signal. Without it, 60 million silicon channels can be permanently destroyed in milliseconds.
+    </p>
+    <div style="background:#07090d;border:1px solid #1a2433;border-radius:6px;padding:14px 18px;margin-bottom:24px;text-align:left;">
+      <div style="font-family:'IBM Plex Mono',monospace;font-size:9px;font-weight:600;letter-spacing:.12em;color:#d29922;margin-bottom:8px;">YOUR TASK</div>
+      <p style="font-size:12px;color:#6a7a8a;line-height:1.75;margin:0;">
+        Wire up the LISSY crate correctly — connect the temperature sensors, global safety signals, power supplies, and Ethernet links. Load the firmware. Power on the crate. Then power on the detector and watch the interlock system protect it.
+        <br><br>
+        <span style="color:#f06060;">Get it wrong and the detector burns.</span>
+        <span style="color:#3ddc6e;"> Get it right and you save the ITk.</span>
+      </p>
+    </div>
+    <button onclick="document.getElementById('intro-ov').classList.remove('active')"
+      style="font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:600;
+             padding:10px 36px;border-radius:4px;border:1px solid #3ddc6e;
+             background:#031208;color:#3ddc6e;cursor:pointer;letter-spacing:.1em;
+             transition:all .2s;text-transform:uppercase;
+             box-shadow:0 0 16px rgba(61,220,110,.15);"
+      onmouseover="this.style.background='#052a10';this.style.boxShadow='0 0 28px rgba(61,220,110,.3)'"
+      onmouseout="this.style.background='#031208';this.style.boxShadow='0 0 16px rgba(61,220,110,.15)'">
+      Start →
+    </button>
+    <div style="margin-top:14px;font-family:'IBM Plex Mono',monospace;font-size:9px;color:#4a6a8a;letter-spacing:.08em;">Hover any component for details</div>
+  </div>
+</div>
+
+<div id="topbar">
+  <span class="badge">ATLAS ITk</span>
+  <div class="tb-sep"></div>
+  <h1>Level 1 — Wire the LISSY</h1>
+  <div class="tb-sep"></div>
+
+
+</div>
+
+<div id="main">
+  <div id="det-panel">
+    <div id="det-label">ATLAS Cavern · 80m underground</div>
+    <div id="det-heat-overlay"></div>
+    <button id="power-on-btn" onclick="attemptPowerOn()">⏻  POWER ON DETECTOR</button>
+
+    <svg id="det-svg" width="100%" height="100%" style="position:absolute;inset:0;display:block;" xmlns="http://www.w3.org/2000/svg">
+      <g id="det-nodes"></g><g id="det-ports"></g>
+    </svg>
+  </div>
+
+  <div id="lissy-panel">
+    <div id="lissy-label">Level 2 rack rooms · US15 or USA15</div>
+    <svg id="lissy-svg" width="100%" height="100%" style="position:absolute;inset:0;display:block;" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <filter id="glow-green"><feGaussianBlur stdDeviation="2.5" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+        <filter id="glow-red"><feGaussianBlur stdDeviation="2.5" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+        <filter id="glow-blue"><feGaussianBlur stdDeviation="2" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+        <filter id="glow-pink"><feGaussianBlur stdDeviation="2" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+        <filter id="glow-amber"><feGaussianBlur stdDeviation="2" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+        <marker id="sig-arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+          <path d="M0 0.5L7 3L0 5.5" fill="none" stroke="#3ddc6e" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+        </marker>
+        <marker id="sig-arrow-amber" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+          <path d="M0 0.5L7 3L0 5.5" fill="none" stroke="#f0b030" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+        </marker>
+        <marker id="sig-arrow-cyan" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+          <path d="M0 0.5L7 3L0 5.5" fill="none" stroke="#20c8e0" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+        </marker>
+        <marker id="sig-arrow-pink" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+          <path d="M0 0.5L7 3L0 5.5" fill="none" stroke="#f472b6" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+        </marker>
+      </defs>
+      <!-- Backplane (behind cards) -->
+      <g id="backplane-layer"></g>
+      <!-- Cards -->
+      <g id="lissy-cards"></g>
+      <!-- Crate shell -->
+      <g id="crate-shell"></g>
+      <!-- Signal traces (top of crate) -->
+      <g id="signal-traces"></g>
+      <!-- Laptop -->
+      <g id="laptop-layer"></g>
+      <!-- Ports (on top) -->
+      <g id="lissy-ports" style="pointer-events:all"></g>
+    </svg>
+  </div>
+
+  <div id="wire-tray">
+    <button id="new-wire-btn" onclick="startNewWire()">＋ New wire</button>
+    <button id="reset-btn" onclick="resetGame()">↺ Reset all</button>
+    <span id="status-strip"></span>
+  </div>
+</div>
+
+<!-- Global wire layer -->
+<svg id="global-svg" xmlns="http://www.w3.org/2000/svg">
+  <g id="placed-wires"></g>
+  <path id="ghost-path" fill="none" stroke="#fff" stroke-width="2" stroke-dasharray="6 4" opacity="0" pointer-events="none"/>
+</svg>
+
+<div id="tooltip"><div id="tt-title"></div><div id="tt-body"></div></div>
+
+<!-- Ice overlay -->
+<div id="ice-overlay"><canvas id="ice-canvas"></canvas></div>
+
+<!-- Auto-test Overlay -->
+<div class="overlay" id="autotest-ov" style="align-items:flex-start;padding:20px;overflow-y:auto;">
+  <div style="background:#0c1118;border:1px solid #1a2433;border-radius:8px;padding:20px;width:100%;max-width:600px;margin:auto;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+      <span style="font-family:'IBM Plex Mono',monospace;font-size:12px;font-weight:600;color:var(--amber);letter-spacing:.1em;">⚡ AUTO-TEST — ALL SCENARIOS</span>
+      <button id="autotest-close" onclick="document.getElementById('autotest-ov').classList.remove('active')" style="font-family:'IBM Plex Mono',monospace;font-size:10px;padding:4px 12px;border:1px solid #1a2433;background:#111820;color:#6a7a8a;border-radius:3px;cursor:pointer;">CLOSE</button>
+    </div>
+    <div id="autotest-log" style="font-family:'IBM Plex Mono',monospace;font-size:11px;line-height:2;color:#445566;min-height:200px;"></div>
+    <div id="autotest-progress" style="margin-top:12px;height:3px;background:#1a2433;border-radius:2px;"><div id="autotest-bar" style="height:100%;width:0;background:var(--amber);border-radius:2px;transition:width .4s;"></div></div>
+  </div>
+</div>
+
+<!-- Monitoring Plots Overlay -->
+<div class="overlay" id="mon-ov" style="align-items:flex-start;padding:20px;overflow-y:auto;">
+  <div style="background:#0c1118;border:1px solid #1a2433;border-radius:8px;padding:20px;width:100%;max-width:860px;margin:auto;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+      <span style="font-family:'IBM Plex Mono',monospace;font-size:12px;font-weight:600;color:#8aad7a;letter-spacing:.1em;">MONITORING PLOTS — PYNQ OPC-UA</span>
+      <button onclick="document.getElementById('mon-ov').classList.remove('active')" style="font-family:'IBM Plex Mono',monospace;font-size:10px;padding:4px 12px;border:1px solid #1a2433;background:#111820;color:#6a7a8a;border-radius:3px;cursor:pointer;">CLOSE</button>
+    </div>
+    <div id="mon-plots-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:14px;"></div>
+  </div>
+</div>
+
+<div class="overlay" id="fire-ov">
+  <div class="ov-card fire-card">
+    <div class="big fire-anim">🔥</div>
+    <h2 id="fire-title">Detector burned.</h2>
+    <p id="fire-body"></p>
+    <button class="ov-btn fire-btn" onclick="dismissError()">OK, got it</button>
+  </div>
+</div>
+<div class="overlay" id="ok-ov">
+  <div class="ov-card ok-card">
+    <div class="big">✅</div>
+    <h2>Detector protected.</h2>
+    <p id="ok-body"></p>
+    <button class="ov-btn ok-btn" onclick="document.getElementById('ok-ov').classList.remove('active')">Continue</button>
+  </div>
+</div>
+
+<script>
+// ══════════════════════════════════════════════════
+// TOOLTIPS
+// ══════════════════════════════════════════════════
+const TIPS = {
+  detector:  {t:'ITk Strip Detector',
+    b:'~60 million readout channels tracking charged particles at the heart of ATLAS. Silicon is irreversibly destroyed by overtemperature or overvoltage. The LISSY interlock system exists solely to prevent this.'},
+  ntc1:      {t:'NTC Temperature Sensor — channel 1',
+    b:'A 10 kΩ NTC thermistor on the detector module. The T2I reads its voltage: T-HI fires if temperature exceeds threshold, T-ERR fires if the cable breaks. An open circuit is treated as danger — you cannot leave a sensor disconnected safely.'},
+  ntc2:      {t:'NTC Temperature Sensor — channel 2',
+    b:'Second NTC on a different detector module. Multiple sensors let the system protect regions independently and distinguish a broken cable from a genuine overtemperature.'},
+  lv:        {t:'Low Voltage Supply (LV)',
+    b:'Powers the detector readout ASICs. The OUT module drives this with a fail-safe signal: 3.3 V = OK, 0 V = cut. A broken interlock cable automatically cuts LV — no accidental power-on possible.'},
+  hv:        {t:'High Voltage Supply (HV)',
+    b:'Depletes the silicon bulk so it detects ionising particles. Must be cut first in an emergency — a biased detector in a bad thermal state can be destroyed within milliseconds.'},
+  mon_fpga:  {t:'MON-FPGA — Monitor Card (Slot 1)',
+    b:'FPGA-based 3U card in Slot 1. Has independent I²C access (Mon_I2C) to every IO module in slots 2–19. Reads all signals at ~10 Hz and sends them to the OPC-UA server via serial link. Completely separate from the interlock path — it can observe but never override a power cut. Test signals can be injected per slot, but IO-expander outputs are disabled by default.'},
+  t2i:       {t:'T2I — Temperature to Interlock (up to 16 ch)',
+    b:'Converts analogue NTC voltages to binary interlock signals. Comparators produce T-HI (overtemperature) and T-ERR (broken cable). Low-pass filters (τ ≈ 0.5 s) suppress noise. Signals go to ILK-FPGA via I²C-ILK and to MON-FPGA via I²C-MON on separate independent buses. Disabling a channel requires re-programming ILK-FPGA firmware — deliberate friction to track any change.'},
+  gss:       {t:'GSS — Global Safety Signals Module',
+    b:'Bridge between the LISSY crate and the Main Interlock Crate (MIC). Carries up to 10 global inputs. Three lines are hardwired directly to the ILK-FPGA board — ISO-IN1 (emergency exit), ISO-IN2 (continental A), ISO-IN3 (continental B) — bypassing all IO-expanders and firmware. These cannot be masked by any software.'},
+  out:       {t:'OUT Module — Interlock Output Driver (32 ch)',
+    b:'Produces up to 32 interlock outputs commanded by the ILK-FPGA. Each channel drives 5 mA. Active-low fail-safe: 3.3 V = OK, 0 V = INTERLOCK — a broken cable is an automatic interlock. A slot interlock ORs all channels simultaneously. IO-expanders on the MON side have latch functionality: even a sub-cycle pulse is captured.'},
+  ilk_fpga:  {t:'ILK-FPGA — Interlock Decision Engine (Slot 20)',
+    b:'Dual-width FPGA card in Slot 20. Reads T2I and GSS signals via I²C-ILK, evaluates the user-programmed interlock matrix, and drives OUT modules via backplane slot-interlock lines. Without firmware loaded the matrix is empty — no fault can trigger a cut. Any matrix change requires deliberate re-programming via JTAG.'},
+  backplane: {t:'LISSY Backplane — Custom 3U VME PCB',
+    b:'21 card positions: slots 2–19 for IO modules (30-pin), Slot 1 for MON-FPGA (160-pin), Slot 20 for ILK-FPGA (96-pin). Press-fit connectors rated for 400 insertions — ten times more reliable than soldered. Point-to-point signal routing minimises crosstalk.'},
+  laptop:    {t:'DCS Laptop',
+    b:'Connected to the ILK-FPGA via Ethernet and JTAG to load and verify the interlock firmware matrix. Without JTAG the firmware cannot be programmed and the ILK-FPGA cannot respond to any fault.'},
+  psu1:      {t:'PSU Switch 1 — Back Panel',
+    b:'Powers the crate from one of two redundant MEAN WELL MSP-100-5 medical-grade supplies (17 A output, MTBF 34 years). In normal operation both supplies are active. Either alone is sufficient — if one fails, the interlock system keeps running without interruption.'},
+  psu2:      {t:'PSU Switch 2 — Back Panel',
+    b:'Second redundant power supply. The two LEDs on the MON-FPGA front panel show which supplies are active — in normal operation both should glow.'},
+  pynq_board:{t:'PYNQ Board — OPC-UA Server Host',
+    b:'Hosts the OPC-UA server. Receives monitoring data from MON-FPGA via serial link and publishes the full interlock state to the DCS (WinCC) at ~10 Hz. Operators in the control room see which signals fired and which channels are active in real time.'},
+};
+function showTip(key,evt){
+  const t=TIPS[key]; if(!t) return;
+  const el=document.getElementById('tooltip');
+  document.getElementById('tt-title').textContent=t.t;
+  document.getElementById('tt-body').textContent=t.b;
+  el.style.display='block'; moveTip(evt);
+}
+function moveTip(evt){
+  const el=document.getElementById('tooltip');
+  let x=evt.clientX+14, y=evt.clientY+10;
+  if(x+230>window.innerWidth) x=evt.clientX-236;
+  if(y+130>window.innerHeight) y=evt.clientY-130;
+  el.style.left=x+'px'; el.style.top=y+'px';
+}
+function hideTip(){document.getElementById('tooltip').style.display='none';}
+document.addEventListener('mousemove',e=>{
+  if(document.getElementById('tooltip').style.display==='block') moveTip(e);
+});
+
+// ══════════════════════════════════════════════════
+// CONNECTIONS & STATE
+// ══════════════════════════════════════════════════
+const VALID_CONNECTIONS = [
+  ['p-ntc1-out',  'p-t2i-in1'],
+  ['p-ntc2-out',  'p-t2i-in2'],
+  ['p-t2i-ilk',  'p-ilk-t2i'],
+  ['p-t2i-mon',  'p-mon-t2i'],
+  ['p-ilk-out',  'p-out-ilk'],
+  ['p-gss-out',  'p-ilk-gss'],
+  // ['p-pynq-eth2', 'p-mon-eth'],  // pre-wired
+  ['p-eth-switch-ilk', 'p-ilk-eth'],
+  ['p-lap-jtag',    'p-ilk-jtag'],
+  ['p-global-sig',  'p-gss-out'],
+  // LV and HV each connect to any OUT port — validated flexibly below
+  ['p-lv-conn',  'p-out-ilk'],
+  ['p-hv-conn',  'p-out2-ilk'],
+];
+
+const OUT_PORTS = ['p-out-ilk','p-out2-ilk'];
+const SUPPLY_PORTS = ['p-lv-conn','p-hv-conn'];
+
+// Override checkPowerBtn and attemptPowerOn to handle flexible LV/HV→OUT matching
+function supplyConnected(supplyPort){
+  return OUT_PORTS.some(op => placedConnections.has(connKey(supplyPort, op)));
+}
+const WIRE_COLOR = '#a0b8cc';
+
+function connKey(a,b){ return [a,b].sort().join('|'); }
+
+let placedConnections = new Set();
+let pendingFrom  = null;   // first port clicked for current wire
+let sw1 = false, sw2 = false;
+let fwLoaded = false;
+const NS = 'http://www.w3.org/2000/svg';
+
+// ══════════════════════════════════════════════════
+// SVG HELPERS
+// ══════════════════════════════════════════════════
+function svgEl(tag,attrs,parent){
+  const e=document.createElementNS(NS,tag);
+  for(const[k,v] of Object.entries(attrs)) e.setAttribute(k,v);
+  if(parent) parent.appendChild(e);
+  return e;
+}
+function rect(p,x,y,w,h,rx,fill,stroke,sw=1){
+  return svgEl('rect',{x,y,width:w,height:h,rx,fill,stroke,'stroke-width':sw},p);
+}
+function text(p,x,y,s,fill,size,weight=600,anchor='middle'){
+  const t=svgEl('text',{x,y,fill,'font-size':size,'font-weight':weight,
+    'font-family':"'IBM Plex Mono',monospace",'text-anchor':anchor,
+    'dominant-baseline':'central','pointer-events':'none'},p);
+  t.textContent=s; return t;
+}
+function line(p,x1,y1,x2,y2,stroke,sw=1,dash=''){
+  const a={x1,y1,x2,y2,stroke,'stroke-width':sw,'stroke-linecap':'round'};
+  if(dash) a['stroke-dasharray']=dash;
+  return svgEl('line',a,p);
+}
+function tip(el,key){
+  el.addEventListener('mouseenter',e=>showTip(key,e));
+  el.addEventListener('mouseleave',hideTip);
+}
+function mkG(p,tipKey){
+  const g=svgEl('g',{},p);
+  if(tipKey) tip(g,tipKey);
+  return g;
+}
+
+// ══════════════════════════════════════════════════
+// PORT SYSTEM
+// ══════════════════════════════════════════════════
+const portCoords = {};
+
+// addPort: visible circle (used on detector/laptop)
+function addPort(parent,id,x,y,color){
+  // Invisible hit area only — visual is the dashed circle drawn by caller
+  portCoords[id]={x,y};
+  const g=svgEl('g',{id:'pg-'+id,cursor:'pointer','pointer-events':'all'},parent);
+  const c=svgEl('rect',{x:x-8,y:y-8,width:16,height:16,fill:'transparent',id:'pc-'+id},g);
+  g.addEventListener('click',e=>{e.stopPropagation();handlePort(id);});
+  g.addEventListener('mouseenter',()=>{ c.setAttribute('fill',color+'20'); });
+  g.addEventListener('mouseleave',()=>{ if(pendingFrom!==id) c.setAttribute('fill','transparent'); });
+}
+
+// addPortAt: invisible hit area (used on card connectors)
+function addPortAt(parent,id,x,y,color){
+  portCoords[id]={x,y};
+  const g=svgEl('g',{id:'pg-'+id,cursor:'pointer','pointer-events':'all'},parent);
+  const hit=svgEl('rect',{x:x-8,y:y-8,width:16,height:16,fill:'transparent',id:'pc-'+id},g);
+  g.addEventListener('click',e=>{e.stopPropagation();handlePort(id);});
+  g.addEventListener('mouseenter',()=>{ hit.setAttribute('fill',color+'30'); });
+  g.addEventListener('mouseleave',()=>{ if(pendingFrom!==id) hit.setAttribute('fill','transparent'); });
+}
+
+function getPortXY(id){
+  const el=document.getElementById('pc-'+id);
+  if(el){
+    const r=el.getBoundingClientRect();
+    return{x:r.left+r.width/2,y:r.top+r.height/2};
+  }
+  return portCoords[id]||{x:0,y:0};
+}
+
+// ══════════════════════════════════════════════════
+// RENDER DETECTOR
+// ══════════════════════════════════════════════════
+function renderDetector(){
+  const svg=document.getElementById('det-svg');
+  const W=svg.clientWidth, H=svg.clientHeight;
+  const dn=document.getElementById('det-nodes');
+  const dp=document.getElementById('det-ports');
+  dn.innerHTML=''; dp.innerHTML='';
+  const cx=W/2;
+
+  const dw=Math.min(W*0.45,160);
+  const dh=Math.min(H*0.42,190);
+  const dy=H*0.22;
+
+  for(let i=-5;i<=5;i++) line(dn,cx+i*Math.floor(dw/12),dy+8,cx+i*Math.floor(dw/12),dy+dh-8,'#1a3050',0.5);
+  const dg=mkG(dn,'detector');
+  rect(dg,cx-dw/2,dy,dw,dh,8,'#0e1828','#8ab0d060',1.5);
+  text(dg,cx,dy+dh/2-8,'ITk','#a0c0d8',13,600);
+  text(dg,cx,dy+dh/2+10,'Detector','#a0c0d8',13,600);
+
+  // NTC sensors on top
+  const ntc1x=cx-dw/4, ntc2x=cx+dw/4, ntcY=dy;
+  mkSensor(dn,dp,ntc1x,ntcY-22,'ntc1','1');
+  mkSensor(dn,dp,ntc2x,ntcY-22,'ntc2','2');
+  line(dn,ntc1x,ntcY-8,ntc1x,ntcY,'#f0b030',1);
+  line(dn,ntc2x,ntcY-8,ntc2x,ntcY,'#f0b030',1);
+
+  // LV and HV — both on right side, stacked
+  const supRx=cx+dw/2+50;
+  const supY_lv=dy+dh*0.65, supY_hv=dy+dh*0.95;
+  mkSupply(dn,dp,supRx,supY_lv,'lv','LV','#b070f0','#0e0318');
+  line(dn,cx+dw/2,supY_lv,supRx-30,supY_lv,'#b070f050',1.5);
+  mkSupply(dn,dp,supRx,supY_hv,'hv','HV','#b070f0','#0e0318');
+  line(dn,cx+dw/2,supY_hv,supRx-30,supY_hv,'#b070f050',1.5);
+
+  // Temperature gauge — above the NTCs
+  const gaugeY = dy + dh + 24;
+  text(dn,cx,gaugeY,'TEMP','#4a5a6a',9);
+  rect(dn,cx-28,gaugeY+8,56,10,3,'#060e18','#1e3048',0.5);
+  svgEl('rect',{x:cx-27,y:gaugeY+9,width:0,height:8,rx:2,fill:'#3ddc6e',id:'det-gauge-fill'},dn);
+  svgEl('text',{x:cx,y:gaugeY+30,'font-family':"'IBM Plex Mono',monospace",
+    'font-size':13,'font-weight':600,fill:'#3ddc6e','text-anchor':'middle',
+    'dominant-baseline':'central',id:'det-temp-text'},dn).textContent='18°C';
+}
+
+function mkSensor(dn,dp,x,y,id,num){
+  const g=mkG(dn,id);
+  rect(g,x-26,y-14,52,28,3,'#181000','#f0b030',1);
+  text(g,x,y-3,'NTC','#f0b030',8,600);
+  text(g,x,y+7,'sensor '+num,'#806010',7);
+  svgEl('circle',{cx:x,cy:y-14,r:7,fill:'transparent',stroke:'#4a5a6a','stroke-width':1.2,'stroke-dasharray':'3 2'},dn);
+  addPort(dp,'p-'+id+'-out',x,y-14,'#f0b030');
+}
+function mkSupply(dn,dp,x,y,id,label,color,bg){
+  const g=mkG(dn,id);
+  rect(g,x-30,y-18,60,36,4,bg,color,1.2);
+  text(g,x,y-4,label,color,10,600);
+  text(g,x,y+7,'supply',color+'80',7);
+  // LED — consistent with mkLed style
+  mkLed(g, x+20, y-8, 'led-'+id, '#b070f0');
+  // Dashed connection port
+  svgEl('circle',{cx:x,cy:y-18,r:7,fill:'transparent',stroke:'#4a5a6a','stroke-width':1.2,'stroke-dasharray':'3 2'},g);
+  addPort(dp,'p-'+id+'-conn',x,y-18,color);
+}
+
+// ══════════════════════════════════════════════════
+// RENDER LISSY
+// ══════════════════════════════════════════════════
+let CX,CY,CW,CH,CARD_W,CARD_H,CARD_Y,BP_Y,BP_H;
+const CARDS=[
+  {id:'mon_fpga',label:'MON-FPGA',sub:'Slot 1',      color:'#f06060',bg:'#1a0404'},
+  {id:'t2i',     label:'T2I',     sub:'Temp→ILK',    color:'#f0b030',bg:'#181000'},
+  {id:'gss',     label:'GSS',     sub:'Global safety',color:'#20c8e0',bg:'#041218'},
+  {id:'out',     label:'OUT',     sub:'32-ch driver', color:'#b070f0',bg:'#100420'},
+  {id:'out2',    label:'OUT',     sub:'32-ch driver', color:'#b070f0',bg:'#100420'},
+  {id:'ilk_fpga',label:'ILK-FPGA',sub:'Slot 20',     color:'#4898f0',bg:'#020a1e'},
+];
+
+function renderLISSY(){
+  const svg=document.getElementById('lissy-svg');
+  const W=svg.clientWidth, H=svg.clientHeight;
+  ['backplane-layer','lissy-cards','crate-shell','laptop-layer','lissy-ports']
+    .forEach(id=>{ document.getElementById(id).innerHTML=''; });
+  const bp=document.getElementById('backplane-layer');
+  const cl=document.getElementById('lissy-cards');
+  const cs=document.getElementById('crate-shell');
+  const ll=document.getElementById('laptop-layer');
+  const lp=document.getElementById('lissy-ports');
+
+  const lapW=80, lapGap=20, pad=14;
+  const ASPECT=3.5;
+  // Compute CW to fill available width, then derive CH from aspect ratio
+  // But clamp CH so the crate + PC below + eth above all fit in H
+  CW = W - lapW - lapGap - pad*2;
+  CH = (CW / ASPECT) * 2;
+  // If crate + PC (128px below) + eth box (128px above) don't fit, shrink
+  const maxCH = H - 170; // 128 above for eth + 14 pad, 42 below for PC label
+  if(CH > maxCH){ CH = maxCH; CW = CH * ASPECT / 2; }
+  CX = pad + 30;
+  CY = Math.round((H - CH) / 2 + 30); // shift down slightly to leave room above
+  BP_H=0; BP_Y=CY+CH-28;
+  const BACK_H=22;
+  CARD_H=CH-BACK_H-28;
+  CARD_Y=CY+12;
+  CARD_W=(CW-14)/CARDS.length-5;
+
+  // Backplane paths (invisible layer — just for glow lines)
+  drawBackplanePaths(bp);
+
+  // Crate shell
+  rect(cs,CX,CY,CW,CH,5,'none','#2a3848',1.5);
+  rect(cs,CX,CY,CW,10,0,'#0e1828','#1e3048',0.5);
+  // LISSY label — top right of crate
+  text(cs,CX+CW-8,CY+6,'LISSY — Local Interlock & Safety SYstem','#4a6a8a',7,600,'end');
+  const bkY=CY+CH-BACK_H;
+  rect(cs,CX,bkY,CW,BACK_H,0,'#060c18','#1e3048',0.5);
+  text(cs,CX+60,bkY+9,'BACK PANEL','#4a6a8a',8,600);
+  drawSwitch(cs,CX+CW-72,bkY,1);
+  drawSwitch(cs,CX+CW-38,bkY,2);
+
+  // ── Ethernet switch box — above crate, aligned with PC ──
+  const ethBoxX = CX + 56, ethBoxY = CY - 100;
+  // Wider box to fit 3 ports
+  rect(cs, ethBoxX-40, ethBoxY-20, 80, 60, 4, '#0a1520', '#4a6a8a', 1.5);
+  text(cs, ethBoxX, ethBoxY-8, 'ETHERNET', '#4a6a8a', 7, 600);
+  text(cs, ethBoxX, ethBoxY+4, 'SWITCH',   '#4a6a8a', 7, 600);
+  // Left port — PYNQ (sage green)
+  mkRJ45(cs, ethBoxX-20, ethBoxY+28, '#8aad7a');
+  svgEl('circle',{cx:ethBoxX-20,cy:ethBoxY+28,r:6,fill:'transparent',stroke:'#4a5a6a','stroke-width':1.2,'stroke-dasharray':'3 2'},cs);
+  addPortAt(lp,'p-eth-switch-pynq',ethBoxX-20,ethBoxY+28,'#8aad7a');
+
+  // Right port — ILK (blue)
+  mkRJ45(cs, ethBoxX+20, ethBoxY+28, '#4898f0');
+  svgEl('circle',{cx:ethBoxX+20,cy:ethBoxY+28,r:6,fill:'transparent',stroke:'#4a5a6a','stroke-width':1.2,'stroke-dasharray':'3 2'},cs);
+  addPortAt(lp,'p-eth-switch-ilk',ethBoxX+20,ethBoxY+28,'#4898f0');
+
+  // ── Global signals box — beside Ethernet switch ──
+  const gsBoxX = ethBoxX + 90, gsBoxY = ethBoxY;
+  rect(cs, gsBoxX-36, gsBoxY-20, 72, 50, 4, '#0a1520', '#20c8e040', 1.5);
+  text(cs, gsBoxX, gsBoxY-8,  'GLOBAL',  '#20c8e0', 7, 600);
+  text(cs, gsBoxX, gsBoxY+4,  'SIGNALS', '#20c8e0', 7, 600);
+  // One dashed port dot
+  svgEl('circle',{cx:gsBoxX,cy:gsBoxY+26,r:7,fill:'transparent',stroke:'#4a5a6a','stroke-width':1.2,'stroke-dasharray':'3 2'},cs);
+  svgEl('circle',{cx:gsBoxX,cy:gsBoxY+26,r:2,fill:'#3a4a5a',stroke:'none'},cs);
+  addPortAt(lp,'p-global-sig',gsBoxX,gsBoxY+26,'#20c8e0');
+
+  // PYNQ switch removed — merged into main ethernet switch
+
+  // ── PYNQ board — between ILK card and PYNQ switch ──
+  const pynqX = CX + 56, pynqY = CY + CH + 60;
+  // Board body
+  const pynqG = mkG(cs, 'pynq_board');
+  rect(pynqG, pynqX-40, pynqY-20, 80, 50, 4, '#111a0e', '#8aad7a', 1.5);
+  // Label left-aligned
+  text(pynqG, pynqX-16, pynqY-6, 'PYNQ',  '#8aad7a', 8, 600);
+  text(pynqG, pynqX-16, pynqY+6, 'board', '#8aad7a70', 6, 400);
+  // MONITORING PLOTS button — shown when PYNQ is on
+  const monBtnG = svgEl('g',{id:'mon-plots-btn',cursor:'pointer',opacity:0,'pointer-events':'none'},pynqG);
+  rect(monBtnG, pynqX-40, pynqY+36, 80, 18, 2, '#060c18', '#8aad7a', 0.8);
+  text(monBtnG, pynqX, pynqY+45, 'MONITORING PLOTS', '#8aad7a80', 6, 600);
+  monBtnG.addEventListener('click', e=>{ e.stopPropagation(); openMonitoringPlots(); });
+  // LED — using mkLed for consistency
+  mkLed(pynqG, pynqX+32, pynqY-2, 'led-pynq', '#8aad7a');
+  // Power switch — more prominent rocker
+  const pynqSwG = svgEl('g',{id:'pynq-sw-g',cursor:'pointer'},pynqG);
+  rect(pynqSwG, pynqX+16, pynqY+10, 22, 12, 3, '#0a1a0a', '#8aad7a', 1.5);
+  svgEl('rect',{x:pynqX+16,y:pynqY+12,width:9,height:8,rx:2,fill:'#1a4a1a',stroke:'#8aad7a60','stroke-width':0.5,id:'pynq-sw-knob'},pynqSwG);
+  text(pynqSwG, pynqX+27, pynqY+26, 'POWER', '#8aad7a80', 6, 600);
+  pynqSwG.addEventListener('click', e=>{e.stopPropagation(); togglePynq();});
+  // ETH port on top (left, sage)
+  mkRJ45(cs, pynqX-26, pynqY-20, '#8aad7a');
+  text(cs, pynqX-26, pynqY-32, 'ETH', '#8aad7a60', 5, 600);
+  addPortAt(lp, 'p-pynq-eth', pynqX-26, pynqY-20, '#8aad7a');
+  // ETH2 port on top (centre, red)
+  mkRJ45(cs, pynqX, pynqY-20, '#f06060');
+  text(cs, pynqX, pynqY-32, 'ETH2', '#f0606060', 5, 600);
+  addPortAt(lp, 'p-pynq-eth2', pynqX, pynqY-20, '#f06060');
+  // JTAG port on top (right)
+  mkJTAG(cs, pynqX+26, pynqY-20, '#8aad7a');
+  text(cs, pynqX+26, pynqY-32, 'JTAG', '#8aad7a60', 5, 600);
+  addPortAt(lp, 'p-pynq-jtag', pynqX+26, pynqY-20, '#8aad7a');
+
+  // ── Computer icon with LOAD FIRMWARE inside ──
+  const compX = CX+CW-56, compY = CY+CH+36;
+  // monitor body — compact
+  rect(cs,compX-30,compY,60,44,3,'#0a1520','#4a6a8a',1.5);
+  // screen (top) — slim
+  rect(cs,compX-24,compY+3,48,14,2,'#0d2040','none',0);
+  text(cs,compX,compY+9,'PC','#4a6a8a',7,600);
+  // divider
+  svgEl('line',{x1:compX-30,y1:compY+19,x2:compX+30,y2:compY+19,stroke:'#1e3048','stroke-width':0.5},cs);
+  // LOAD FIRMWARE button inside lower half
+  const fwBtnG = svgEl('g',{id:'fw-btn-g',cursor:'not-allowed'},cs);
+  rect(fwBtnG,compX-22,compY+21,44,20,2,'#060c18','#1e3048',0.8);
+  text(fwBtnG,compX,compY+28,'LOAD',     '#4a6a8a50',7,600);
+  text(fwBtnG,compX,compY+38,'FIRMWARE', '#4a6a8a50',7,600);
+  fwBtnG.addEventListener('click',e=>{e.stopPropagation();tryLoadFirmware();});
+  // stand + base
+  svgEl('line',{x1:compX,y1:compY+44,x2:compX,y2:compY+52,stroke:'#4a6a8a','stroke-width':3},cs);
+  rect(cs,compX-16,compY+52,32,5,2,'#0a1520','#4a6a8a',1.5);
+  // Dashed JTAG port on top
+  svgEl('circle',{cx:compX,cy:compY,r:4,fill:'transparent',stroke:'#4a5a6a','stroke-width':1.2,'stroke-dasharray':'3 2'},cs);
+  addPortAt(lp,'p-lap-jtag',compX,compY,'#f08030');
+
+  // Cards + slot divider lines
+  CARDS.forEach((card,i)=>{
+    const mx=CX+7+i*(CARD_W+5);
+    drawCard(cl,lp,card,mx,CARD_Y,CARD_W,CARD_H);
+    // slot gap line
+    if(i<CARDS.length-1){
+      svgEl('line',{
+        x1:mx+CARD_W+2,y1:CARD_Y,
+        x2:mx+CARD_W+2,y2:CARD_Y+CARD_H,
+        stroke:'#0a0e14','stroke-width':3
+      },cl);
+    }
+  });
+
+  // Laptop removed
+  drawSignalTraces();
+  drawPrewiredConnections();
+}
+
+function drawPrewiredConnections(){
+  // Called after render so port coords are registered
+  requestAnimationFrame(()=>{
+    const layer = document.getElementById('placed-wires');
+
+    function prewire(fromId, toId, color){
+      const p1 = getPortXY(fromId), p2 = getPortXY(toId);
+      if(!p1||!p2) return;
+      const mx = (p1.x+p2.x)/2;
+      // Thin pre-wired cable
+      svgEl('path',{
+        d:`M${p1.x},${p1.y} C${mx},${p1.y} ${mx},${p2.y} ${p2.x},${p2.y}`,
+        fill:'none', stroke:color, 'stroke-width':1.2,
+        'stroke-linecap':'round', opacity:0.55,
+        'stroke-dasharray':'none', 'data-prewired':'true'
+      }, layer);
+    }
+
+    // MON-FPGA ETH → PYNQ ETH2 (red port)
+    const monEthPt   = getPortXY('p-mon-eth');
+    const pynqEth2Pt = getPortXY('p-pynq-eth2');
+    if(monEthPt && pynqEth2Pt){
+      const mx = monEthPt.x - 90;
+      svgEl('path',{
+        d:`M${monEthPt.x},${monEthPt.y} C${mx},${monEthPt.y} ${mx},${pynqEth2Pt.y} ${pynqEth2Pt.x},${pynqEth2Pt.y}`,
+        fill:'none', stroke:'#f06060', 'stroke-width':1.2,
+        'stroke-linecap':'round', opacity:0.55, 'data-prewired':'true'
+      }, layer);
+    }
+
+
+
+    // PYNQ board ETH → eth switch PYNQ port
+    const pynqBrdEth = getPortXY('p-pynq-eth');
+    const swPynqPt   = getPortXY('p-eth-switch-pynq');
+    if(pynqBrdEth && swPynqPt){
+      const mx = pynqBrdEth.x - 100;
+      svgEl('path',{
+        d:`M${pynqBrdEth.x},${pynqBrdEth.y} C${mx},${pynqBrdEth.y} ${mx},${swPynqPt.y} ${swPynqPt.x},${swPynqPt.y}`,
+        fill:'none', stroke:'#5a7a5a', 'stroke-width':1.2,
+        'stroke-linecap':'round', opacity:0.6, 'data-prewired':'true'
+      }, layer);
+    }
+
+    // MON-FPGA JTAG → PYNQ JTAG
+    const monJtagPt  = getPortXY('p-mon-jtag');
+    const pynqJtagPt = getPortXY('p-pynq-jtag');
+    if(monJtagPt && pynqJtagPt){
+      const mx = monJtagPt.x - 70;
+      svgEl('path',{
+        d:`M${monJtagPt.x},${monJtagPt.y} C${mx},${monJtagPt.y} ${mx},${pynqJtagPt.y} ${pynqJtagPt.x},${pynqJtagPt.y}`,
+        fill:'none', stroke:'#8aad7a', 'stroke-width':1.2,
+        'stroke-linecap':'round', opacity:0.55, 'data-prewired':'true'
+      }, layer);
+    }
+
+    // Mark pre-connected ports
+    ['p-mon-eth','p-pynq-eth2','p-mon-jtag','p-pynq-jtag'].forEach(id=>usedPorts.add(id));
+    placedConnections.add(connKey('p-mon-eth','p-pynq-eth2'));
+  });
+}
+
+function drawCard(parent,ports,card,x,y,w,h){
+  const g=mkG(parent,card.id);
+  const c=card.color, mx=x+w/2;
+  rect(g,x,y,w,h,3,card.bg,c,1);
+  rect(g,x,y,w,5,0,'#0a1520',c+'30',0.5);
+  rect(g,x,y+h-18,w,18,0,'#00000060','none',0);
+  text(g,mx,y+h-8,card.label,c,10,600);
+
+  if(card.id==='mon_fpga'){
+    // ── Two POWER LEDs ──
+    mkLed(g,mx-10,y+16,'led1',c);
+    mkLed(g,mx+10,y+16,'led2',c);
+    text(g,mx,y+30,'POWER',c+'50',8);
+    // ── Firmware status LED ──
+    mkLed(g,mx,y+46,'led-fw-status',c);
+    text(g,mx,y+60,'FIRMWARE',c+'40',6);
+    text(g,mx,y+69,'STATUS',  c+'40',6);
+
+    // ── Ethernet port + one dashed wire dot ──
+    const ethY=y+121;
+    mkRJ45(g,mx,ethY,c);
+    mkPortDot(g,ports,mx,ethY,c,'p-mon-eth');
+    text(g,mx,ethY+22,'Ethernet',c+'70',10);
+
+    // ── JTAG port + one dashed wire dot below connector ──
+    const jtagY=y+185;
+    mkJTAG(g,mx,jtagY,c);
+    mkPortDot(g,ports,mx,jtagY,c,'p-mon-jtag');
+    text(g,mx,jtagY+22,'JTAG',c+'70',10);
+  }
+  if(card.id==='t2i'){
+    // ── D-Sub connector same width as RJ45 (24px), centred ──
+    const subY = y + h*0.45;
+    mkSubDconn(g,ports,mx,subY-20,subY+20,c,'subD37');
+    text(g,mx,subY+32,'subD37',c+'70',10);
+    // Two dashed port dots side by side on the connector
+    mkPortDot(g,ports,mx-10,subY,c,'p-t2i-in1');
+    mkPortDot(g,ports,mx+10,subY,c,'p-t2i-in2');
+    // Signal ports (invisible)
+    addPortAt(ports,'p-t2i-ilk',mx-10,subY,c);
+    addPortAt(ports,'p-t2i-mon',mx+10,subY,c);
+  }
+  if(card.id==='gss'){
+    const subY = y + h*0.45;
+    mkSubDconn(g,ports,mx,subY-20,subY+20,c,'subD15');
+    text(g,mx,subY+32,'subD15',c+'70',10);
+    mkPortDot(g,ports,mx,subY,c,'p-gss-out');
+  }
+  if(card.id==='out'||card.id==='out2'){
+    const pid=card.id==='out'?'p-out-ilk':'p-out2-ilk';
+    const subY = y + h*0.45;
+    mkSubDconn(g,ports,mx,subY-20,subY+20,c,'subD37');
+    text(g,mx,subY+32,'subD37',c+'70',10);
+    mkPortDot(g,ports,mx,subY,c,pid);
+  }
+  if(card.id==='ilk_fpga'){
+    // ── One LED — glows when firmware loaded ──
+    mkLed(g,mx,y+16,'fw-led',c);
+    text(g,mx,y+27,'FIRMWARE',c+'50',8);
+    text(g,mx,y+38,'STATUS',c+'50',8);
+
+    // ── Ethernet port + one dashed wire dot ──
+    const ethY=y+121;
+    mkRJ45(g,mx,ethY,c);
+    mkPortDot(g,ports,mx,ethY,c,'p-ilk-eth');
+    text(g,mx,ethY+22,'Ethernet',c+'70',10);
+
+    // ── JTAG port + one dashed wire dot below connector ──
+    const jtagY=y+185;
+    mkJTAG(g,mx,jtagY,c);
+    mkPortDot(g,ports,mx,jtagY,c,'p-ilk-jtag');
+    text(g,mx,jtagY+22,'JTAG',c+'70',10);
+
+    // Signal ports registered invisibly — at very bottom of card, clear of JTAG
+    addPortAt(ports,'p-ilk-t2i',mx-10,y+h-8,c);
+    addPortAt(ports,'p-ilk-gss',mx+10,y+h-8,c);
+    addPortAt(ports,'p-ilk-out',mx,   y+h-8,c);
+  }
+}
+
+function mkPortDot(parent,ports,cx,cy,color,portId){
+  // dashed circle = wire connection point, muted color
+  svgEl('circle',{cx,cy,r:4,fill:'#050a1880',
+    stroke:'#4a5a6a','stroke-width':1.2,'stroke-dasharray':'3 2'},parent);
+  if(portId) addPortAt(ports,portId,cx,cy,color);
+}
+
+// Draw-only helpers (no port — port dot added separately by caller)
+function mkRJ45(parent,cx,cy,color){
+  rect(parent,cx-12,cy-10,24,18,2,'#050a18',color,1.2);
+  for(let i=0;i<8;i++) svgEl('line',{x1:cx-10+i*2.8,y1:cy+4,x2:cx-10+i*2.8,y2:cy+8,stroke:color+'80','stroke-width':0.8},parent);
+  rect(parent,cx-4,cy-16,8,6,1,'#050a18',color+'50',0.8);
+}
+function mkJTAG(parent,cx,cy,color){
+  rect(parent,cx-12,cy-8,24,16,2,'#050a18',color,1.2);
+  for(let r=0;r<2;r++) for(let col=0;col<5;col++)
+    svgEl('circle',{cx:cx-9+col*4.5,cy:cy-4+r*8,r:1.4,fill:color+'80'},parent);
+}
+
+// Legacy wrappers used by ILK-FPGA block (kept for compat)
+function mkRJ45conn(parent,ports,cx,cy,color,portId){
+  mkRJ45(parent,cx,cy,color);
+  mkPortDot(parent,ports,cx,cy,color,portId);
+}
+function mkJTAGconn(parent,ports,cx,cy,color,portId){
+  mkJTAG(parent,cx,cy,color);
+  mkPortDot(parent,ports,cx,cy,color,portId);
+}
+
+function mkSubDconn(parent,ports,cx,yTop,yBot,color,label){
+  // Same width as RJ45: 24px
+  const w=24,h=yBot-yTop;
+  svgEl('polygon',{points:`${cx-w/2},${yTop+2} ${cx+w/2},${yTop+2} ${cx+w/2+2},${yBot-2} ${cx-w/2-2},${yBot-2}`,
+    fill:'#050a18',stroke:color,'stroke-width':1.2},parent);
+  const rows=Math.min(7,Math.round(h/8));
+  const step=(h-8)/Math.max(rows-1,1);
+  for(let i=0;i<rows;i++){
+    const py=yTop+4+i*step;
+    svgEl('circle',{cx:cx-6,cy:py,r:1.4,fill:color+'80'},parent);
+    svgEl('circle',{cx:cx,  cy:py,r:1.4,fill:color+'80'},parent);
+    svgEl('circle',{cx:cx+6,cy:py,r:1.4,fill:color+'80'},parent);
+  }
+}
+function mkLed(parent,cx,cy,id,color){
+  const g = svgEl('g',{id},parent);
+  // LED housing (dark bezel)
+  svgEl('circle',{cx,cy,r:7,fill:'#0a0c10',stroke:color+'60','stroke-width':1.5},g);
+  // LED dome — brighter tint when off
+  svgEl('circle',{cx,cy,r:5,fill:color+'50',stroke:color+'90','stroke-width':1.2},g);
+  // LED specular highlight
+  svgEl('circle',{cx:cx-1.8,cy:cy-1.8,r:1.6,fill:'#ffffff60',stroke:'none'},g);
+}
+
+function drawSwitch(parent,x,y,num){
+  const sw=num===1?sw1:sw2;
+  const g=mkG(parent,'psu'+num);
+  g.classList.add('sw-grp');
+  // rocker housing — visible even when off
+  rect(g,x,y,28,16,3,'#1a2a1a',sw?'#3ddc6e':'#4a6a4a',1.5);
+  // rocker knob
+  const kx = sw ? x+15 : x+2;
+  rect(g,kx,y+2,11,12,2,sw?'#3ddc6e':'#2a4a2a','none',0);
+  // ON / OFF labels
+  text(g,x+7, y+10,'O', sw?'#3ddc6e':'#4a6a4a', 7, 600);
+  text(g,x+21,y+10,'I', sw?'#4a6a4a':'#3ddc6e', 7, 600);
+  // indicator LED dot above switch
+  svgEl('circle',{cx:x+14,cy:y-5,r:3,
+    fill:sw?'#3ddc6e':'#1a2a1a',
+    stroke:sw?'#3ddc6e':'#2a4a2a','stroke-width':1,
+    filter:sw?'url(#glow-green)':'none'
+  },g);
+  // label below
+  text(g,x+14,y+26,'PSU '+num, sw?'#3ddc6e':'#4a6a4a', 6, 600);
+  g.style.cursor='pointer';
+  g.addEventListener('click',e=>{e.stopPropagation();toggleSwitch(num);});
+}
+
+function drawLaptop(parent,ports,x,y,w,h){
+  const g=mkG(parent,'laptop');
+  const sh=h*0.62;
+  rect(g,x,y,w,sh,4,'#0a1020','#2a3848',1);
+  rect(g,x+3,y+3,w-6,sh-6,2,'#060e1a','none',0);
+  text(g,x+w/2,y+sh*0.35,'DCS','#4898f0',8,600);
+  text(g,x+w/2,y+sh*0.55,'laptop','#2a3848',7);
+  rect(g,x-4,y+sh,w+8,h-sh-4,3,'#0e1828','#2a3848',1);
+  addPort(ports,'p-lap-eth1',x,y+sh*0.25,'#a0b8d0');
+  addPort(ports,'p-lap-eth2',x,y+sh*0.45,'#a0b8d0');
+  addPort(ports,'p-lap-jtag',x,y+sh*0.65,'#f08030');
+  text(g,x+w/2,y+sh*0.25,'ETH1','#2a3848',6);
+  text(g,x+w/2,y+sh*0.45,'ETH2','#2a3848',6);
+  text(g,x+w/2,y+sh*0.65,'JTAG','#2a3848',6);
+}
+
+// ══════════════════════════════════════════════════
+// BACKPLANE
+// ══════════════════════════════════════════════════
+function drawSignalTraces(){
+  const layer = document.getElementById('signal-traces');
+  if(!layer) return;
+  layer.innerHTML = '';
+  // T2I and ILK card centers
+  const centers = CARDS.map((_,i)=>CX+7+i*(CARD_W+5)+CARD_W/2);
+  const byId = Object.fromEntries(CARDS.map((c,i)=>[c.id,centers[i]]));
+  const traceY = CY + 10; // green line
+
+  // "status transmitted" green label (NTC→T2I→ILK)
+  const statusLblGreen = svgEl('text',{
+    x:CX + CW/2, y:CY - 6,
+    'text-anchor':'middle', 'font-family':"'IBM Plex Mono',monospace",
+    'font-size':6, fill:'#f0b030', opacity:0,
+    class:'sig-trace sig-status-label', id:'sig-status-label-green',
+    'pointer-events':'none'
+  }, layer);
+  statusLblGreen.textContent = 'status transmitted';
+  // "status transmitted" cyan label (GSS→ILK)
+  const statusLblCyan = svgEl('text',{
+    x:CX + CW/2, y:CY - 6,
+    'text-anchor':'middle', 'font-family':"'IBM Plex Mono',monospace",
+    'font-size':6, fill:'#20c8e0', opacity:0,
+    class:'sig-trace sig-status-label', id:'sig-status-label-cyan',
+    'pointer-events':'none'
+  }, layer);
+  statusLblCyan.textContent = 'status transmitted';
+
+  // ILK → OUT trace (pink, below the other traces)
+  const ilkX2 = byId.ilk_fpga, outX2 = byId.out;
+  const traceY3 = CY - 14;
+  svgEl('path',{
+    d:`M${ilkX2},${traceY3} L${outX2},${traceY3}`,
+    fill:'none', stroke:'#f472b6', 'stroke-width':1,
+    'stroke-linecap':'round', 'stroke-dasharray':'none',
+    class:'sig-trace sig-ilk-out-glow', id:'sig-ilk-out-glow'
+  }, layer);
+  svgEl('path',{
+    d:`M${ilkX2},${traceY3} L${outX2+6},${traceY3}`,
+    fill:'none', stroke:'#f472b6', 'stroke-width':1,
+    'stroke-linecap':'round', 'marker-end':'url(#sig-arrow-pink)',
+    class:'sig-trace', id:'sig-ilk-out'
+  }, layer);
+  // "decision transmitted" label — above the green/cyan glow lines
+  const midX = (ilkX2+outX2)/2;
+  const lbl = svgEl('text',{
+    x:midX, y:CY - 22,
+    'text-anchor':'middle', 'font-family':"'IBM Plex Mono',monospace",
+    'font-size':6, fill:'#f472b6', opacity:0,
+    class:'sig-trace sig-ilk-label', id:'sig-ilk-label',
+    'pointer-events':'none'
+  }, layer);
+  lbl.textContent = 'decision transmitted';
+
+  // T2I → ILK signal path along top of crate
+  const x1 = byId.t2i, x2 = byId.ilk_fpga;
+  svgEl('path',{
+    d:`M${x1},${traceY} L${x2},${traceY}`,
+    fill:'none', stroke:'#f0b030', 'stroke-width':1,
+    'stroke-linecap':'round', 'stroke-dasharray':'none',
+    class:'sig-trace sig-glow', id:'sig-t2i-glow'
+  }, layer);
+  svgEl('path',{
+    d:`M${x1},${traceY} L${x2-6},${traceY}`,
+    fill:'none', stroke:'#f0b030', 'stroke-width':0.8,
+    'stroke-linecap':'round', 'marker-end':'url(#sig-arrow-amber)',
+    class:'sig-trace', id:'sig-t2i-ilk'
+  }, layer);
+
+  // GSS → ILK trace — positioned just above T2I line if T2I is active, else same y
+  const gssX = byId.gss, ilkX = byId.ilk_fpga;
+  const gssTraceEl = document.getElementById('sig-gss-ilk');
+  const t2iActive = gssTraceEl ? false : false; // resolved dynamically in updateSignalTraces
+  const traceY2 = traceY - 8; // cyan line, above green
+  svgEl('path',{
+    d:`M${gssX},${traceY2} L${ilkX},${traceY2}`,
+    fill:'none', stroke:'#20c8e0', 'stroke-width':1,
+    'stroke-linecap':'round', 'stroke-dasharray':'none',
+    class:'sig-trace sig-gss-glow', id:'sig-gss-glow'
+  }, layer);
+  svgEl('path',{
+    d:`M${gssX},${traceY2} L${ilkX-6},${traceY2}`,
+    fill:'none', stroke:'#20c8e0', 'stroke-width':1,
+    'stroke-linecap':'round', 'marker-end':'url(#sig-arrow-cyan)',
+    class:'sig-trace', id:'sig-gss-ilk'
+  }, layer);
+}
+
+function drawBackplanePaths(parent){
+  [
+    {id:'bp-t2i-ilk',color:'#3ddc6e'},
+    {id:'bp-t2i-mon',color:'#f06060'},
+    {id:'bp-ilk-out',color:'#4898f0'},
+    {id:'bp-gss-ilk',color:'#20c8e0'},
+  ].forEach(p=>{
+    svgEl('line',{x1:0,y1:0,x2:0,y2:0,stroke:p.color,'stroke-width':2,'stroke-linecap':'round',opacity:0.06,id:p.id},parent);
+  });
+}
+function updateBackplane(){
+  const centers=CARDS.map((_,i)=>CX+7+i*(CARD_W+5)+CARD_W/2);
+  const byId=Object.fromEntries(CARDS.map((c,i)=>[c.id,centers[i]]));
+  const mid=BP_Y+BP_H/2;
+  [
+    {id:'bp-t2i-ilk',x1:byId.t2i,     x2:byId.ilk_fpga,key:connKey('p-t2i-ilk','p-ilk-t2i')},
+    {id:'bp-t2i-mon',x1:byId.t2i,     x2:byId.mon_fpga, key:connKey('p-t2i-mon','p-mon-t2i')},
+    {id:'bp-ilk-out',x1:byId.ilk_fpga,x2:byId.out,      key:connKey('p-ilk-out','p-out-ilk')},
+    {id:'bp-gss-ilk',x1:byId.gss,     x2:byId.ilk_fpga, key:connKey('p-gss-out','p-ilk-gss')},
+  ].forEach(p=>{
+    const el=document.getElementById(p.id); if(!el) return;
+    el.setAttribute('x1',p.x1); el.setAttribute('x2',p.x2);
+    el.setAttribute('y1',mid);  el.setAttribute('y2',mid);
+    const on=placedConnections.has(p.key)&&(sw1||sw2);
+    el.setAttribute('opacity',on?0.9:0.06);
+    el.setAttribute('stroke-width',on?3:2);
+    if(on) el.setAttribute('filter','url(#glow-green)');
+    else   el.removeAttribute('filter');
+  });
+}
+
+// ══════════════════════════════════════════════════
+// POWER SWITCHES
+// ══════════════════════════════════════════════════
+function toggleSwitch(num){
+  if(num===1) sw1=!sw1; else sw2=!sw2;
+  updateLEDs(); updateBackplane(); updateFwBtn(); updateSignalTraces(); updateFwStatusLed();
+  // Redraw switches
+  const cs=document.getElementById('crate-shell');
+  cs.querySelectorAll('.sw-grp').forEach(e=>e.remove());
+  const bkY=CY+CH-18;
+  drawSwitch(cs,CX+CW-72,bkY,1);
+  drawSwitch(cs,CX+CW-38,bkY,2);
+  checkPowerBtn();
+}
+function updateLEDs(){
+  // MON-FPGA LEDs — card color #f06060
+  const monColor = '#f06060';
+  setLed('led1', sw1, monColor);
+  setLed('led2', sw2, monColor);
+}
+function setLed(id, on, color){
+  const g = document.getElementById(id); if(!g) return;
+  const dome = g.children[1];
+  if(dome){
+    dome.setAttribute('fill', on ? color : color+'50');
+    dome.setAttribute('stroke', on ? '#ffffff' : color+'90');
+  }
+  if(on) g.setAttribute('filter','url(#glow-red)');
+  else   g.removeAttribute('filter');
+}
+
+// ══════════════════════════════════════════════════
+// FIRMWARE
+// ══════════════════════════════════════════════════
+function tryLoadFirmware(){
+  if(fwLoaded) return;
+  const powered = sw1||sw2;
+  const hasEth  = placedConnections.has(connKey('p-eth-switch-ilk','p-ilk-eth'));
+  const hasJtag = placedConnections.has(connKey('p-lap-jtag','p-ilk-jtag'))
+              || Array.from(placedConnections).some(k=>k.includes('p-ilk-jtag')&&k.includes('p-lap-jtag'));
+  if(!powered){
+    setStatus('Power the crate first — flip a PSU switch.','warn'); return;
+  }
+  if(!hasJtag){
+    // Debug: show what's in placedConnections
+    setStatus('Connect JTAG between ILK-FPGA and PC first.','warn'); return;
+  }
+  if(!hasEth){
+    setStatus('Connect ILK-FPGA Ethernet to the switch first.','warn'); return;
+  }
+  fwLoaded=true;
+  // LED on ILK-FPGA glows blue (ILK card color)
+  // ILK-FPGA LED — card color #4898f0
+  const fwLedG = document.getElementById('fw-led');
+  if(fwLedG){
+    const dome = fwLedG.children[1];
+    if(dome){ dome.setAttribute('fill','#4898f0'); dome.setAttribute('stroke','#ffffff'); }
+    fwLedG.setAttribute('filter','url(#glow-blue)');
+  }
+  // Update button on PC
+  const btn=document.getElementById('fw-btn-g');
+  if(btn){
+    const r=btn.querySelector('rect'); if(r){ r.setAttribute('stroke','#4898f0'); r.setAttribute('fill','#020a1e'); }
+    btn.querySelectorAll('text').forEach(t=>t.setAttribute('fill','#4898f0'));
+    btn.style.cursor='default';
+  }
+  setStatus('ILK firmware loaded — interlock matrix is now active.','ok');
+  checkPowerBtn();
+  updateSignalTraces();
+}
+
+// ══════════════════════════════════════════════════
+// WIRING
+// ══════════════════════════════════════════════════
+function startNewWire(){
+  pendingFrom=null;
+  document.getElementById('new-wire-btn').classList.add('active');
+  setTrayStatus('Click source port…');
+  document.getElementById('ghost-path').setAttribute('opacity',0);
+}
+
+function handlePort(portId){
+  const btn=document.getElementById('new-wire-btn');
+  if(!btn.classList.contains('active')){
+    setTrayStatus('Press "+ New wire" first.');
+    return;
+  }
+  if(!pendingFrom){
+    pendingFrom=portId;
+    const xy=getPortXY(portId);
+    const gp=document.getElementById('ghost-path');
+    gp.setAttribute('d',`M${xy.x},${xy.y} L${xy.x},${xy.y}`);
+    gp.setAttribute('stroke',WIRE_COLOR);
+    gp.setAttribute('opacity',0.5);
+    setTrayStatus('Source set — click destination port.');
+  } else {
+    if(portId===pendingFrom){ cancelWire(); return; }
+    placeWire(pendingFrom,portId);
+    pendingFrom=null;
+    btn.classList.remove('active');
+    document.getElementById('ghost-path').setAttribute('opacity',0);
+    setTrayStatus('Wire placed.');
+  }
+}
+
+function cancelWire(){
+  pendingFrom=null;
+  document.getElementById('new-wire-btn').classList.remove('active');
+  document.getElementById('ghost-path').setAttribute('opacity',0);
+  setTrayStatus('');
+}
+
+document.addEventListener('mousemove',e=>{
+  const gp=document.getElementById('ghost-path');
+  if(parseFloat(gp.getAttribute('opacity'))>0){
+    const d=gp.getAttribute('d').split('L')[0];
+    gp.setAttribute('d',`${d} L${e.clientX},${e.clientY}`);
+  }
+});
+
+// NTC ports must only connect to T2I ports, and vice versa
+const NTC_PORTS    = ['p-ntc1-out','p-ntc2-out'];
+const T2I_IN_PORTS = ['p-t2i-in1','p-t2i-in2','p-t2i-ilk','p-t2i-mon','p-t2i-conn'];
+
+function isNtcPort(id)  { return NTC_PORTS.includes(id); }
+function isT2iIn(id)    { return T2I_IN_PORTS.includes(id); }
+
+function isSupplyPort(id){ return ['p-lv-conn','p-hv-conn'].includes(id); }
+function isOutPort(id)    { return OUT_PORTS.includes(id); }
+
+function validateConnection(a, b){
+  // NTC must connect to T2I only
+  if(isNtcPort(a) && !isT2iIn(b)) return 'NTC sensors only connect to the T2I module. The T2I reads the temperature — nothing else can.';
+  if(isNtcPort(b) && !isT2iIn(a)) return 'NTC sensors only connect to the T2I module. The T2I reads the temperature — nothing else can.';
+  // T2I inputs only accept NTC
+  if(isT2iIn(a) && !isNtcPort(b)) return 'The T2I inputs only accept NTC sensor cables. Connect the NTC sensor first.';
+  if(isT2iIn(b) && !isNtcPort(a)) return 'The T2I inputs only accept NTC sensor cables. Connect the NTC sensor first.';
+  // LV/HV must connect to an OUT card only
+  if(isSupplyPort(a) && !isOutPort(b)) return 'LV and HV supplies can only connect to an OUT card. The OUT module is the one that physically cuts power.';
+  if(isSupplyPort(b) && !isOutPort(a)) return 'LV and HV supplies can only connect to an OUT card. The OUT module is the one that physically cuts power.';
+  // OUT ports only accept LV/HV or ILK-FPGA
+  if(isOutPort(a) && !isSupplyPort(b) && b!=='p-ilk-out') return 'The OUT card connects to LV/HV supplies or the ILK-FPGA only.';
+  if(isOutPort(b) && !isSupplyPort(a) && a!=='p-ilk-out') return 'The OUT card connects to LV/HV supplies or the ILK-FPGA only.';
+  // ILK JTAG only connects to PC JTAG
+  if(a==='p-ilk-jtag' && b!=='p-lap-jtag') return 'The ILK-FPGA JTAG port connects only to the PC JTAG port. This is how firmware is loaded.';
+  if(b==='p-ilk-jtag' && a!=='p-lap-jtag') return 'The ILK-FPGA JTAG port connects only to the PC JTAG port. This is how firmware is loaded.';
+
+  // Ethernet switch ports — each only connects to its designated FPGA
+  if(a==='p-eth-switch-ilk' && b!=='p-ilk-eth') return 'The blue ethernet port on the switch is for the ILK-FPGA only. Connect it to the ILK-FPGA Ethernet port.';
+  if(b==='p-eth-switch-ilk' && a!=='p-ilk-eth') return 'The blue ethernet port on the switch is for the ILK-FPGA only. Connect it to the ILK-FPGA Ethernet port.';
+  if(a==='p-pynq-eth2' && b!=='p-mon-eth') return 'The red ethernet port on the switch is for the MON-FPGA only. Connect it to the MON-FPGA Ethernet port.';
+  if(b==='p-pynq-eth2' && a!=='p-mon-eth') return 'The red ethernet port on the switch is for the MON-FPGA only. Connect it to the MON-FPGA Ethernet port.';
+  // ILK/MON eth ports only connect to their switch port
+  if(a==='p-ilk-eth' && b!=='p-eth-switch-ilk') return 'The ILK-FPGA Ethernet port connects only to the blue port on the Ethernet switch.';
+  if(b==='p-ilk-eth' && a!=='p-eth-switch-ilk') return 'The ILK-FPGA Ethernet port connects only to the blue port on the Ethernet switch.';
+  if(a==='p-mon-eth' && b!=='p-pynq-eth2') return 'The MON-FPGA Ethernet port connects only to the red port on the Ethernet switch.';
+  if(b==='p-mon-eth' && a!=='p-pynq-eth2') return 'The MON-FPGA Ethernet port connects only to the red port on the Ethernet switch.';
+  // Global signals port only connects to GSS
+  if(a==='p-global-sig' && b!=='p-gss-out') return 'The Global Signals port connects only to the GSS card. GSS is the bridge between the outside world and the LISSY.';
+  if(b==='p-global-sig' && a!=='p-gss-out') return 'The Global Signals port connects only to the GSS card. GSS is the bridge between the outside world and the LISSY.';
+  // GSS only connects to Global signals or ILK-FPGA
+  if(a==='p-gss-out' && b!=='p-global-sig' && b!=='p-ilk-gss') return 'The GSS card connects to the Global Signals port or the ILK-FPGA only.';
+  if(b==='p-gss-out' && a!=='p-global-sig' && a!=='p-ilk-gss') return 'The GSS card connects to the Global Signals port or the ILK-FPGA only.';
+  return null;
+}
+
+// Track which ports are already used
+const usedPorts = new Set();
+
+function placeWire(fromId,toId){
+  const key=connKey(fromId,toId);
+  if(placedConnections.has(key)){ setTrayStatus('Already connected.'); return; }
+
+  // Block if either port already has a wire
+  if(usedPorts.has(fromId)){ setTrayStatus('That port already has a wire connected.'); return; }
+  if(usedPorts.has(toId)){   setTrayStatus('That port already has a wire connected.'); return; }
+
+  // Validate NTC/T2I constraints
+  const err = validateConnection(fromId, toId);
+  if(err){ showFire('Wrong connection', err); return; }
+
+  placedConnections.add(key);
+  usedPorts.add(fromId);
+  usedPorts.add(toId);
+
+  // Visually mark both ports as used (solid fill)
+  [fromId, toId].forEach(id => {
+    const el = document.getElementById('pc-'+id);
+    if(el){
+      el.setAttribute('fill','#3a5a3a');
+      el.setAttribute('stroke','#3ddc6e');
+      el.style.pointerEvents='none';
+    }
+    // Also dim the parent group
+    const g = document.getElementById('pg-'+id);
+    if(g) g.style.pointerEvents='none';
+  });
+
+  const p1=getPortXY(fromId), p2=getPortXY(toId);
+  const mx=(p1.x+p2.x)/2;
+  svgEl('path',{
+    d:`M${p1.x},${p1.y} C${mx},${p1.y} ${mx},${p2.y} ${p2.x},${p2.y}`,
+    fill:'none',stroke:WIRE_COLOR,'stroke-width':2,'stroke-linecap':'round',opacity:0.9,'data-key':key
+  },document.getElementById('placed-wires'));
+  updateBackplane();
+  updateFwBtn();
+  checkPowerBtn();
+  updateSignalTraces();
+  // Inform if LOAD FW just became available
+  if(!fwLoaded){
+    const powered=sw1||sw2;
+    const hasEth=placedConnections.has(connKey('p-eth-switch-ilk','p-ilk-eth'));
+    const hasJtag=placedConnections.has(connKey('p-lap-jtag','p-ilk-jtag'));
+    if(powered&&hasEth&&hasJtag) setStatus('JTAG + Ethernet connected — click LOAD FIRMWARE on the PC.','ok');
+  }
+}
+
+let pynqOn = false;
+let detectorOn = false;
+
+function updateFwStatusLed(){
+  const on = pynqOn && (sw1||sw2);
+  setLed('led-fw-status', on, '#f06060');
+}
+
+function togglePynq(){
+  pynqOn = !pynqOn;
+  setLed('led-pynq', pynqOn, '#8aad7a');
+  updateFwStatusLed();
+  const mb = document.getElementById('mon-plots-btn');
+  if(mb){ mb.setAttribute('opacity', pynqOn?1:0); mb.style.pointerEvents = pynqOn?'all':'none'; }
+  const knob = document.getElementById('pynq-sw-knob');
+  if(knob){
+    const baseX = parseFloat(knob.getAttribute('x'));
+    // knob starts at pynqX+14; on = slide right 7px
+    const offX = parseFloat(knob.getAttribute('data-base')||knob.getAttribute('x'));
+    if(!knob.getAttribute('data-base')) knob.setAttribute('data-base', offX);
+    const base = parseFloat(knob.getAttribute('data-base'));
+    knob.setAttribute('x', pynqOn ? base+7 : base);
+    knob.setAttribute('fill', pynqOn ? '#8aad7a' : '#1a3a1a');
+  }
+}
+
+let ntcTraceFired    = false;
+let gssTraceFired    = false;
+let ilkOutTraceFired = false;
+
+function fireTrace(traceId, glowId){
+  const trace = document.getElementById(traceId);
+  const glow  = document.getElementById(glowId);
+  if(trace) trace.classList.add('active');
+  if(glow)  glow.classList.add('active');
+  setTimeout(()=>{
+    if(trace) trace.classList.remove('active');
+    if(glow)  glow.classList.remove('active');
+  }, 5000);
+}
+
+function updateSignalTraces(){
+  const crateOn = sw1||sw2;
+  // T2I → ILK: fire exactly once when both NTCs are first connected to T2I AND crate is powered
+  if(!ntcTraceFired && crateOn){
+    const bothNtc = ['p-ntc1-out','p-ntc2-out'].every(ntc =>
+      ['p-t2i-in1','p-t2i-in2','p-t2i-ilk','p-t2i-mon','p-t2i-conn'].some(t2i =>
+        placedConnections.has(connKey(ntc, t2i))
+      )
+    );
+    if(bothNtc){
+      ntcTraceFired = true;
+      fireTrace('sig-t2i-ilk','sig-t2i-glow');
+      const sl = document.getElementById('sig-status-label-green');
+      if(sl){ sl.classList.add('active'); setTimeout(()=>sl.classList.remove('active'), 5000); }
+    }
+  }
+
+  // GSS → ILK: fire exactly once when Global signals first connects to GSS AND crate is powered
+  if(!gssTraceFired && crateOn){
+    const gssConnected = placedConnections.has(connKey('p-global-sig','p-gss-out'));
+    if(gssConnected){
+      gssTraceFired = true;
+      fireTrace('sig-gss-ilk','sig-gss-glow');
+      const sl = document.getElementById('sig-status-label-cyan');
+      if(sl){ sl.classList.add('active'); setTimeout(()=>sl.classList.remove('active'), 5000); }
+    }
+  }
+
+  // ILK → OUT: fire once when firmware loaded AND crate powered AND supply wired
+  if(!ilkOutTraceFired && fwLoaded && crateOn){
+    const outWired = OUT_PORTS.some(op => SUPPLY_PORTS.some(sp => placedConnections.has(connKey(sp,op))));
+    const out2Wired = OUT_PORTS.filter(op => SUPPLY_PORTS.some(sp => placedConnections.has(connKey(sp,op)))).length >= 2;
+    if(outWired){
+      ilkOutTraceFired = true;
+      fireTrace('sig-ilk-out','sig-ilk-out-glow');
+      // Also show the label
+      const lbl = document.getElementById('sig-ilk-label');
+      if(lbl){ lbl.classList.add('active'); setTimeout(()=>lbl.classList.remove('active'), 5000); }
+    }
+  }
+}
+
+function updateFwBtn(){
+  if(fwLoaded) return;
+  const powered = sw1||sw2;
+  const hasEth  = placedConnections.has(connKey('p-eth-switch-ilk','p-ilk-eth'));
+  const hasJtag = placedConnections.has(connKey('p-lap-jtag','p-ilk-jtag'))
+              || Array.from(placedConnections).some(k=>k.includes('p-ilk-jtag')&&k.includes('p-lap-jtag'));
+  const ready   = powered && hasEth && hasJtag;
+  const btn=document.getElementById('fw-btn-g'); if(!btn) return;
+  const r=btn.querySelector('rect'), t=btn.querySelector('text');
+  const texts = btn.querySelectorAll('text');
+  if(ready){
+    if(r){ r.setAttribute('stroke','#4898f060'); r.setAttribute('fill','#020a1e'); }
+    texts.forEach(t=>t.setAttribute('fill','#4898f0'));
+    btn.style.cursor='pointer';
+  } else {
+    if(r){ r.setAttribute('stroke','#1e3048'); r.setAttribute('fill','#0a1520'); }
+    texts.forEach(t=>t.setAttribute('fill','#2a3848'));
+    btn.style.cursor='not-allowed';
+  }
+}
+
+// ══════════════════════════════════════════════════
+// POWER ON
+// ══════════════════════════════════════════════════
+const FIRE_MSGS = {
+  [connKey('p-ntc1-out','p-t2i-in1')]:  ['NTC sensor 1 not wired',       'T2I had no input from sensor 1. It could not detect overtemperature — an open circuit fires T-ERR, but without the I²C-ILK path the FPGA never heard it.'],
+  [connKey('p-ntc2-out','p-t2i-in2')]:  ['NTC sensor 2 not wired',       'Same problem on sensor 2. The T2I saw an open circuit but had no path to report it.'],
+  [connKey('p-t2i-ilk','p-ilk-t2i')]:   ['T2I not connected to ILK-FPGA','The temperature signal never reached the interlock matrix. The fault fired but nothing acted on it.'],
+  [connKey('p-t2i-mon','p-mon-t2i')]:   ['T2I not connected to MON-FPGA','Monitoring path missing. The DCS saw nothing — no log, no alarm, no record.'],
+  [connKey('p-ilk-out','p-out-ilk')]:   ['ILK-FPGA not connected to OUT','The FPGA made the right decision but could not send it. The OUT module never received the cut command.'],
+  [connKey('p-gss-out','p-ilk-gss')]:   ['GSS not connected to ILK-FPGA','When the coolant failed, the global safety signal arrived at GSS — but had nowhere to go.'],
+  // MON eth pre-wired — removed from fire messages
+  [connKey('p-eth-switch-ilk','p-ilk-eth')]: ['ILK-FPGA has no Ethernet', 'Firmware state could not be verified remotely — a commissioning requirement.'],
+  [connKey('p-lap-jtag','p-ilk-jtag')]:  ['ILK-FPGA has no JTAG',        'Firmware cannot be loaded without JTAG. The interlock matrix is empty — the detector is unprotected.'],
+
+};
+
+function checkPowerBtn(){
+  const coreWired = VALID_CONNECTIONS.filter(([a,b])=>!a.includes('prewired') && a!=='//').every(([a,b])=>placedConnections.has(connKey(a,b)));
+  const lvWired   = supplyConnected('p-lv-conn');
+  const hvWired   = supplyConnected('p-hv-conn');
+  document.getElementById('power-on-btn').className=(coreWired&&lvWired&&hvWired&&(sw1||sw2)&&fwLoaded)?'ready':'';
+}
+
+function attemptPowerOn(){
+  lightSupplyLEDs(true);
+  if(!sw1&&!sw2){
+    // Crate not powered — dramatic failure, random mode
+    const r=Math.random();
+    if(r<0.04)      triggerSilent();
+    else if(r<0.52) triggerIce('No global safety signal received. The GSS to Global Signals cable is missing and the crate is not powered.');
+    else            triggerOverheat('Crate not powered — the interlock system has no power and cannot protect the detector.');
+    return;
+  }
+
+  // Collect missing connections
+  const ntcWired = ['p-ntc1-out','p-ntc2-out'].every(ntc =>
+    ['p-t2i-in1','p-t2i-in2','p-t2i-ilk','p-t2i-mon','p-t2i-conn'].some(t2i =>
+      placedConnections.has(connKey(ntc,t2i))));
+  const gssWired = placedConnections.has(connKey('p-global-sig','p-gss-out'));
+  const lvWired  = supplyConnected('p-lv-conn');
+  const hvWired  = supplyConnected('p-hv-conn');
+
+  const tempFails = [];
+  const iceFails  = [];
+  if(!ntcWired) tempFails.push('NTC sensors not connected to T2I — temperature cannot be monitored.');
+  if(!lvWired)  tempFails.push('LV supply not connected to an OUT module — low voltage cannot be cut.');
+  if(!hvWired)  tempFails.push('HV supply not connected to an OUT module — high voltage cannot be cut.');
+  if(!fwLoaded) tempFails.push('ILK firmware not loaded — the interlock matrix is empty and cannot respond to any fault.');
+  if(!gssWired) iceFails.push('No global safety signal received. The GSS to Global Signals cable is missing.');
+
+  const allFails = [
+    ...iceFails.map(m=>({type:'ice',msg:m})),
+    ...tempFails.map(m=>({type:'temp',msg:m}))
+  ];
+
+  if(allFails.length > 0){
+    const r = Math.random();
+    if(r < 0.04){
+      triggerSilent();
+    } else {
+      // 48/48 split between ice and temp from the collected failures
+      const iceOnly  = allFails.filter(f=>f.type==='ice');
+      const tempOnly = allFails.filter(f=>f.type==='temp');
+      let pool;
+      if(iceOnly.length && tempOnly.length) pool = r < 0.52 ? iceOnly : tempOnly;
+      else pool = allFails;
+      const chosen = pool[Math.floor(Math.random()*pool.length)];
+      if(chosen.type==='ice') triggerIce(chosen.msg);
+      else                    triggerOverheat(chosen.msg);
+    }
+    return;
+  }
+
+  // All good — dramatic success sequence
+  triggerSuccess();
+}
+
+function lightSupplyLEDs(on){
+  setLed('led-lv', on, '#b070f0');
+  setLed('led-hv', on, '#b070f0');
+  updateFwStatusLed();
+}
+
+// ══════════════════════════════════════════════════
+// AUTO-TEST
+// ══════════════════════════════════════════════════
+const AUTO_TEST_SCENARIOS = [
+  { name:'No connections — crate off',
+    setup: ()=>{},
+    desc:'Nothing wired, crate off → random dramatic failure' },
+  { name:'Crate powered, nothing wired',
+    setup: ()=>{ sw1=true; updateLEDs(); updateBackplane(); },
+    desc:'PSU on but no signal paths → interlock cannot respond' },
+  { name:'NTCs wired, T2I→ILK missing',
+    setup: ()=>{ autoWire('p-ntc1-out','p-t2i-in1'); autoWire('p-ntc2-out','p-t2i-in2'); },
+    desc:'Sensors connected but T2I not linked to ILK-FPGA' },
+  { name:'T2I→ILK wired, GSS missing',
+    setup: ()=>{ autoWire('p-t2i-ilk','p-ilk-t2i'); autoWire('p-t2i-mon','p-mon-t2i'); },
+    desc:'Interlock path partial — no global safety signal' },
+  { name:'GSS wired, no LV/HV to OUT',
+    setup: ()=>{ autoWire('p-gss-out','p-ilk-gss'); autoWire('p-global-sig','p-gss-out'); },
+    desc:'Signals reach FPGA but OUT not connected to supplies' },
+  { name:'LV/HV wired, ILK→OUT missing',
+    setup: ()=>{ autoWire('p-lv-conn','p-out-ilk'); autoWire('p-hv-conn','p-out2-ilk'); },
+    desc:'Supplies wired but ILK-FPGA cannot command OUT' },
+  { name:'All wired, no firmware',
+    setup: ()=>{ autoWire('p-ilk-out','p-out-ilk');
+                 autoWire('p-eth-switch-ilk','p-ilk-eth');
+                 autoWire('p-lap-jtag','p-ilk-jtag'); sw2=true; updateLEDs(); },
+    desc:'Full wiring but firmware not loaded → matrix empty' },
+  { name:'FULLY CORRECT — detector saved',
+    setup: ()=>{ fwLoaded=true; detectorOn=false;
+      const led=document.getElementById('fw-led');
+      if(led){led.setAttribute('fill','#4898f0');led.setAttribute('stroke','#4898f0');led.setAttribute('filter','url(#glow-blue)');}
+    },
+    desc:'Everything correct → temperature rises, interlock fires, ITk saved' },
+];
+
+let autoTestStep = 0;
+let autoTestRunning = false;
+
+function autoWire(a, b){
+  const key = connKey(a,b);
+  if(!placedConnections.has(key)){
+    placedConnections.add(key);
+    const p1=getPortXY(a), p2=getPortXY(b);
+    if(p1&&p2){
+      const mx=(p1.x+p2.x)/2;
+      svgEl('path',{d:`M${p1.x},${p1.y} C${mx},${p1.y} ${mx},${p2.y} ${p2.x},${p2.y}`,
+        fill:'none',stroke:WIRE_COLOR,'stroke-width':2,'stroke-linecap':'round',opacity:0.9},
+        document.getElementById('placed-wires'));
+    }
+  }
+}
+
+function logAutoTest(msg, color='#445566'){
+  const log = document.getElementById('autotest-log');
+  const line = document.createElement('div');
+  line.style.color = color;
+  line.textContent = msg;
+  log.appendChild(line);
+  log.scrollTop = log.scrollHeight;
+}
+
+function startAutoTest(){
+  document.getElementById('autotest-ov').classList.add('active');
+  document.getElementById('autotest-log').innerHTML = '';
+  document.getElementById('autotest-bar').style.width = '0';
+  autoTestStep = 0;
+  autoTestRunning = true;
+  document.getElementById('autotest-btn').classList.add('running');
+  document.getElementById('autotest-close').style.pointerEvents='none';
+  document.getElementById('autotest-close').style.opacity='0.3';
+  resetGame();
+  setTimeout(runNextAutoTest, 800);
+}
+
+function runNextAutoTest(){
+  if(autoTestStep >= AUTO_TEST_SCENARIOS.length){
+    logAutoTest('━━━ ALL SCENARIOS COMPLETE ━━━', '#3ddc6e');
+    document.getElementById('autotest-btn').classList.remove('running');
+    document.getElementById('autotest-close').style.pointerEvents='all';
+    document.getElementById('autotest-close').style.opacity='1';
+    autoTestRunning = false;
+    return;
+  }
+  const scenario = AUTO_TEST_SCENARIOS[autoTestStep];
+  const pct = (autoTestStep / AUTO_TEST_SCENARIOS.length * 100) + '%';
+  document.getElementById('autotest-bar').style.width = pct;
+
+  logAutoTest(`[${autoTestStep+1}/${AUTO_TEST_SCENARIOS.length}] ${scenario.name}`, '#d29922');
+  logAutoTest(`    ${scenario.desc}`, '#2a3848');
+
+  // Apply setup for this scenario
+  scenario.setup();
+  updateBackplane(); checkPowerBtn();
+
+  if(autoTestStep === AUTO_TEST_SCENARIOS.length - 1){
+    // Final scenario: trigger success sequence condensed
+    logAutoTest('    → Powering on… temperature rising to 40°C…', '#3ddc6e');
+    detectorOn=true; lightSupplyLEDs(true);
+    animTemp(18,40,3000,()=>{
+      setLed('led-lv',false,'#b070f0'); setLed('led-hv',false,'#b070f0');
+      logAutoTest('    → T-HI fired! LV/HV cut. You saved the ITk! ✓', '#3ddc6e');
+      document.getElementById('autotest-bar').style.width='100%';
+      document.getElementById('autotest-btn').classList.remove('running');
+      document.getElementById('autotest-close').style.pointerEvents='all';
+      document.getElementById('autotest-close').style.opacity='1';
+      autoTestRunning=false;
+    });
+    autoTestStep++;
+    return;
+  }
+
+  // Trigger power-on attempt which will fire a failure
+  logAutoTest('    → Triggering power on…', '#445566');
+  setTimeout(()=>{
+    // Intercept — run attemptPowerOn silently and log result
+    autoTestPowerOn(scenario, ()=>{
+      autoTestStep++;
+      setTimeout(()=>{
+        resetGame();
+        setTimeout(runNextAutoTest, 600);
+      }, 2200);
+    });
+  }, 400);
+}
+
+function autoTestPowerOn(scenario, done){
+  // Silently determine what failure fires and log it
+  const ntcWired=['p-ntc1-out','p-ntc2-out'].every(n=>
+    ['p-t2i-in1','p-t2i-in2','p-t2i-ilk','p-t2i-mon','p-t2i-conn'].some(t=>placedConnections.has(connKey(n,t))));
+  const gssWired=placedConnections.has(connKey('p-global-sig','p-gss-out'));
+  const lvWired=supplyConnected('p-lv-conn');
+  const hvWired=supplyConnected('p-hv-conn');
+  const powered=sw1||sw2;
+
+  let result='';
+  if(!powered)               result='✗ Crate not powered';
+  else if(!ntcWired)         result='✗ NTC sensors not connected';
+  else if(!gssWired)         result='✗ GSS not connected';
+  else if(!lvWired||!hvWired)result='✗ LV/HV not connected to OUT';
+  else if(!fwLoaded)         result='✗ Firmware not loaded';
+  else                       result='✓ All correct';
+
+  logAutoTest(`    → Result: ${result}`, result.startsWith('✓')?'#3ddc6e':'#f06060');
+  setTimeout(done, 400);
+}
+
+function openMonitoringPlots(){
+  const grid = document.getElementById('mon-plots-grid');
+  grid.innerHTML = '';
+
+  const ntc1connected = Array.from(placedConnections).some(k=>k.includes('p-ntc1-out'));
+  const ntc2connected = Array.from(placedConnections).some(k=>k.includes('p-ntc2-out'));
+
+  // Read actual current temperature from the gauge
+  const curTempEl = document.getElementById('det-temp-text');
+  const curTemp = curTempEl ? parseFloat(curTempEl.textContent) : 22;
+
+  const plots = [
+    { id:'plt-ntc1', label:'NTC Sensor 1 — Temperature (°C)', active: ntc1connected && detectorOn,
+      inactive: ntc1connected ? 'Detector not powered on' : 'NTC 1 not connected to T2I', color:'#f0b030',
+      gen: (t)=> curTemp + (Math.random()-0.5)*0.6 },
+    { id:'plt-ntc2', label:'NTC Sensor 2 — Temperature (°C)', active: ntc2connected && detectorOn,
+      inactive: ntc2connected ? 'Detector not powered on' : 'NTC 2 not connected to T2I', color:'#f0b030',
+      gen: (t)=> curTemp - 0.8 + (Math.random()-0.5)*0.5 },
+    { id:'plt-psu1', label:'PSU 1 — Board Temperature (°C)', active: sw1,
+      inactive: 'PSU 1 is off', color:'#3ddc6e',
+      gen: (t)=> 45 + (Math.random()-0.5)*2.4 },
+    { id:'plt-psu2', label:'PSU 2 — Board Temperature (°C)', active: sw2,
+      inactive: 'PSU 2 is off', color:'#3ddc6e',
+      gen: (t)=> 44.8 + (Math.random()-0.5)*2.4 },
+  ];
+
+  plots.forEach(p=>{
+    const wrap = document.createElement('div');
+    wrap.style.cssText = 'background:#07090d;border:1px solid #1a2433;border-radius:6px;padding:12px;';
+    const title = document.createElement('div');
+    title.style.cssText = `font-family:'IBM Plex Mono',monospace;font-size:9px;font-weight:600;color:${p.color};letter-spacing:.08em;margin-bottom:8px;`;
+    title.textContent = p.label;
+    wrap.appendChild(title);
+
+    if(!p.active){
+      const msg = document.createElement('div');
+      msg.style.cssText = 'font-family:"IBM Plex Mono",monospace;font-size:9px;color:#445566;padding:20px 0;text-align:center;';
+      msg.textContent = p.inactive;
+      wrap.appendChild(msg);
+    } else {
+      const canvas = document.createElement('canvas');
+      canvas.width = 360; canvas.height = 120;
+      canvas.style.width='100%'; canvas.style.height='120px';
+      wrap.appendChild(canvas);
+      drawPlot(canvas, p.gen, p.color);
+    }
+    grid.appendChild(wrap);
+  });
+
+  document.getElementById('mon-ov').classList.add('active');
+}
+
+function drawPlot(canvas, gen, color){
+  const ctx = canvas.getContext('2d');
+  const W = canvas.width, H = canvas.height;
+  const pts = 60;
+  const data = Array.from({length:pts}, (_,i)=>gen(i));
+  const min = Math.min(...data) - 1;
+  const max = Math.max(...data) + 1;
+
+  ctx.fillStyle = '#07090d';
+  ctx.fillRect(0,0,W,H);
+
+  // Grid lines
+  ctx.strokeStyle = '#1a2433';
+  ctx.lineWidth = 0.5;
+  for(let i=0;i<=4;i++){
+    const y = H*0.1 + (H*0.8)*(i/4);
+    ctx.beginPath(); ctx.moveTo(W*0.08,y); ctx.lineTo(W,y); ctx.stroke();
+    const val = (max - (max-min)*(i/4)).toFixed(1);
+    ctx.fillStyle='#445566'; ctx.font='8px IBM Plex Mono';
+    ctx.textAlign='right'; ctx.fillText(val, W*0.07, y+3);
+  }
+  // X axis labels
+  ctx.fillStyle='#445566'; ctx.font='8px IBM Plex Mono'; ctx.textAlign='center';
+  ['0s','15s','30s','45s','60s'].forEach((l,i)=>{
+    ctx.fillText(l, W*0.08 + (W*0.92)*(i/4), H*0.96);
+  });
+
+  // Data line
+  ctx.beginPath();
+  ctx.strokeStyle = color;
+  ctx.lineWidth = 1.5;
+  ctx.shadowColor = color; ctx.shadowBlur = 4;
+  data.forEach((v,i)=>{
+    const x = W*0.08 + (W*0.92)*(i/(pts-1));
+    const y = H*0.1 + (H*0.8)*(1-(v-min)/(max-min));
+    i===0 ? ctx.moveTo(x,y) : ctx.lineTo(x,y);
+  });
+  ctx.stroke();
+  ctx.shadowBlur = 0;
+}
+
+function triggerSuccess(){
+  detectorOn = true;
+  lightSupplyLEDs(true);
+  setStatus('Detector powered on. Temperature is rising — check the monitoring plots while you can!','ok');
+
+  // Slow rise: 18s to climb from 18°C to 40°C — student has time to explore
+  animTemp(18, 40, 18000, ()=>{
+    setStatus('T-HI fired! ILK-FPGA cuts LV and HV…','warn');
+    setLed('led-lv', false, '#b070f0');
+    setLed('led-hv', false, '#b070f0');
+    setTimeout(()=>{
+      document.getElementById('ok-body').innerHTML =
+        '<strong style="color:#3ddc6e;font-size:16px">You saved the ITk!</strong><br><br>' +
+        'Temperature hit 40°C — T2I fired T-HI, ILK-FPGA evaluated its matrix, ' +
+        'OUT module cut LV and HV in milliseconds. ' +
+        'The detector is safe. The interlock chain worked exactly as designed.';
+      document.getElementById('ok-ov').classList.add('active');
+    }, 800);
+  });
+}
+
+function triggerSilent(){
+  setStatus('Powering on…','');
+  setTimeout(()=>{
+    showFireFatal("That's worth $$$; protect it", "Nothing happened — but you got really lucky. The detector powered on without any interlock protection. One wrong voltage spike, one cooling failure, one stray beam — and 60 million channels of silicon are gone forever.");
+  }, 5000);
+}
+
+function triggerOverheat(reason){
+  setStatus('Temperature rising… interlock not responding…','err');
+  animTemp(20, 42, 3000, ()=>{
+    const heatEl = document.getElementById('det-heat-overlay');
+    if(heatEl){ heatEl.style.transition='background 0.5s'; heatEl.style.background='rgba(255,60,0,0.3)'; heatEl.style.opacity=1; }
+    setTimeout(()=>{
+      if(heatEl){ heatEl.style.opacity=0; heatEl.style.background='rgba(255,60,0,0)'; }
+      setTemp(18);
+      showFireFatal('🔥 Detector overheated', reason);
+    }, 900);
+  });
+}
+
+function triggerIce(reason){
+  drawIce();
+  const ov = document.getElementById('ice-overlay');
+  ov.classList.add('active');
+  setStatus('No global signal received — detector operating blind…','warn');
+  setTimeout(()=>{
+    ov.classList.remove('active');
+    const canvas = document.getElementById('ice-canvas');
+    if(canvas){ const ctx=canvas.getContext('2d'); ctx.clearRect(0,0,canvas.width,canvas.height); }
+    showFireFatal('❄️ No global safety signal', reason);
+  }, 2800);
+}
+
+function drawIce(){
+  const canvas = document.getElementById('ice-canvas');
+  if(!canvas) return;
+  canvas.width=window.innerWidth; canvas.height=window.innerHeight;
+  const ctx=canvas.getContext('2d');
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  ctx.fillStyle='rgba(160,220,255,0.18)'; ctx.fillRect(0,0,canvas.width,canvas.height);
+  const cx=canvas.width/2, cy=canvas.height/2;
+  ctx.strokeStyle='rgba(180,230,255,0.75)'; ctx.lineWidth=1;
+  for(let i=0;i<30;i++){
+    const angle=(i/30)*Math.PI*2;
+    const len=100+Math.random()*280;
+    let x=cx,y=cy,a=angle;
+    ctx.beginPath(); ctx.moveTo(x,y);
+    for(let s=0;s<8;s++){
+      a+=(Math.random()-0.5)*0.35;
+      const sl=len/8*(0.5+Math.random());
+      x+=Math.cos(a)*sl; y+=Math.sin(a)*sl;
+      ctx.lineTo(x,y);
+    }
+    ctx.stroke();
+    for(let b=0;b<2;b++){
+      const bx=cx+Math.cos(angle)*(len*0.25*(b+1));
+      const by=cy+Math.sin(angle)*(len*0.25*(b+1));
+      const ba=angle+(Math.random()-0.5)*1.1;
+      const bl=30+Math.random()*70;
+      ctx.beginPath(); ctx.moveTo(bx,by);
+      ctx.globalAlpha=0.4;
+      ctx.lineTo(bx+Math.cos(ba)*bl,by+Math.sin(ba)*bl);
+      ctx.stroke(); ctx.globalAlpha=1;
+    }
+  }
+  ctx.strokeStyle='rgba(200,240,255,0.5)'; ctx.lineWidth=0.5;
+  for(let i=0;i<50;i++){
+    const fx=Math.random()*canvas.width, fy=Math.random()*canvas.height, fr=6+Math.random()*14;
+    for(let s=0;s<6;s++){
+      const sa=(s/6)*Math.PI*2;
+      ctx.beginPath(); ctx.moveTo(fx,fy);
+      ctx.lineTo(fx+Math.cos(sa)*fr,fy+Math.sin(sa)*fr); ctx.stroke();
+    }
+  }
+}
+
+function showFire(title,body){
+  document.getElementById('fire-title').textContent=title;
+  document.getElementById('fire-body').textContent=body;
+  const btn=document.querySelector('#fire-ov .ov-btn');
+  if(btn){ btn.textContent='OK, got it'; btn.onclick=dismissError; }
+  document.getElementById('fire-ov').classList.add('active');
+}
+function showFireFatal(title,body){
+  document.getElementById('fire-title').textContent=title;
+  document.getElementById('fire-body').textContent=body;
+  // Swap button to reset
+  const btn=document.querySelector('#fire-ov .ov-btn');
+  if(btn){ btn.textContent='Try again'; btn.onclick=resetGame; }
+  document.getElementById('fire-ov').classList.add('active');
+}
+function dismissError(){
+  document.getElementById('fire-ov').classList.remove('active');
+  // Cancel any pending wire
+  pendingFrom=null;
+  document.getElementById('new-wire-btn').classList.remove('active');
+  document.getElementById('ghost-path').setAttribute('opacity',0);
+  setTrayStatus('');
+}
+
+// ══════════════════════════════════════════════════
+// TEMPERATURE
+// ══════════════════════════════════════════════════
+function animTemp(from,to,dur,cb){
+  const start=performance.now();
+  (function step(now){
+    const t=Math.min((now-start)/dur,1);
+    setTemp(Math.round(from+(to-from)*t));
+    if(t<1) requestAnimationFrame(step); else cb&&cb();
+  })(performance.now());
+}
+function setTemp(deg){
+  const pct=Math.min(Math.max((deg-15)/50,0),1);
+  const col=deg<28?'#3ddc6e':deg<40?'#f0b030':'#f06060';
+  const fill=document.getElementById('det-gauge-fill');
+  const txt=document.getElementById('det-temp-text');
+  if(fill){ fill.setAttribute('width',pct*54); fill.setAttribute('fill',col); }
+  if(txt){  txt.textContent=deg+'°C'; txt.setAttribute('fill',col); }
+}
+
+// ══════════════════════════════════════════════════
+// STATUS
+// ══════════════════════════════════════════════════
+function setStatus(msg,cls){
+  const s=document.getElementById('status-strip');
+  s.textContent=msg; s.className=cls||'';
+}
+function setTrayStatus(msg,cls){
+  setStatus(msg,cls||'');
+}
+
+// ══════════════════════════════════════════════════
+// RESET
+// ══════════════════════════════════════════════════
+function resetGame(){
+  placedConnections.clear();
+  usedPorts.clear();
+  if(pynqOn){ pynqOn=false; setLed('led-pynq',false,'#8aad7a');
+    const knob=document.getElementById('pynq-sw-knob'); if(knob){knob.setAttribute('fill','#1a3a1a');}
+  }
+  pynqOn=false;
+  detectorOn=false;
+  ntcTraceFired    = false;
+  // Re-add pre-wired connections
+  setTimeout(drawPrewiredConnections, 100);
+  gssTraceFired    = false;
+  ilkOutTraceFired = false;
+  ['sig-t2i-ilk','sig-t2i-glow','sig-gss-ilk','sig-gss-glow','sig-ilk-out','sig-ilk-out-glow','sig-ilk-label','sig-status-label-green','sig-status-label-cyan'].forEach(id=>{
+    const el=document.getElementById(id); if(el) el.classList.remove('active');
+  });
+  pendingFrom=null; sw1=false; sw2=false; fwLoaded=false;
+  document.getElementById('fire-ov').classList.remove('active');
+  document.getElementById('ok-ov').classList.remove('active');
+  document.getElementById('ice-overlay').classList.remove('active');
+  const ic=document.getElementById('ice-canvas'); if(ic){const ctx=ic.getContext('2d');ctx.clearRect(0,0,ic.width,ic.height);}
+  const he=document.getElementById('det-heat-overlay'); if(he){he.style.opacity=0;he.style.background='rgba(255,60,0,0)';}
+  lightSupplyLEDs(false);
+  document.getElementById('placed-wires').innerHTML='';
+  document.getElementById('ghost-path').setAttribute('opacity',0);
+  document.getElementById('power-on-btn').className='';
+  document.getElementById('new-wire-btn').classList.remove('active');
+  setTrayStatus('');
+  setTemp(18);
+  init();
+}
+
+// ══════════════════════════════════════════════════
+// INIT
+// ══════════════════════════════════════════════════
+function init(){
+  renderDetector();
+  renderLISSY();
+  updateLEDs();
+  updateBackplane();
+  setStatus('To switch on the LISSY, flip a PSU switch on the back panel.','ok');
+}
+window.addEventListener('resize',()=>{ placedConnections.clear(); document.getElementById('placed-wires').innerHTML=''; fwLoaded=false; init(); });
+window.addEventListener('load', init);
+</script>
+</body>
+</html>
