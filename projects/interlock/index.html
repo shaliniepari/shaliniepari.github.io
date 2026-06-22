@@ -34,29 +34,29 @@
 }
 
 *{box-sizing:border-box;margin:0;padding:0;}
-body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;font-size:13px;font-weight:500;height:100vh;height:100dvh;max-height:100vh;max-height:100dvh;overflow:hidden;display:flex;flex-direction:column;}
+body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;font-size:13px;font-weight:500;height:100vh;height:100dvh;overflow:hidden;display:flex;flex-direction:column;}
 
 /* ── TOP BAR ── */
 #topbar{
-  height:46px;flex-shrink:0;
+  height:clamp(38px,4.8vh,50px);flex-shrink:0;
   background:linear-gradient(to bottom,#111820,#0c1118);
   border-bottom:1px solid var(--border);
-  display:flex;align-items:center;padding:0 16px;gap:12px;z-index:20;
+  display:flex;align-items:center;padding:0 clamp(10px,1.5vw,20px);gap:clamp(8px,1vw,14px);z-index:20;
   box-shadow:0 1px 12px rgba(0,0,0,.4);
 }
 .badge{
-  font-family:'IBM Plex Mono',monospace;font-size:9px;font-weight:600;
+  font-family:'IBM Plex Mono',monospace;font-size:clamp(7px,0.75vw,9px);font-weight:600;
   letter-spacing:.14em;border:1px solid var(--blue);color:var(--blue);
   background:linear-gradient(135deg,#031228,#062050);
-  border-radius:3px;padding:3px 8px;
-  box-shadow:0 0 8px rgba(72,152,240,.2);
+  border-radius:3px;padding:2px 7px;
+  box-shadow:0 0 8px rgba(72,152,240,.2);white-space:nowrap;
 }
-#topbar h1{font-size:13px;font-weight:400;color:#c8dae8;letter-spacing:.02em;}
-.tb-sep{width:1px;height:20px;background:var(--border2);}
+#topbar h1{font-size:clamp(10px,1vw,13px);font-weight:400;color:#c8dae8;letter-spacing:.02em;white-space:nowrap;}
+.tb-sep{width:1px;height:18px;background:var(--border2);}
 
 /* ── STATUS STRIP ── */
 #status-strip{
-  font-family:'IBM Plex Mono',monospace;font-size:10px;
+  font-family:'IBM Plex Mono',monospace;font-size:clamp(9px,0.85vw,11px);
   color:var(--dim);flex:1;padding:0 10px;
   letter-spacing:.04em;
 }
@@ -66,9 +66,9 @@ body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;font-
 
 /* ── POWER ON BUTTON ── */
 #power-on-btn{
-  position:absolute;bottom:14px;left:14px;
-  font-family:'IBM Plex Mono',monospace;font-size:9px;font-weight:600;
-  padding:6px 16px;border-radius:3px;
+  position:absolute;bottom:clamp(10px,1.5vh,16px);left:clamp(10px,1.5vw,16px);
+  font-family:'IBM Plex Mono',monospace;font-size:clamp(8px,0.8vw,10px);font-weight:600;
+  padding:clamp(5px,0.7vh,8px) clamp(12px,1.4vw,18px);border-radius:3px;
   border:1px solid var(--border2);
   background:var(--panel2);color:var(--dim);
   cursor:pointer;letter-spacing:.1em;
@@ -83,7 +83,7 @@ body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;font-
 #power-on-btn.ready:hover{background:#052a10;box-shadow:0 0 20px rgba(61,220,110,.25);}
 
 /* ── MAIN GRID ── */
-#main{display:grid;grid-template-columns:40% 60%;grid-template-rows:1fr 72px;flex:1;min-height:0;overflow:hidden;height:0;}
+#main{display:grid;grid-template-columns:40% 60%;grid-template-rows:1fr auto;flex:1;min-height:0;overflow:hidden;height:0;}
 
 /* ── DETECTOR PANEL ── */
 #det-panel{
@@ -100,10 +100,10 @@ body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;font-
 }
 #det-label{
   position:absolute;top:0;left:0;right:0;
-  font-family:'IBM Plex Mono',monospace;font-size:8px;
+  font-family:'IBM Plex Mono',monospace;font-size:clamp(7px,0.7vw,8px);
   letter-spacing:.16em;color:var(--dim);
   text-transform:uppercase;
-  padding:7px 12px 6px;
+  padding:6px 12px 5px;
   border-bottom:1px solid var(--border);
   background:linear-gradient(to bottom,#0e1018,transparent);
   pointer-events:none;z-index:2;
@@ -118,10 +118,10 @@ body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;font-
 }
 #lissy-label{
   position:absolute;top:0;left:0;right:0;
-  font-family:'IBM Plex Mono',monospace;font-size:8px;
+  font-family:'IBM Plex Mono',monospace;font-size:clamp(7px,0.7vw,8px);
   letter-spacing:.16em;color:var(--dim);
   text-transform:uppercase;
-  padding:7px 12px 6px;
+  padding:6px 12px 5px;
   border-bottom:1px solid var(--border);
   background:linear-gradient(to bottom,#111820,transparent);
   pointer-events:none;z-index:2;
@@ -132,12 +132,12 @@ body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;font-
   grid-column:1/3;
   background:linear-gradient(to top,#080b10,#0c1118);
   border-top:1px solid var(--border);
-  padding:0 16px;display:flex;align-items:center;gap:14px;
-  overflow:hidden;height:72px;flex-shrink:0;
+  padding:0 clamp(10px,1.5vw,20px);display:flex;align-items:center;gap:clamp(8px,1vw,14px);
+  overflow:hidden;height:clamp(52px,7vh,68px);flex-shrink:0;
 }
 #new-wire-btn{
-  font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:600;
-  padding:7px 20px;border-radius:3px;
+  font-family:'IBM Plex Mono',monospace;font-size:clamp(9px,0.85vw,11px);font-weight:600;
+  padding:clamp(5px,0.7vh,8px) clamp(12px,1.5vw,22px);border-radius:3px;
   border:1px solid var(--border2);
   background:var(--panel2);color:var(--text);
   cursor:pointer;letter-spacing:.08em;
@@ -150,8 +150,8 @@ body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;font-
   box-shadow:0 0 10px rgba(72,152,240,.2);
 }
 #reset-btn{
-  font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:600;
-  padding:7px 16px;border-radius:3px;
+  font-family:'IBM Plex Mono',monospace;font-size:clamp(9px,0.85vw,11px);font-weight:600;
+  padding:clamp(5px,0.7vh,8px) clamp(10px,1.2vw,18px);border-radius:3px;
   border:1px solid #3a1010;
   background:#160505;color:#804040;
   cursor:pointer;letter-spacing:.08em;
@@ -228,16 +228,16 @@ svg text{font-weight:600;}
 <body>
 
 <!-- Intro Overlay -->
-<div class="overlay active" id="intro-ov" style="align-items:center;justify-content:center;">
-  <div style="background:linear-gradient(135deg,#0c1118,#0e1420);border:1px solid #1a2433;border-radius:10px;padding:40px 44px;max-width:560px;text-align:center;box-shadow:0 8px 48px rgba(0,0,0,.8);">
-    <div style="font-family:'IBM Plex Mono',monospace;font-size:9px;font-weight:600;letter-spacing:.18em;color:#4898f0;background:#031228;border:1px solid #4898f0;border-radius:3px;display:inline-block;padding:3px 10px;margin-bottom:20px;">ATLAS ITk — LISSY WIRING EXERCISE</div>
-    <div style="font-size:22px;font-weight:600;color:#c8dae8;margin-bottom:14px;line-height:1.3;">The ITk Detector needs protecting.</div>
-    <p style="font-size:13px;color:#506070;line-height:1.8;margin-bottom:20px;">
+<div class="overlay active" id="intro-ov" style="align-items:center;justify-content:center;overflow-y:auto;padding:20px;">
+  <div style="background:linear-gradient(135deg,#0c1118,#0e1420);border:1px solid #1a2433;border-radius:10px;padding:clamp(24px,4vh,44px) clamp(20px,4vw,48px);max-width:560px;width:100%;text-align:center;box-shadow:0 8px 48px rgba(0,0,0,.8);">
+    <div style="font-family:'IBM Plex Mono',monospace;font-size:clamp(8px,0.9vw,9px);font-weight:600;letter-spacing:.18em;color:#4898f0;background:#031228;border:1px solid #4898f0;border-radius:3px;display:inline-block;padding:3px 10px;margin-bottom:clamp(14px,2.5vh,22px);">ATLAS ITk — LISSY WIRING EXERCISE</div>
+    <div style="font-size:clamp(17px,2.2vw,22px);font-weight:600;color:#c8dae8;margin-bottom:clamp(10px,1.8vh,14px);line-height:1.3;">The ITk Detector needs protecting.</div>
+    <p style="font-size:clamp(12px,1.1vw,13px);color:#506070;line-height:1.8;margin-bottom:clamp(14px,2.5vh,22px);">
       The LISSY — <em>Local Interlock &amp; Safety SYstem</em> — is the hardware guardian that automatically cuts power to the detector the moment something goes wrong: overtemperature, broken cable, loss of global safety signal. Without it, 60 million silicon channels can be permanently destroyed in milliseconds.
     </p>
-    <div style="background:#07090d;border:1px solid #1a2433;border-radius:6px;padding:14px 18px;margin-bottom:24px;text-align:left;">
-      <div style="font-family:'IBM Plex Mono',monospace;font-size:9px;font-weight:600;letter-spacing:.12em;color:#d29922;margin-bottom:8px;">YOUR TASK</div>
-      <p style="font-size:12px;color:#6a7a8a;line-height:1.75;margin:0;">
+    <div style="background:#07090d;border:1px solid #1a2433;border-radius:6px;padding:clamp(12px,1.8vh,16px) clamp(14px,2vw,20px);margin-bottom:clamp(18px,3vh,26px);text-align:left;">
+      <div style="font-family:'IBM Plex Mono',monospace;font-size:clamp(8px,0.9vw,9px);font-weight:600;letter-spacing:.12em;color:#d29922;margin-bottom:8px;">YOUR TASK</div>
+      <p style="font-size:clamp(11px,1.05vw,12px);color:#6a7a8a;line-height:1.75;margin:0;">
         Wire up the LISSY crate correctly — connect the temperature sensors, global safety signals, power supplies, and Ethernet links. Load the firmware. Power on the crate. Then power on the detector and watch the interlock system protect it.
         <br><br>
         <span style="color:#f06060;">Get it wrong and the detector burns.</span>
@@ -245,8 +245,8 @@ svg text{font-weight:600;}
       </p>
     </div>
     <button onclick="document.getElementById('intro-ov').classList.remove('active')"
-      style="font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:600;
-             padding:10px 36px;border-radius:4px;border:1px solid #3ddc6e;
+      style="font-family:'IBM Plex Mono',monospace;font-size:clamp(10px,1.1vw,12px);font-weight:600;
+             padding:clamp(9px,1.3vh,12px) clamp(28px,3vw,40px);border-radius:4px;border:1px solid #3ddc6e;
              background:#031208;color:#3ddc6e;cursor:pointer;letter-spacing:.1em;
              transition:all .2s;text-transform:uppercase;
              box-shadow:0 0 16px rgba(61,220,110,.15);"
@@ -378,7 +378,7 @@ svg text{font-weight:600;}
 // TOOLTIPS
 // ══════════════════════════════════════════════════
 const TIPS = {
-  detector:  {t:'ITk Strip Detector',
+  detector:  {t:'ITk Detector',
     b:'~60 million readout channels tracking charged particles at the heart of ATLAS. Silicon is irreversibly destroyed by overtemperature or overvoltage. The LISSY interlock system exists solely to prevent this.'},
   ntc1:      {t:'NTC Temperature Sensor — channel 1',
     b:'A 10 kΩ NTC thermistor on the detector module. The T2I reads its voltage: T-HI fires if temperature exceeds threshold, T-ERR fires if the cable breaks. An open circuit is treated as danger — you cannot leave a sensor disconnected safely.'},
@@ -464,6 +464,11 @@ let sw1 = false, sw2 = false;
 let fwLoaded = false;
 const NS = 'http://www.w3.org/2000/svg';
 
+// ── GLOBAL SCALE ──
+// S is set by renderDetector/renderLISSY based on available space.
+// All SVG coordinates, sizes, and stroke widths are multiplied by S.
+let S = 1;
+
 // ══════════════════════════════════════════════════
 // SVG HELPERS
 // ══════════════════════════════════════════════════
@@ -477,13 +482,13 @@ function rect(p,x,y,w,h,rx,fill,stroke,sw=1){
   return svgEl('rect',{x,y,width:w,height:h,rx,fill,stroke,'stroke-width':sw},p);
 }
 function text(p,x,y,s,fill,size,weight=600,anchor='middle'){
-  const t=svgEl('text',{x,y,fill,'font-size':size,'font-weight':weight,
+  const t=svgEl('text',{x,y,fill,'font-size':size*S,'font-weight':weight,
     'font-family':"'IBM Plex Mono',monospace",'text-anchor':anchor,
     'dominant-baseline':'central','pointer-events':'none'},p);
   t.textContent=s; return t;
 }
 function line(p,x1,y1,x2,y2,stroke,sw=1,dash=''){
-  const a={x1,y1,x2,y2,stroke,'stroke-width':sw,'stroke-linecap':'round'};
+  const a={x1,y1,x2,y2,stroke,'stroke-width':sw*S,'stroke-linecap':'round'};
   if(dash) a['stroke-dasharray']=dash;
   return svgEl('line',a,p);
 }
@@ -504,10 +509,9 @@ const portCoords = {};
 
 // addPort: visible circle (used on detector/laptop)
 function addPort(parent,id,x,y,color){
-  // Invisible hit area only — visual is the dashed circle drawn by caller
   portCoords[id]={x,y};
   const g=svgEl('g',{id:'pg-'+id,cursor:'pointer','pointer-events':'all'},parent);
-  const c=svgEl('rect',{x:x-8,y:y-8,width:16,height:16,fill:'transparent',id:'pc-'+id},g);
+  const c=svgEl('rect',{x:x-8*S,y:y-8*S,width:16*S,height:16*S,fill:'transparent',id:'pc-'+id},g);
   g.addEventListener('click',e=>{e.stopPropagation();handlePort(id);});
   g.addEventListener('mouseenter',()=>{ c.setAttribute('fill',color+'20'); });
   g.addEventListener('mouseleave',()=>{ if(pendingFrom!==id) c.setAttribute('fill','transparent'); });
@@ -517,7 +521,7 @@ function addPort(parent,id,x,y,color){
 function addPortAt(parent,id,x,y,color){
   portCoords[id]={x,y};
   const g=svgEl('g',{id:'pg-'+id,cursor:'pointer','pointer-events':'all'},parent);
-  const hit=svgEl('rect',{x:x-8,y:y-8,width:16,height:16,fill:'transparent',id:'pc-'+id},g);
+  const hit=svgEl('rect',{x:x-8*S,y:y-8*S,width:16*S,height:16*S,fill:'transparent',id:'pc-'+id},g);
   g.addEventListener('click',e=>{e.stopPropagation();handlePort(id);});
   g.addEventListener('mouseenter',()=>{ hit.setAttribute('fill',color+'30'); });
   g.addEventListener('mouseleave',()=>{ if(pendingFrom!==id) hit.setAttribute('fill','transparent'); });
@@ -538,64 +542,64 @@ function getPortXY(id){
 function renderDetector(){
   const svg=document.getElementById('det-svg');
   const W=svg.clientWidth, H=svg.clientHeight;
+  // Scale relative to baseline 400×500 design space
+  S = Math.min(W/400, H/500, 1.6);
   const dn=document.getElementById('det-nodes');
   const dp=document.getElementById('det-ports');
   dn.innerHTML=''; dp.innerHTML='';
   const cx=W/2;
 
-  const dw=Math.min(W*0.45,160);
-  const dh=Math.min(H*0.42,190);
+  const dw=Math.min(W*0.45,160*S);
+  const dh=Math.min(H*0.42,190*S);
   const dy=H*0.22;
 
-  for(let i=-5;i<=5;i++) line(dn,cx+i*Math.floor(dw/12),dy+8,cx+i*Math.floor(dw/12),dy+dh-8,'#1a3050',0.5);
+  for(let i=-5;i<=5;i++) line(dn,cx+i*Math.floor(dw/12),dy+8*S,cx+i*Math.floor(dw/12),dy+dh-8*S,'#1a3050',0.5);
   const dg=mkG(dn,'detector');
-  rect(dg,cx-dw/2,dy,dw,dh,8,'#0e1828','#8ab0d060',1.5);
-  text(dg,cx,dy+dh/2-8,'ITk','#a0c0d8',13,600);
-  text(dg,cx,dy+dh/2+10,'Detector','#a0c0d8',13,600);
+  rect(dg,cx-dw/2,dy,dw,dh,8*S,'#0e1828','#8ab0d060',1.5*S);
+  text(dg,cx,dy+dh/2-8*S,'ITk','#a0c0d8',13,600);
+  text(dg,cx,dy+dh/2+10*S,'Detector','#a0c0d8',13,600);
 
   // NTC sensors on top
   const ntc1x=cx-dw/4, ntc2x=cx+dw/4, ntcY=dy;
-  mkSensor(dn,dp,ntc1x,ntcY-22,'ntc1','1');
-  mkSensor(dn,dp,ntc2x,ntcY-22,'ntc2','2');
-  line(dn,ntc1x,ntcY-8,ntc1x,ntcY,'#f0b030',1);
-  line(dn,ntc2x,ntcY-8,ntc2x,ntcY,'#f0b030',1);
+  mkSensor(dn,dp,ntc1x,ntcY-22*S,'ntc1','1');
+  mkSensor(dn,dp,ntc2x,ntcY-22*S,'ntc2','2');
+  line(dn,ntc1x,ntcY-8*S,ntc1x,ntcY,'#f0b030',1);
+  line(dn,ntc2x,ntcY-8*S,ntc2x,ntcY,'#f0b030',1);
 
   // LV and HV — both on right side, stacked
-  const supRx=cx+dw/2+50;
+  const supRx=cx+dw/2+50*S;
   const supY_lv=dy+dh*0.65, supY_hv=dy+dh*0.95;
   mkSupply(dn,dp,supRx,supY_lv,'lv','LV','#b070f0','#0e0318');
-  line(dn,cx+dw/2,supY_lv,supRx-30,supY_lv,'#b070f050',1.5);
+  line(dn,cx+dw/2,supY_lv,supRx-30*S,supY_lv,'#b070f050',1.5);
   mkSupply(dn,dp,supRx,supY_hv,'hv','HV','#b070f0','#0e0318');
-  line(dn,cx+dw/2,supY_hv,supRx-30,supY_hv,'#b070f050',1.5);
+  line(dn,cx+dw/2,supY_hv,supRx-30*S,supY_hv,'#b070f050',1.5);
 
-  // Temperature gauge — above the NTCs
-  const gaugeY = dy + dh + 24;
+  // Temperature gauge — below the detector box
+  const gaugeY = dy + dh + 24*S;
   text(dn,cx,gaugeY,'TEMP','#4a5a6a',9);
-  rect(dn,cx-28,gaugeY+8,56,10,3,'#060e18','#1e3048',0.5);
-  svgEl('rect',{x:cx-27,y:gaugeY+9,width:0,height:8,rx:2,fill:'#3ddc6e',id:'det-gauge-fill'},dn);
-  svgEl('text',{x:cx,y:gaugeY+30,'font-family':"'IBM Plex Mono',monospace",
-    'font-size':13,'font-weight':600,fill:'#3ddc6e','text-anchor':'middle',
+  rect(dn,cx-28*S,gaugeY+8*S,56*S,10*S,3*S,'#060e18','#1e3048',0.5);
+  svgEl('rect',{x:cx-27*S,y:gaugeY+9*S,width:0,height:8*S,rx:2*S,fill:'#3ddc6e',id:'det-gauge-fill'},dn);
+  svgEl('text',{x:cx,y:gaugeY+30*S,'font-family':"'IBM Plex Mono',monospace",
+    'font-size':13*S,'font-weight':600,fill:'#3ddc6e','text-anchor':'middle',
     'dominant-baseline':'central',id:'det-temp-text'},dn).textContent='18°C';
 }
 
 function mkSensor(dn,dp,x,y,id,num){
   const g=mkG(dn,id);
-  rect(g,x-26,y-14,52,28,3,'#181000','#f0b030',1);
-  text(g,x,y-3,'NTC','#f0b030',8,600);
-  text(g,x,y+7,'sensor '+num,'#806010',7);
-  svgEl('circle',{cx:x,cy:y-14,r:7,fill:'transparent',stroke:'#4a5a6a','stroke-width':1.2,'stroke-dasharray':'3 2'},dn);
-  addPort(dp,'p-'+id+'-out',x,y-14,'#f0b030');
+  rect(g,x-26*S,y-14*S,52*S,28*S,3*S,'#181000','#f0b030',1);
+  text(g,x,y-3*S,'NTC','#f0b030',8,600);
+  text(g,x,y+7*S,'sensor '+num,'#806010',7);
+  svgEl('circle',{cx:x,cy:y-14*S,r:7*S,fill:'transparent',stroke:'#4a5a6a','stroke-width':1.2*S,'stroke-dasharray':`${3*S} ${2*S}`},dn);
+  addPort(dp,'p-'+id+'-out',x,y-14*S,'#f0b030');
 }
 function mkSupply(dn,dp,x,y,id,label,color,bg){
   const g=mkG(dn,id);
-  rect(g,x-30,y-18,60,36,4,bg,color,1.2);
-  text(g,x,y-4,label,color,10,600);
-  text(g,x,y+7,'supply',color+'80',7);
-  // LED — consistent with mkLed style
-  mkLed(g, x+20, y-8, 'led-'+id, '#b070f0');
-  // Dashed connection port
-  svgEl('circle',{cx:x,cy:y-18,r:7,fill:'transparent',stroke:'#4a5a6a','stroke-width':1.2,'stroke-dasharray':'3 2'},g);
-  addPort(dp,'p-'+id+'-conn',x,y-18,color);
+  rect(g,x-30*S,y-18*S,60*S,36*S,4*S,bg,color,1.2);
+  text(g,x,y-4*S,label,color,10,600);
+  text(g,x,y+7*S,'supply',color+'80',7);
+  mkLed(g, x+20*S, y-8*S, 'led-'+id, '#b070f0');
+  svgEl('circle',{cx:x,cy:y-18*S,r:7*S,fill:'transparent',stroke:'#4a5a6a','stroke-width':1.2*S,'stroke-dasharray':`${3*S} ${2*S}`},g);
+  addPort(dp,'p-'+id+'-conn',x,y-18*S,color);
 }
 
 // ══════════════════════════════════════════════════
@@ -622,136 +626,118 @@ function renderLISSY(){
   const ll=document.getElementById('laptop-layer');
   const lp=document.getElementById('lissy-ports');
 
-  const lapW=80, lapGap=20, pad=14;
-  const ASPECT=3.5;
-  // Compute CW to fill available width, then derive CH from aspect ratio
-  // But clamp CH so the crate + PC below + eth above all fit in H
-  CW = W - lapW - lapGap - pad*2;
-  CH = (CW / ASPECT) * 2;
-  // If crate + PC (128px below) + eth box (128px above) don't fit, shrink
-  const maxCH = H - 170; // 128 above for eth + 14 pad, 42 below for PC label
-  if(CH > maxCH){ CH = maxCH; CW = CH * ASPECT / 2; }
-  CX = pad + 30;
-  CY = Math.round((H - CH) / 2 + 30); // shift down slightly to leave room above
-  BP_H=0; BP_Y=CY+CH-28;
-  const BACK_H=22;
-  CARD_H=CH-BACK_H-28;
-  CARD_Y=CY+12;
-  CARD_W=(CW-14)/CARDS.length-5;
+  // ── Compute scale so the full diagram (crate + eth above + PYNQ/PC below) fits ──
+  // Baseline design: W=900, H=560. Scale to fit while preserving proportions.
+  S = Math.min(W / 900, H / 560, 1.4);
 
-  // Backplane paths (invisible layer — just for glow lines)
+  const pad = 14*S;
+  const ASPECT = 3.5;
+
+  // Vertical budget: ethBox above + crate + PYNQ/PC below
+  const ethAbove = 110*S;   // space above crate for eth switch + gap
+  const belowH   = 120*S;   // space below crate for PYNQ board + PC
+  const maxCH    = H - ethAbove - belowH - pad*2;
+
+  CW = W - pad*2 - 20*S;
+  CH = Math.min(CW / ASPECT * 2, maxCH);
+  if(CH < maxCH){ /* fine */ } else { CW = CH * ASPECT / 2; }
+
+  CX = pad + 10*S;
+  CY = ethAbove + pad;
+  BP_H=0; BP_Y=CY+CH-28*S;
+  const BACK_H=22*S;
+  CARD_H=CH-BACK_H-28*S;
+  CARD_Y=CY+12*S;
+  CARD_W=(CW-14*S)/CARDS.length-5*S;
+
   drawBackplanePaths(bp);
 
   // Crate shell
-  rect(cs,CX,CY,CW,CH,5,'none','#2a3848',1.5);
-  rect(cs,CX,CY,CW,10,0,'#0e1828','#1e3048',0.5);
-  // LISSY label — top right of crate
-  text(cs,CX+CW-8,CY+6,'LISSY — Local Interlock & Safety SYstem','#4a6a8a',7,600,'end');
+  rect(cs,CX,CY,CW,CH,5*S,'none','#2a3848',1.5*S);
+  rect(cs,CX,CY,CW,10*S,0,'#0e1828','#1e3048',0.5*S);
+  text(cs,CX+CW-8*S,CY+6*S,'LISSY — Local Interlock & Safety SYstem','#4a6a8a',7,600,'end');
   const bkY=CY+CH-BACK_H;
-  rect(cs,CX,bkY,CW,BACK_H,0,'#060c18','#1e3048',0.5);
-  text(cs,CX+60,bkY+9,'BACK PANEL','#4a6a8a',8,600);
-  drawSwitch(cs,CX+CW-72,bkY,1);
-  drawSwitch(cs,CX+CW-38,bkY,2);
+  rect(cs,CX,bkY,CW,BACK_H,0,'#060c18','#1e3048',0.5*S);
+  text(cs,CX+60*S,bkY+9*S,'BACK PANEL','#4a6a8a',8,600);
+  drawSwitch(cs,CX+CW-72*S,bkY,1);
+  drawSwitch(cs,CX+CW-38*S,bkY,2);
 
-  // ── Ethernet switch box — above crate, aligned with PC ──
-  const ethBoxX = CX + 56, ethBoxY = CY - 100;
-  // Wider box to fit 3 ports
-  rect(cs, ethBoxX-40, ethBoxY-20, 80, 60, 4, '#0a1520', '#4a6a8a', 1.5);
-  text(cs, ethBoxX, ethBoxY-8, 'ETHERNET', '#4a6a8a', 7, 600);
-  text(cs, ethBoxX, ethBoxY+4, 'SWITCH',   '#4a6a8a', 7, 600);
-  // Left port — PYNQ (sage green)
-  mkRJ45(cs, ethBoxX-20, ethBoxY+28, '#8aad7a');
-  svgEl('circle',{cx:ethBoxX-20,cy:ethBoxY+28,r:6,fill:'transparent',stroke:'#4a5a6a','stroke-width':1.2,'stroke-dasharray':'3 2'},cs);
-  addPortAt(lp,'p-eth-switch-pynq',ethBoxX-20,ethBoxY+28,'#8aad7a');
-
-  // Right port — ILK (blue)
-  mkRJ45(cs, ethBoxX+20, ethBoxY+28, '#4898f0');
-  svgEl('circle',{cx:ethBoxX+20,cy:ethBoxY+28,r:6,fill:'transparent',stroke:'#4a5a6a','stroke-width':1.2,'stroke-dasharray':'3 2'},cs);
-  addPortAt(lp,'p-eth-switch-ilk',ethBoxX+20,ethBoxY+28,'#4898f0');
+  // ── Ethernet switch box — above crate ──
+  const ethBoxX = CX + 56*S, ethBoxY = CY - 80*S;
+  rect(cs, ethBoxX-40*S, ethBoxY-20*S, 80*S, 60*S, 4*S, '#0a1520', '#4a6a8a', 1.5*S);
+  text(cs, ethBoxX, ethBoxY-8*S, 'ETHERNET', '#4a6a8a', 7, 600);
+  text(cs, ethBoxX, ethBoxY+4*S, 'SWITCH',   '#4a6a8a', 7, 600);
+  mkRJ45(cs, ethBoxX-20*S, ethBoxY+28*S, '#8aad7a');
+  svgEl('circle',{cx:ethBoxX-20*S,cy:ethBoxY+28*S,r:6*S,fill:'transparent',stroke:'#4a5a6a','stroke-width':1.2*S,'stroke-dasharray':`${3*S} ${2*S}`},cs);
+  addPortAt(lp,'p-eth-switch-pynq',ethBoxX-20*S,ethBoxY+28*S,'#8aad7a');
+  mkRJ45(cs, ethBoxX+20*S, ethBoxY+28*S, '#4898f0');
+  svgEl('circle',{cx:ethBoxX+20*S,cy:ethBoxY+28*S,r:6*S,fill:'transparent',stroke:'#4a5a6a','stroke-width':1.2*S,'stroke-dasharray':`${3*S} ${2*S}`},cs);
+  addPortAt(lp,'p-eth-switch-ilk',ethBoxX+20*S,ethBoxY+28*S,'#4898f0');
 
   // ── Global signals box — beside Ethernet switch ──
-  const gsBoxX = ethBoxX + 90, gsBoxY = ethBoxY;
-  rect(cs, gsBoxX-36, gsBoxY-20, 72, 50, 4, '#0a1520', '#20c8e040', 1.5);
-  text(cs, gsBoxX, gsBoxY-8,  'GLOBAL',  '#20c8e0', 7, 600);
-  text(cs, gsBoxX, gsBoxY+4,  'SIGNALS', '#20c8e0', 7, 600);
-  // One dashed port dot
-  svgEl('circle',{cx:gsBoxX,cy:gsBoxY+26,r:7,fill:'transparent',stroke:'#4a5a6a','stroke-width':1.2,'stroke-dasharray':'3 2'},cs);
-  svgEl('circle',{cx:gsBoxX,cy:gsBoxY+26,r:2,fill:'#3a4a5a',stroke:'none'},cs);
-  addPortAt(lp,'p-global-sig',gsBoxX,gsBoxY+26,'#20c8e0');
+  const gsBoxX = ethBoxX + 90*S, gsBoxY = ethBoxY;
+  rect(cs, gsBoxX-36*S, gsBoxY-20*S, 72*S, 50*S, 4*S, '#0a1520', '#20c8e040', 1.5*S);
+  text(cs, gsBoxX, gsBoxY-8*S, 'GLOBAL',  '#20c8e0', 7, 600);
+  text(cs, gsBoxX, gsBoxY+4*S, 'SIGNALS', '#20c8e0', 7, 600);
+  svgEl('circle',{cx:gsBoxX,cy:gsBoxY+26*S,r:7*S,fill:'transparent',stroke:'#4a5a6a','stroke-width':1.2*S,'stroke-dasharray':`${3*S} ${2*S}`},cs);
+  svgEl('circle',{cx:gsBoxX,cy:gsBoxY+26*S,r:2*S,fill:'#3a4a5a',stroke:'none'},cs);
+  addPortAt(lp,'p-global-sig',gsBoxX,gsBoxY+26*S,'#20c8e0');
 
-  // PYNQ switch removed — merged into main ethernet switch
-
-  // ── PYNQ board — between ILK card and PYNQ switch ──
-  const pynqX = CX + 56, pynqY = CY + CH + 60;
-  // Board body
+  // ── PYNQ board — below crate ──
+  const pynqX = CX + 56*S, pynqY = CY + CH + 60*S;
   const pynqG = mkG(cs, 'pynq_board');
-  rect(pynqG, pynqX-40, pynqY-20, 80, 50, 4, '#111a0e', '#8aad7a', 1.5);
-  // Label left-aligned
-  text(pynqG, pynqX-16, pynqY-6, 'PYNQ',  '#8aad7a', 8, 600);
-  text(pynqG, pynqX-16, pynqY+6, 'board', '#8aad7a70', 6, 400);
-  // MONITORING PLOTS button — shown when PYNQ is on
+  rect(pynqG, pynqX-40*S, pynqY-20*S, 80*S, 50*S, 4*S, '#111a0e', '#8aad7a', 1.5*S);
+  text(pynqG, pynqX-16*S, pynqY-6*S, 'PYNQ',  '#8aad7a', 8, 600);
+  text(pynqG, pynqX-16*S, pynqY+6*S, 'board', '#8aad7a70', 6, 400);
   const monBtnG = svgEl('g',{id:'mon-plots-btn',cursor:'pointer',opacity:0,'pointer-events':'none'},pynqG);
-  rect(monBtnG, pynqX-40, pynqY+36, 80, 18, 2, '#060c18', '#8aad7a', 0.8);
-  text(monBtnG, pynqX, pynqY+45, 'MONITORING PLOTS', '#8aad7a80', 6, 600);
+  rect(monBtnG, pynqX-40*S, pynqY+36*S, 80*S, 18*S, 2*S, '#060c18', '#8aad7a', 0.8*S);
+  text(monBtnG, pynqX, pynqY+45*S, 'MONITORING PLOTS', '#8aad7a80', 6, 600);
   monBtnG.addEventListener('click', e=>{ e.stopPropagation(); openMonitoringPlots(); });
-  // LED — using mkLed for consistency
-  mkLed(pynqG, pynqX+32, pynqY-2, 'led-pynq', '#8aad7a');
-  // Power switch — more prominent rocker
+  mkLed(pynqG, pynqX+32*S, pynqY-2*S, 'led-pynq', '#8aad7a');
   const pynqSwG = svgEl('g',{id:'pynq-sw-g',cursor:'pointer'},pynqG);
-  rect(pynqSwG, pynqX+16, pynqY+10, 22, 12, 3, '#0a1a0a', '#8aad7a', 1.5);
-  svgEl('rect',{x:pynqX+16,y:pynqY+12,width:9,height:8,rx:2,fill:'#1a4a1a',stroke:'#8aad7a60','stroke-width':0.5,id:'pynq-sw-knob'},pynqSwG);
-  text(pynqSwG, pynqX+27, pynqY+26, 'POWER', '#8aad7a80', 6, 600);
+  rect(pynqSwG, pynqX+16*S, pynqY+10*S, 22*S, 12*S, 3*S, '#0a1a0a', '#8aad7a', 1.5*S);
+  svgEl('rect',{x:pynqX+16*S,y:pynqY+12*S,width:9*S,height:8*S,rx:2*S,fill:'#1a4a1a',stroke:'#8aad7a60','stroke-width':0.5*S,id:'pynq-sw-knob'},pynqSwG);
+  text(pynqSwG, pynqX+27*S, pynqY+26*S, 'POWER', '#8aad7a80', 6, 600);
   pynqSwG.addEventListener('click', e=>{e.stopPropagation(); togglePynq();});
-  // ETH port on top (left, sage)
-  mkRJ45(cs, pynqX-26, pynqY-20, '#8aad7a');
-  text(cs, pynqX-26, pynqY-32, 'ETH', '#8aad7a60', 5, 600);
-  addPortAt(lp, 'p-pynq-eth', pynqX-26, pynqY-20, '#8aad7a');
-  // ETH2 port on top (centre, red)
-  mkRJ45(cs, pynqX, pynqY-20, '#f06060');
-  text(cs, pynqX, pynqY-32, 'ETH2', '#f0606060', 5, 600);
-  addPortAt(lp, 'p-pynq-eth2', pynqX, pynqY-20, '#f06060');
-  // JTAG port on top (right)
-  mkJTAG(cs, pynqX+26, pynqY-20, '#8aad7a');
-  text(cs, pynqX+26, pynqY-32, 'JTAG', '#8aad7a60', 5, 600);
-  addPortAt(lp, 'p-pynq-jtag', pynqX+26, pynqY-20, '#8aad7a');
+  mkRJ45(cs, pynqX-26*S, pynqY-20*S, '#8aad7a');
+  text(cs, pynqX-26*S, pynqY-32*S, 'ETH', '#8aad7a60', 5, 600);
+  addPortAt(lp, 'p-pynq-eth', pynqX-26*S, pynqY-20*S, '#8aad7a');
+  mkRJ45(cs, pynqX, pynqY-20*S, '#f06060');
+  text(cs, pynqX, pynqY-32*S, 'ETH2', '#f0606060', 5, 600);
+  addPortAt(lp, 'p-pynq-eth2', pynqX, pynqY-20*S, '#f06060');
+  mkJTAG(cs, pynqX+26*S, pynqY-20*S, '#8aad7a');
+  text(cs, pynqX+26*S, pynqY-32*S, 'JTAG', '#8aad7a60', 5, 600);
+  addPortAt(lp, 'p-pynq-jtag', pynqX+26*S, pynqY-20*S, '#8aad7a');
 
-  // ── Computer icon with LOAD FIRMWARE inside ──
-  const compX = CX+CW-56, compY = CY+CH+36;
-  // monitor body — compact
-  rect(cs,compX-30,compY,60,44,3,'#0a1520','#4a6a8a',1.5);
-  // screen (top) — slim
-  rect(cs,compX-24,compY+3,48,14,2,'#0d2040','none',0);
-  text(cs,compX,compY+9,'PC','#4a6a8a',7,600);
-  // divider
-  svgEl('line',{x1:compX-30,y1:compY+19,x2:compX+30,y2:compY+19,stroke:'#1e3048','stroke-width':0.5},cs);
-  // LOAD FIRMWARE button inside lower half
+  // ── Computer icon with LOAD FIRMWARE ──
+  const compX = CX+CW-56*S, compY = CY+CH+36*S;
+  rect(cs,compX-30*S,compY,60*S,44*S,3*S,'#0a1520','#4a6a8a',1.5*S);
+  rect(cs,compX-24*S,compY+3*S,48*S,14*S,2*S,'#0d2040','none',0);
+  text(cs,compX,compY+9*S,'PC','#4a6a8a',7,600);
+  svgEl('line',{x1:compX-30*S,y1:compY+19*S,x2:compX+30*S,y2:compY+19*S,stroke:'#1e3048','stroke-width':0.5*S},cs);
   const fwBtnG = svgEl('g',{id:'fw-btn-g',cursor:'not-allowed'},cs);
-  rect(fwBtnG,compX-22,compY+21,44,20,2,'#060c18','#1e3048',0.8);
-  text(fwBtnG,compX,compY+28,'LOAD',     '#4a6a8a50',7,600);
-  text(fwBtnG,compX,compY+38,'FIRMWARE', '#4a6a8a50',7,600);
+  rect(fwBtnG,compX-22*S,compY+21*S,44*S,20*S,2*S,'#060c18','#1e3048',0.8*S);
+  text(fwBtnG,compX,compY+28*S,'LOAD',     '#4a6a8a50',7,600);
+  text(fwBtnG,compX,compY+38*S,'FIRMWARE', '#4a6a8a50',7,600);
   fwBtnG.addEventListener('click',e=>{e.stopPropagation();tryLoadFirmware();});
-  // stand + base
-  svgEl('line',{x1:compX,y1:compY+44,x2:compX,y2:compY+52,stroke:'#4a6a8a','stroke-width':3},cs);
-  rect(cs,compX-16,compY+52,32,5,2,'#0a1520','#4a6a8a',1.5);
-  // Dashed JTAG port on top
-  svgEl('circle',{cx:compX,cy:compY,r:4,fill:'transparent',stroke:'#4a5a6a','stroke-width':1.2,'stroke-dasharray':'3 2'},cs);
+  svgEl('line',{x1:compX,y1:compY+44*S,x2:compX,y2:compY+52*S,stroke:'#4a6a8a','stroke-width':3*S},cs);
+  rect(cs,compX-16*S,compY+52*S,32*S,5*S,2*S,'#0a1520','#4a6a8a',1.5*S);
+  svgEl('circle',{cx:compX,cy:compY,r:4*S,fill:'transparent',stroke:'#4a5a6a','stroke-width':1.2*S,'stroke-dasharray':`${3*S} ${2*S}`},cs);
   addPortAt(lp,'p-lap-jtag',compX,compY,'#f08030');
 
   // Cards + slot divider lines
   CARDS.forEach((card,i)=>{
-    const mx=CX+7+i*(CARD_W+5);
+    const mx=CX+7*S+i*(CARD_W+5*S);
     drawCard(cl,lp,card,mx,CARD_Y,CARD_W,CARD_H);
-    // slot gap line
     if(i<CARDS.length-1){
       svgEl('line',{
-        x1:mx+CARD_W+2,y1:CARD_Y,
-        x2:mx+CARD_W+2,y2:CARD_Y+CARD_H,
-        stroke:'#0a0e14','stroke-width':3
+        x1:mx+CARD_W+2*S,y1:CARD_Y,
+        x2:mx+CARD_W+2*S,y2:CARD_Y+CARD_H,
+        stroke:'#0a0e14','stroke-width':3*S
       },cl);
     }
   });
 
-  // Laptop removed
   drawSignalTraces();
   drawPrewiredConnections();
 }
@@ -765,10 +751,9 @@ function drawPrewiredConnections(){
       const p1 = getPortXY(fromId), p2 = getPortXY(toId);
       if(!p1||!p2) return;
       const mx = (p1.x+p2.x)/2;
-      // Thin pre-wired cable
       svgEl('path',{
         d:`M${p1.x},${p1.y} C${mx},${p1.y} ${mx},${p2.y} ${p2.x},${p2.y}`,
-        fill:'none', stroke:color, 'stroke-width':1.2,
+        fill:'none', stroke:color, 'stroke-width':1.2*S,
         'stroke-linecap':'round', opacity:0.55,
         'stroke-dasharray':'none', 'data-prewired':'true'
       }, layer);
@@ -781,12 +766,10 @@ function drawPrewiredConnections(){
       const mx = monEthPt.x - 90;
       svgEl('path',{
         d:`M${monEthPt.x},${monEthPt.y} C${mx},${monEthPt.y} ${mx},${pynqEth2Pt.y} ${pynqEth2Pt.x},${pynqEth2Pt.y}`,
-        fill:'none', stroke:'#f06060', 'stroke-width':1.2,
+        fill:'none', stroke:'#f06060', 'stroke-width':1.2*S,
         'stroke-linecap':'round', opacity:0.55, 'data-prewired':'true'
       }, layer);
     }
-
-
 
     // PYNQ board ETH → eth switch PYNQ port
     const pynqBrdEth = getPortXY('p-pynq-eth');
@@ -795,7 +778,7 @@ function drawPrewiredConnections(){
       const mx = pynqBrdEth.x - 100;
       svgEl('path',{
         d:`M${pynqBrdEth.x},${pynqBrdEth.y} C${mx},${pynqBrdEth.y} ${mx},${swPynqPt.y} ${swPynqPt.x},${swPynqPt.y}`,
-        fill:'none', stroke:'#5a7a5a', 'stroke-width':1.2,
+        fill:'none', stroke:'#5a7a5a', 'stroke-width':1.2*S,
         'stroke-linecap':'round', opacity:0.6, 'data-prewired':'true'
       }, layer);
     }
@@ -807,7 +790,7 @@ function drawPrewiredConnections(){
       const mx = monJtagPt.x - 70;
       svgEl('path',{
         d:`M${monJtagPt.x},${monJtagPt.y} C${mx},${monJtagPt.y} ${mx},${pynqJtagPt.y} ${pynqJtagPt.x},${pynqJtagPt.y}`,
-        fill:'none', stroke:'#8aad7a', 'stroke-width':1.2,
+        fill:'none', stroke:'#8aad7a', 'stroke-width':1.2*S,
         'stroke-linecap':'round', opacity:0.55, 'data-prewired':'true'
       }, layer);
     }
@@ -821,100 +804,83 @@ function drawPrewiredConnections(){
 function drawCard(parent,ports,card,x,y,w,h){
   const g=mkG(parent,card.id);
   const c=card.color, mx=x+w/2;
-  rect(g,x,y,w,h,3,card.bg,c,1);
-  rect(g,x,y,w,5,0,'#0a1520',c+'30',0.5);
-  rect(g,x,y+h-18,w,18,0,'#00000060','none',0);
-  text(g,mx,y+h-8,card.label,c,10,600);
+  rect(g,x,y,w,h,3*S,card.bg,c,1*S);
+  rect(g,x,y,w,5*S,0,'#0a1520',c+'30',0.5*S);
+  rect(g,x,y+h-18*S,w,18*S,0,'#00000060','none',0);
+  text(g,mx,y+h-8*S,card.label,c,10,600);
 
   if(card.id==='mon_fpga'){
-    // ── Two POWER LEDs ──
-    mkLed(g,mx-10,y+16,'led1',c);
-    mkLed(g,mx+10,y+16,'led2',c);
-    text(g,mx,y+30,'POWER',c+'50',8);
-    // ── Firmware status LED ──
-    mkLed(g,mx,y+46,'led-fw-status',c);
-    text(g,mx,y+60,'FIRMWARE',c+'40',6);
-    text(g,mx,y+69,'STATUS',  c+'40',6);
-
-    // ── Ethernet port + one dashed wire dot ──
-    const ethY=y+121;
+    mkLed(g,mx-10*S,y+16*S,'led1',c);
+    mkLed(g,mx+10*S,y+16*S,'led2',c);
+    text(g,mx,y+30*S,'POWER',c+'50',8);
+    mkLed(g,mx,y+46*S,'led-fw-status',c);
+    text(g,mx,y+60*S,'FIRMWARE',c+'40',6);
+    text(g,mx,y+69*S,'STATUS',  c+'40',6);
+    const ethY=y+h*0.52;
     mkRJ45(g,mx,ethY,c);
     mkPortDot(g,ports,mx,ethY,c,'p-mon-eth');
-    text(g,mx,ethY+22,'Ethernet',c+'70',10);
-
-    // ── JTAG port + one dashed wire dot below connector ──
-    const jtagY=y+185;
+    text(g,mx,ethY+22*S,'Ethernet',c+'70',10);
+    const jtagY=y+h*0.79;
     mkJTAG(g,mx,jtagY,c);
     mkPortDot(g,ports,mx,jtagY,c,'p-mon-jtag');
-    text(g,mx,jtagY+22,'JTAG',c+'70',10);
+    text(g,mx,jtagY+22*S,'JTAG',c+'70',10);
   }
   if(card.id==='t2i'){
-    // ── D-Sub connector same width as RJ45 (24px), centred ──
     const subY = y + h*0.45;
-    mkSubDconn(g,ports,mx,subY-20,subY+20,c,'subD37');
-    text(g,mx,subY+32,'subD37',c+'70',10);
-    // Two dashed port dots side by side on the connector
-    mkPortDot(g,ports,mx-10,subY,c,'p-t2i-in1');
-    mkPortDot(g,ports,mx+10,subY,c,'p-t2i-in2');
-    // Signal ports (invisible)
-    addPortAt(ports,'p-t2i-ilk',mx-10,subY,c);
-    addPortAt(ports,'p-t2i-mon',mx+10,subY,c);
+    mkSubDconn(g,ports,mx,subY-20*S,subY+20*S,c,'DSUB9/37');
+    text(g,mx,subY+32*S,'DSUB9 or 37',c+'70',10);
+    mkPortDot(g,ports,mx-10*S,subY,c,'p-t2i-in1');
+    mkPortDot(g,ports,mx+10*S,subY,c,'p-t2i-in2');
+    addPortAt(ports,'p-t2i-ilk',mx-10*S,subY,c);
+    addPortAt(ports,'p-t2i-mon',mx+10*S,subY,c);
   }
   if(card.id==='gss'){
     const subY = y + h*0.45;
-    mkSubDconn(g,ports,mx,subY-20,subY+20,c,'subD15');
-    text(g,mx,subY+32,'subD15',c+'70',10);
+    mkSubDconn(g,ports,mx,subY-20*S,subY+20*S,c,'subD15');
+    text(g,mx,subY+32*S,'subD15',c+'70',10);
     mkPortDot(g,ports,mx,subY,c,'p-gss-out');
   }
   if(card.id==='out'||card.id==='out2'){
     const pid=card.id==='out'?'p-out-ilk':'p-out2-ilk';
     const subY = y + h*0.45;
-    mkSubDconn(g,ports,mx,subY-20,subY+20,c,'subD37');
-    text(g,mx,subY+32,'subD37',c+'70',10);
+    mkSubDconn(g,ports,mx,subY-20*S,subY+20*S,c,'subD9/15/32');
+    text(g,mx,subY+32*S,'subD9/subD15/subD32',c+'70',10);
     mkPortDot(g,ports,mx,subY,c,pid);
   }
   if(card.id==='ilk_fpga'){
-    // ── One LED — glows when firmware loaded ──
-    mkLed(g,mx,y+16,'fw-led',c);
-    text(g,mx,y+27,'FIRMWARE',c+'50',8);
-    text(g,mx,y+38,'STATUS',c+'50',8);
-
-    // ── Ethernet port + one dashed wire dot ──
-    const ethY=y+121;
+    mkLed(g,mx,y+16*S,'fw-led',c);
+    text(g,mx,y+27*S,'FIRMWARE',c+'50',8);
+    text(g,mx,y+38*S,'STATUS',c+'50',8);
+    const ethY=y+h*0.52;
     mkRJ45(g,mx,ethY,c);
     mkPortDot(g,ports,mx,ethY,c,'p-ilk-eth');
-    text(g,mx,ethY+22,'Ethernet',c+'70',10);
-
-    // ── JTAG port + one dashed wire dot below connector ──
-    const jtagY=y+185;
+    text(g,mx,ethY+22*S,'Ethernet',c+'70',10);
+    const jtagY=y+h*0.79;
     mkJTAG(g,mx,jtagY,c);
     mkPortDot(g,ports,mx,jtagY,c,'p-ilk-jtag');
-    text(g,mx,jtagY+22,'JTAG',c+'70',10);
-
-    // Signal ports registered invisibly — at very bottom of card, clear of JTAG
-    addPortAt(ports,'p-ilk-t2i',mx-10,y+h-8,c);
-    addPortAt(ports,'p-ilk-gss',mx+10,y+h-8,c);
-    addPortAt(ports,'p-ilk-out',mx,   y+h-8,c);
+    text(g,mx,jtagY+22*S,'JTAG',c+'70',10);
+    addPortAt(ports,'p-ilk-t2i',mx-10*S,y+h-8*S,c);
+    addPortAt(ports,'p-ilk-gss',mx+10*S,y+h-8*S,c);
+    addPortAt(ports,'p-ilk-out',mx,     y+h-8*S,c);
   }
 }
 
 function mkPortDot(parent,ports,cx,cy,color,portId){
-  // dashed circle = wire connection point, muted color
-  svgEl('circle',{cx,cy,r:4,fill:'#050a1880',
-    stroke:'#4a5a6a','stroke-width':1.2,'stroke-dasharray':'3 2'},parent);
+  svgEl('circle',{cx,cy,r:4*S,fill:'#050a1880',
+    stroke:'#4a5a6a','stroke-width':1.2*S,'stroke-dasharray':`${3*S} ${2*S}`},parent);
   if(portId) addPortAt(ports,portId,cx,cy,color);
 }
 
 // Draw-only helpers (no port — port dot added separately by caller)
 function mkRJ45(parent,cx,cy,color){
-  rect(parent,cx-12,cy-10,24,18,2,'#050a18',color,1.2);
-  for(let i=0;i<8;i++) svgEl('line',{x1:cx-10+i*2.8,y1:cy+4,x2:cx-10+i*2.8,y2:cy+8,stroke:color+'80','stroke-width':0.8},parent);
-  rect(parent,cx-4,cy-16,8,6,1,'#050a18',color+'50',0.8);
+  rect(parent,cx-12*S,cy-10*S,24*S,18*S,2*S,'#050a18',color,1.2*S);
+  for(let i=0;i<8;i++) svgEl('line',{x1:cx-10*S+i*2.8*S,y1:cy+4*S,x2:cx-10*S+i*2.8*S,y2:cy+8*S,stroke:color+'80','stroke-width':0.8*S},parent);
+  rect(parent,cx-4*S,cy-16*S,8*S,6*S,1*S,'#050a18',color+'50',0.8*S);
 }
 function mkJTAG(parent,cx,cy,color){
-  rect(parent,cx-12,cy-8,24,16,2,'#050a18',color,1.2);
+  rect(parent,cx-12*S,cy-8*S,24*S,16*S,2*S,'#050a18',color,1.2*S);
   for(let r=0;r<2;r++) for(let col=0;col<5;col++)
-    svgEl('circle',{cx:cx-9+col*4.5,cy:cy-4+r*8,r:1.4,fill:color+'80'},parent);
+    svgEl('circle',{cx:cx-9*S+col*4.5*S,cy:cy-4*S+r*8*S,r:1.4*S,fill:color+'80'},parent);
 }
 
 // Legacy wrappers used by ILK-FPGA block (kept for compat)
@@ -928,49 +894,40 @@ function mkJTAGconn(parent,ports,cx,cy,color,portId){
 }
 
 function mkSubDconn(parent,ports,cx,yTop,yBot,color,label){
-  // Same width as RJ45: 24px
-  const w=24,h=yBot-yTop;
-  svgEl('polygon',{points:`${cx-w/2},${yTop+2} ${cx+w/2},${yTop+2} ${cx+w/2+2},${yBot-2} ${cx-w/2-2},${yBot-2}`,
-    fill:'#050a18',stroke:color,'stroke-width':1.2},parent);
-  const rows=Math.min(7,Math.round(h/8));
-  const step=(h-8)/Math.max(rows-1,1);
+  const w=24*S,h=yBot-yTop;
+  svgEl('polygon',{points:`${cx-w/2},${yTop+2*S} ${cx+w/2},${yTop+2*S} ${cx+w/2+2*S},${yBot-2*S} ${cx-w/2-2*S},${yBot-2*S}`,
+    fill:'#050a18',stroke:color,'stroke-width':1.2*S},parent);
+  const rows=Math.min(7,Math.round(h/(8*S)));
+  const step=(h-8*S)/Math.max(rows-1,1);
   for(let i=0;i<rows;i++){
-    const py=yTop+4+i*step;
-    svgEl('circle',{cx:cx-6,cy:py,r:1.4,fill:color+'80'},parent);
-    svgEl('circle',{cx:cx,  cy:py,r:1.4,fill:color+'80'},parent);
-    svgEl('circle',{cx:cx+6,cy:py,r:1.4,fill:color+'80'},parent);
+    const py=yTop+4*S+i*step;
+    svgEl('circle',{cx:cx-6*S,cy:py,r:1.4*S,fill:color+'80'},parent);
+    svgEl('circle',{cx:cx,    cy:py,r:1.4*S,fill:color+'80'},parent);
+    svgEl('circle',{cx:cx+6*S,cy:py,r:1.4*S,fill:color+'80'},parent);
   }
 }
 function mkLed(parent,cx,cy,id,color){
   const g = svgEl('g',{id},parent);
-  // LED housing (dark bezel)
-  svgEl('circle',{cx,cy,r:7,fill:'#0a0c10',stroke:color+'60','stroke-width':1.5},g);
-  // LED dome — brighter tint when off
-  svgEl('circle',{cx,cy,r:5,fill:color+'50',stroke:color+'90','stroke-width':1.2},g);
-  // LED specular highlight
-  svgEl('circle',{cx:cx-1.8,cy:cy-1.8,r:1.6,fill:'#ffffff60',stroke:'none'},g);
+  svgEl('circle',{cx,cy,r:7*S,fill:'#0a0c10',stroke:color+'60','stroke-width':1.5*S},g);
+  svgEl('circle',{cx,cy,r:5*S,fill:color+'50',stroke:color+'90','stroke-width':1.2*S},g);
+  svgEl('circle',{cx:cx-1.8*S,cy:cy-1.8*S,r:1.6*S,fill:'#ffffff60',stroke:'none'},g);
 }
 
 function drawSwitch(parent,x,y,num){
   const sw=num===1?sw1:sw2;
   const g=mkG(parent,'psu'+num);
   g.classList.add('sw-grp');
-  // rocker housing — visible even when off
-  rect(g,x,y,28,16,3,'#1a2a1a',sw?'#3ddc6e':'#4a6a4a',1.5);
-  // rocker knob
-  const kx = sw ? x+15 : x+2;
-  rect(g,kx,y+2,11,12,2,sw?'#3ddc6e':'#2a4a2a','none',0);
-  // ON / OFF labels
-  text(g,x+7, y+10,'O', sw?'#3ddc6e':'#4a6a4a', 7, 600);
-  text(g,x+21,y+10,'I', sw?'#4a6a4a':'#3ddc6e', 7, 600);
-  // indicator LED dot above switch
-  svgEl('circle',{cx:x+14,cy:y-5,r:3,
+  rect(g,x,y,28*S,16*S,3*S,'#1a2a1a',sw?'#3ddc6e':'#4a6a4a',1.5*S);
+  const kx = sw ? x+15*S : x+2*S;
+  rect(g,kx,y+2*S,11*S,12*S,2*S,sw?'#3ddc6e':'#2a4a2a','none',0);
+  text(g,x+7*S, y+10*S,'O', sw?'#3ddc6e':'#4a6a4a', 7, 600);
+  text(g,x+21*S,y+10*S,'I', sw?'#4a6a4a':'#3ddc6e', 7, 600);
+  svgEl('circle',{cx:x+14*S,cy:y-5*S,r:3*S,
     fill:sw?'#3ddc6e':'#1a2a1a',
-    stroke:sw?'#3ddc6e':'#2a4a2a','stroke-width':1,
+    stroke:sw?'#3ddc6e':'#2a4a2a','stroke-width':1*S,
     filter:sw?'url(#glow-green)':'none'
   },g);
-  // label below
-  text(g,x+14,y+26,'PSU '+num, sw?'#3ddc6e':'#4a6a4a', 6, 600);
+  text(g,x+14*S,y+26*S,'PSU '+num, sw?'#3ddc6e':'#4a6a4a', 6, 600);
   g.style.cursor='pointer';
   g.addEventListener('click',e=>{e.stopPropagation();toggleSwitch(num);});
 }
@@ -998,85 +955,76 @@ function drawSignalTraces(){
   const layer = document.getElementById('signal-traces');
   if(!layer) return;
   layer.innerHTML = '';
-  // T2I and ILK card centers
-  const centers = CARDS.map((_,i)=>CX+7+i*(CARD_W+5)+CARD_W/2);
+  const centers = CARDS.map((_,i)=>CX+7*S+i*(CARD_W+5*S)+CARD_W/2);
   const byId = Object.fromEntries(CARDS.map((c,i)=>[c.id,centers[i]]));
-  const traceY = CY + 10; // green line
+  const traceY = CY + 10*S;
 
-  // "status transmitted" green label (NTC→T2I→ILK)
   const statusLblGreen = svgEl('text',{
-    x:CX + CW/2, y:CY - 6,
+    x:CX + CW/2, y:CY - 6*S,
     'text-anchor':'middle', 'font-family':"'IBM Plex Mono',monospace",
-    'font-size':6, fill:'#f0b030', opacity:0,
+    'font-size':6*S, fill:'#f0b030', opacity:0,
     class:'sig-trace sig-status-label', id:'sig-status-label-green',
     'pointer-events':'none'
   }, layer);
   statusLblGreen.textContent = 'status transmitted';
-  // "status transmitted" cyan label (GSS→ILK)
   const statusLblCyan = svgEl('text',{
-    x:CX + CW/2, y:CY - 6,
+    x:CX + CW/2, y:CY - 6*S,
     'text-anchor':'middle', 'font-family':"'IBM Plex Mono',monospace",
-    'font-size':6, fill:'#20c8e0', opacity:0,
+    'font-size':6*S, fill:'#20c8e0', opacity:0,
     class:'sig-trace sig-status-label', id:'sig-status-label-cyan',
     'pointer-events':'none'
   }, layer);
   statusLblCyan.textContent = 'status transmitted';
 
-  // ILK → OUT trace (pink, below the other traces)
   const ilkX2 = byId.ilk_fpga, outX2 = byId.out;
-  const traceY3 = CY - 14;
+  const traceY3 = CY - 14*S;
   svgEl('path',{
     d:`M${ilkX2},${traceY3} L${outX2},${traceY3}`,
-    fill:'none', stroke:'#f472b6', 'stroke-width':1,
+    fill:'none', stroke:'#f472b6', 'stroke-width':1*S,
     'stroke-linecap':'round', 'stroke-dasharray':'none',
     class:'sig-trace sig-ilk-out-glow', id:'sig-ilk-out-glow'
   }, layer);
   svgEl('path',{
-    d:`M${ilkX2},${traceY3} L${outX2+6},${traceY3}`,
-    fill:'none', stroke:'#f472b6', 'stroke-width':1,
+    d:`M${ilkX2},${traceY3} L${outX2+6*S},${traceY3}`,
+    fill:'none', stroke:'#f472b6', 'stroke-width':1*S,
     'stroke-linecap':'round', 'marker-end':'url(#sig-arrow-pink)',
     class:'sig-trace', id:'sig-ilk-out'
   }, layer);
-  // "decision transmitted" label — above the green/cyan glow lines
   const midX = (ilkX2+outX2)/2;
   const lbl = svgEl('text',{
-    x:midX, y:CY - 22,
+    x:midX, y:CY - 22*S,
     'text-anchor':'middle', 'font-family':"'IBM Plex Mono',monospace",
-    'font-size':6, fill:'#f472b6', opacity:0,
+    'font-size':6*S, fill:'#f472b6', opacity:0,
     class:'sig-trace sig-ilk-label', id:'sig-ilk-label',
     'pointer-events':'none'
   }, layer);
   lbl.textContent = 'decision transmitted';
 
-  // T2I → ILK signal path along top of crate
   const x1 = byId.t2i, x2 = byId.ilk_fpga;
   svgEl('path',{
     d:`M${x1},${traceY} L${x2},${traceY}`,
-    fill:'none', stroke:'#f0b030', 'stroke-width':1,
+    fill:'none', stroke:'#f0b030', 'stroke-width':1*S,
     'stroke-linecap':'round', 'stroke-dasharray':'none',
     class:'sig-trace sig-glow', id:'sig-t2i-glow'
   }, layer);
   svgEl('path',{
-    d:`M${x1},${traceY} L${x2-6},${traceY}`,
-    fill:'none', stroke:'#f0b030', 'stroke-width':0.8,
+    d:`M${x1},${traceY} L${x2-6*S},${traceY}`,
+    fill:'none', stroke:'#f0b030', 'stroke-width':0.8*S,
     'stroke-linecap':'round', 'marker-end':'url(#sig-arrow-amber)',
     class:'sig-trace', id:'sig-t2i-ilk'
   }, layer);
 
-  // GSS → ILK trace — positioned just above T2I line if T2I is active, else same y
   const gssX = byId.gss, ilkX = byId.ilk_fpga;
-  const gssTraceEl = document.getElementById('sig-gss-ilk');
-  const t2iActive = gssTraceEl ? false : false; // resolved dynamically in updateSignalTraces
-  const traceY2 = traceY - 8; // cyan line, above green
+  const traceY2 = traceY - 8*S;
   svgEl('path',{
     d:`M${gssX},${traceY2} L${ilkX},${traceY2}`,
-    fill:'none', stroke:'#20c8e0', 'stroke-width':1,
+    fill:'none', stroke:'#20c8e0', 'stroke-width':1*S,
     'stroke-linecap':'round', 'stroke-dasharray':'none',
     class:'sig-trace sig-gss-glow', id:'sig-gss-glow'
   }, layer);
   svgEl('path',{
-    d:`M${gssX},${traceY2} L${ilkX-6},${traceY2}`,
-    fill:'none', stroke:'#20c8e0', 'stroke-width':1,
+    d:`M${gssX},${traceY2} L${ilkX-6*S},${traceY2}`,
+    fill:'none', stroke:'#20c8e0', 'stroke-width':1*S,
     'stroke-linecap':'round', 'marker-end':'url(#sig-arrow-cyan)',
     class:'sig-trace', id:'sig-gss-ilk'
   }, layer);
@@ -1089,11 +1037,11 @@ function drawBackplanePaths(parent){
     {id:'bp-ilk-out',color:'#4898f0'},
     {id:'bp-gss-ilk',color:'#20c8e0'},
   ].forEach(p=>{
-    svgEl('line',{x1:0,y1:0,x2:0,y2:0,stroke:p.color,'stroke-width':2,'stroke-linecap':'round',opacity:0.06,id:p.id},parent);
+    svgEl('line',{x1:0,y1:0,x2:0,y2:0,stroke:p.color,'stroke-width':2*S,'stroke-linecap':'round',opacity:0.06,id:p.id},parent);
   });
 }
 function updateBackplane(){
-  const centers=CARDS.map((_,i)=>CX+7+i*(CARD_W+5)+CARD_W/2);
+  const centers=CARDS.map((_,i)=>CX+7*S+i*(CARD_W+5*S)+CARD_W/2);
   const byId=Object.fromEntries(CARDS.map((c,i)=>[c.id,centers[i]]));
   const mid=BP_Y+BP_H/2;
   [
@@ -1107,7 +1055,7 @@ function updateBackplane(){
     el.setAttribute('y1',mid);  el.setAttribute('y2',mid);
     const on=placedConnections.has(p.key)&&(sw1||sw2);
     el.setAttribute('opacity',on?0.9:0.06);
-    el.setAttribute('stroke-width',on?3:2);
+    el.setAttribute('stroke-width',on?3*S:2*S);
     if(on) el.setAttribute('filter','url(#glow-green)');
     else   el.removeAttribute('filter');
   });
@@ -1119,12 +1067,12 @@ function updateBackplane(){
 function toggleSwitch(num){
   if(num===1) sw1=!sw1; else sw2=!sw2;
   updateLEDs(); updateBackplane(); updateFwBtn(); updateSignalTraces(); updateFwStatusLed();
-  // Redraw switches
   const cs=document.getElementById('crate-shell');
   cs.querySelectorAll('.sw-grp').forEach(e=>e.remove());
-  const bkY=CY+CH-18;
-  drawSwitch(cs,CX+CW-72,bkY,1);
-  drawSwitch(cs,CX+CW-38,bkY,2);
+  const BACK_H=22*S;
+  const bkY=CY+CH-BACK_H;
+  drawSwitch(cs,CX+CW-72*S,bkY,1);
+  drawSwitch(cs,CX+CW-38*S,bkY,2);
   checkPowerBtn();
 }
 function updateLEDs(){
@@ -1315,7 +1263,7 @@ function placeWire(fromId,toId){
   const mx=(p1.x+p2.x)/2;
   svgEl('path',{
     d:`M${p1.x},${p1.y} C${mx},${p1.y} ${mx},${p2.y} ${p2.x},${p2.y}`,
-    fill:'none',stroke:WIRE_COLOR,'stroke-width':2,'stroke-linecap':'round',opacity:0.9,'data-key':key
+    fill:'none',stroke:WIRE_COLOR,'stroke-width':2*S,'stroke-linecap':'round',opacity:0.9,'data-key':key
   },document.getElementById('placed-wires'));
   updateBackplane();
   updateFwBtn();
@@ -1893,7 +1841,7 @@ function setTemp(deg){
   const col=deg<28?'#3ddc6e':deg<40?'#f0b030':'#f06060';
   const fill=document.getElementById('det-gauge-fill');
   const txt=document.getElementById('det-temp-text');
-  if(fill){ fill.setAttribute('width',pct*54); fill.setAttribute('fill',col); }
+  if(fill){ fill.setAttribute('width',pct*54*S); fill.setAttribute('fill',col); }
   if(txt){  txt.textContent=deg+'°C'; txt.setAttribute('fill',col); }
 }
 
