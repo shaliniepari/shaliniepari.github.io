@@ -2249,6 +2249,28 @@ function checkDuplicateSupplyLISSY(fromId, toId){
     if(isHV(supplyPort) && isHV(otherSupply))
       return 'Both HV supplies (region A and B) cannot connect to the same LISSY ('+(newLISSY==='lissy1'?'LISSY 1':'LISSY 2')+') — each region must protect its own crate.';
   }
+  // Check: LV of one region and HV of another region cannot go to the same LISSY
+  // i.e. lv-a and hv-b cannot both go to lissy1, nor lv-b and hv-a both go to lissy1
+  const crossPairs = [
+    ['lv-a-conn','hv-b-ilk'],
+    ['lv-b-conn','hv-a-ilk'],
+  ];
+  for(const [portX, portY] of crossPairs){
+    if(supplyPort!==portX && supplyPort!==portY) continue;
+    const companion2 = supplyPort===portX ? portY : portX;
+    for(const key of placedConnections){
+      if(key===connKey(fromId,toId)) continue;
+      const [p1,p2]=key.split('|');
+      const otherSupply=isOut(p2)?p1:isOut(p1)?p2:null;
+      const otherOut=isOut(p2)?p2:isOut(p1)?p1:null;
+      if(otherSupply!==companion2||!otherOut) continue;
+      if(lissyOf(otherOut)===newLISSY){
+        const la = supplyPort.startsWith('lv-a')||supplyPort.startsWith('hv-a') ? 'A' : 'B';
+        const lb = companion2.startsWith('lv-a')||companion2.startsWith('hv-a') ? 'A' : 'B';
+        return 'LV of Region '+la+' and HV of Region '+lb+' cannot both connect to '+(newLISSY==='lissy1'?'LISSY 1':'LISSY 2')+'. LV and HV of the same region must protect the same crate.';
+      }
+    }
+  }
   // Also check: LV and HV of the SAME region must go to the same LISSY
   // e.g. lv-a-conn and hv-a-ilk must both go to lissy1 or both to lissy2
   const regionOf = p => (p==='lv-a-conn'||p==='hv-a-ilk') ? 'a' : (p==='lv-b-conn'||p==='hv-b-ilk') ? 'b' : null;
@@ -2567,7 +2589,18 @@ function resetGame(){
   lhcHandshakeAllowed = false;
   updateHVMSignalTrace(false);
   const lhcBtn=document.getElementById('lhc-btn');
-  if(lhcBtn){ lhcBtn.style.borderColor=''; lhcBtn.style.color=''; lhcBtn.style.boxShadow=''; lhcBtn.classList.remove('active'); }
+  if(lhcBtn){ lhcBtn.style.borderColor=''; lhcBtn.style.color=''; lhcBtn.style.boxShadow=''; lhcBtn.className=''; }
+  // Reset all PSU switches
+  Object.keys(psuState).forEach(crate=>{
+    psuState[crate]=[false,false];
+  });
+  // Reset HVP toggles visually
+  hvpActive.forEach((_,i)=>{
+    const dot=document.getElementById('hvp-sw-'+i);
+    if(dot){ dot.setAttribute('fill','#1a2a1a'); dot.setAttribute('stroke','#3ddc6e30'); dot.removeAttribute('filter'); }
+    const swg=document.querySelector('[data-row="'+i+'"]');
+    if(swg) swg.setAttribute('data-on','false');
+  });
   document.getElementById('placed-wires').innerHTML='';
   document.getElementById('ghost-path').setAttribute('opacity',0);
   document.getElementById('new-wire-btn').classList.remove('active');
