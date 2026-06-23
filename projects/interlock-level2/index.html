@@ -1576,6 +1576,7 @@ function drawCrateSwitch(parent, bpx, bpy, crate, num){
     drawCrateSwitch(parent,bkX+bkW-38,bkY+1,crate,1);
     updateCrateFwLeds(crate);
     updateDSSSignalTrace();
+    drawBISSignalTrace();
   });
 }
 
@@ -1693,12 +1694,30 @@ function drawBISSignalTrace(){
     trace.appendChild(path);
   }
 
+  // Only draw if BIS wired AND MIC powered on
+  const bisWired = placedConnections.has(connKey('p-bis-in','mic-bis-lemo'));
+  if(!bisWired || !isPowered('mic')){ layer.appendChild(trace); return; }
+
   // BIS IN → MIC BIS
   addAnimPath(bisInPt, misBisPt, '#f08030');
-  // MIC BIS → LISSY1 GSS (if connected)
-  if(lissy1GssPt) addAnimPath(misBisPt, lissy1GssPt, '#f08030');
-  // MIC BIS → LISSY2 GSS (if connected)
-  if(lissy2GssPt) addAnimPath(misBisPt, lissy2GssPt, '#f08030');
+
+  // MIC BIS → TM1 → LISSY(s): follow actual TM wiring like DSS trace
+  const tm1Pt = getPortXY('mic-tm1-a');
+  const lissy1Pt = getPortXY('lissy1-gss-out');
+  const lissy2Pt = getPortXY('lissy2-gss-out');
+  const allTmPorts2 = ['mic-tm1-a','mic-tm1-b','mic-tm2-a','mic-tm2-b'];
+  const drawnTm2 = new Set();
+  allTmPorts2.forEach(tmPort=>{
+    const tmPt2 = getPortXY(tmPort);
+    if(placedConnections.has(connKey(tmPort,'lissy1-gss-out')) && isPowered('lissy1')){
+      if(!drawnTm2.has(tmPort)){ addAnimPath(misBisPt, tmPt2, '#f08030'); drawnTm2.add(tmPort); }
+      addAnimPath(tmPt2, lissy1Pt, '#f08030');
+    }
+    if(placedConnections.has(connKey(tmPort,'lissy2-gss-out')) && isPowered('lissy2')){
+      if(!drawnTm2.has(tmPort)){ addAnimPath(misBisPt, tmPt2, '#f08030'); drawnTm2.add(tmPort); }
+      addAnimPath(tmPt2, lissy2Pt, '#f08030');
+    }
+  });
 
   layer.appendChild(trace);
 }
@@ -2139,10 +2158,119 @@ function placeWire(fromId,toId){
 
   checkComplete();
   checkNTCCrossRegion();
+  checkSupplyCrossRegion();
+  const ntcDup = checkDuplicateNTCLISSY(fromId, toId);
+  if(ntcDup){
+    placedConnections.delete(connKey(fromId,toId));
+    usedPorts.delete(fromId); usedPorts.delete(toId);
+    const pw=document.getElementById('placed-wires');
+    if(pw && pw.lastChild) pw.removeChild(pw.lastChild);
+    showError('Invalid connection', ntcDup);
+    return;
+  }
+  const dup = checkDuplicateSupplyLISSY(fromId, toId);
+  if(dup){
+    placedConnections.delete(connKey(fromId,toId));
+    usedPorts.delete(fromId); usedPorts.delete(toId);
+    const pw=document.getElementById('placed-wires');
+    if(pw && pw.lastChild) pw.removeChild(pw.lastChild);
+    showError('Invalid connection', dup);
+    return;
+  }
   updateDSSSignalTrace();
+  drawBISSignalTrace();
   updateEthLeds();
   evaluateBeamPermit();
-  checkSupplyCrossRegion();
+}
+
+function checkDuplicateNTCLISSY(fromId, toId){
+  // Each NTC region (A or B) must connect only to the same LISSY
+  const t2iOf = p => {
+    if(p.startsWith('lissy1-t2i')) return 'lissy1';
+    if(p.startsWith('lissy2-t2i')) return 'lissy2';
+    return null;
+  };
+  const ntcRegionOf = p => {
+    if(p==='ntc-a1'||p==='ntc-a2') return 'a';
+    if(p==='ntc-b1'||p==='ntc-b2') return 'b';
+    return null;
+  };
+  const ntcPort  = ntcRegionOf(fromId) ? fromId : ntcRegionOf(toId) ? toId : null;
+  const t2iPort  = ntcPort===fromId ? toId : fromId;
+  if(!ntcPort) return null;
+  const newRegion = ntcRegionOf(ntcPort);
+  const newLISSY  = t2iOf(t2iPort);
+  if(!newLISSY) return null;
+
+  // All NTCs of same region = ['ntc-a1','ntc-a2'] or ['ntc-b1','ntc-b2']
+  const sameRegionNTCs = newRegion==='a' ? ['ntc-a1','ntc-a2'] : ['ntc-b1','ntc-b2'];
+
+  for(const key of placedConnections){
+    if(key===connKey(fromId,toId)) continue;
+    const [p1,p2]=key.split('|');
+    const otherNTC = ntcRegionOf(p1)?p1 : ntcRegionOf(p2)?p2 : null;
+    const otherT2i = otherNTC===p1?p2:p1;
+    if(!otherNTC || !sameRegionNTCs.includes(otherNTC)) continue;
+    const otherLISSY = t2iOf(otherT2i);
+    if(otherLISSY && otherLISSY!==newLISSY){
+      const r = newRegion==='a'?'Region A':'Region B';
+      return r+': both NTC sensors must connect to the same LISSY. One is on '+(otherLISSY==='lissy1'?'LISSY 1':'LISSY 2')+' but you are trying to connect to '+(newLISSY==='lissy1'?'LISSY 1':'LISSY 2')+'.';
+    }
+  }
+  return null;
+}
+
+function checkDuplicateSupplyLISSY(fromId, toId){
+  // Check if this new LV or HV connection would put two LVs or two HVs on the same LISSY
+  const isOut = p=>(p==='lissy1-out-ilk'||p==='lissy1-out2-ilk'||p==='lissy2-out-ilk'||p==='lissy2-out2-ilk');
+  const isLV  = p=>(p==='lv-a-conn'||p==='lv-b-conn');
+  const isHV  = p=>(p==='hv-a-ilk'||p==='hv-b-ilk');
+
+  const supplyPort = isOut(toId) ? fromId : isOut(fromId) ? toId : null;
+  const outPort    = isOut(toId) ? toId   : isOut(fromId) ? fromId : null;
+  if(!supplyPort || !outPort) return null;
+
+  // Determine which LISSY this OUT port belongs to
+  const lissyOf = p => p.startsWith('lissy1') ? 'lissy1' : p.startsWith('lissy2') ? 'lissy2' : null;
+  const newLISSY = lissyOf(outPort);
+  if(!newLISSY) return null;
+
+  // Check if another LV (or HV) of the SAME type is already on this LISSY
+  for(const key of placedConnections){
+    if(key === connKey(fromId,toId)) continue; // skip self
+    const [p1,p2] = key.split('|');
+    const otherSupply = isOut(p2) ? p1 : isOut(p1) ? p2 : null;
+    const otherOut    = isOut(p2) ? p2 : isOut(p1) ? p1 : null;
+    if(!otherSupply || !otherOut) continue;
+    if(lissyOf(otherOut) !== newLISSY) continue;
+    // Same LISSY — check if same type (both LV or both HV)
+    if(isLV(supplyPort) && isLV(otherSupply))
+      return 'Both LV supplies (region A and B) cannot connect to the same LISSY ('+(newLISSY==='lissy1'?'LISSY 1':'LISSY 2')+') — each region must protect its own crate.';
+    if(isHV(supplyPort) && isHV(otherSupply))
+      return 'Both HV supplies (region A and B) cannot connect to the same LISSY ('+(newLISSY==='lissy1'?'LISSY 1':'LISSY 2')+') — each region must protect its own crate.';
+  }
+  // Also check: LV and HV of the SAME region must go to the same LISSY
+  // e.g. lv-a-conn and hv-a-ilk must both go to lissy1 or both to lissy2
+  const regionOf = p => (p==='lv-a-conn'||p==='hv-a-ilk') ? 'a' : (p==='lv-b-conn'||p==='hv-b-ilk') ? 'b' : null;
+  const newRegion = regionOf(supplyPort);
+  if(newRegion){
+    // Find the other supply of the same region
+    const sameRegionPorts = newRegion==='a' ? ['lv-a-conn','hv-a-ilk'] : ['lv-b-conn','hv-b-ilk'];
+    const companion = sameRegionPorts.find(p=>p!==supplyPort);
+    for(const key of placedConnections){
+      if(key === connKey(fromId,toId)) continue;
+      const [p1,p2] = key.split('|');
+      const otherSupply = isOut(p2)?p1:isOut(p1)?p2:null;
+      const otherOut    = isOut(p2)?p2:isOut(p1)?p1:null;
+      if(otherSupply!==companion||!otherOut) continue;
+      const companionLISSY = lissyOf(otherOut);
+      if(companionLISSY && companionLISSY!==newLISSY){
+        const regionLabel = newRegion==='a'?'Region A':'Region B';
+        return regionLabel+': LV and HV must connect to the same LISSY. LV is on '+(companionLISSY==='lissy1'?'LISSY 1':'LISSY 2')+' but HV is going to '+(newLISSY==='lissy1'?'LISSY 1':'LISSY 2')+'.';
+      }
+    }
+  }
+  return null;
 }
 
 function checkSupplyCrossRegion(){
@@ -2329,19 +2457,18 @@ function updateDSSSignalTrace(){
 
   // TM1 ports: a or b can connect to either LISSY
   // Check each TM1 port → LISSY connection independently
-  const tmPorts = ['mic-tm1-a','mic-tm1-b'];
-  let tmHit = false;
-  tmPorts.forEach(tmPort=>{
+  // All TM ports from TM1 and TM2
+  const allTmPorts = ['mic-tm1-a','mic-tm1-b','mic-tm2-a','mic-tm2-b'];
+  const drawnTm = new Set();
+  allTmPorts.forEach(tmPort=>{
     const tmPt = getPortXY(tmPort);
-    // TM1 → LISSY1
     if(placedConnections.has(connKey(tmPort,'lissy1-gss-out')) && isPowered('lissy1')){
-      if(!tmHit){ addAnimPath(dssMalePt, tm1Pt, '#20c8e0'); tmHit=true; }
-      addAnimPath(tm1Pt, lissy1Pt, '#20c8e0');
+      if(!drawnTm.has(tmPort)){ addAnimPath(dssMalePt, tmPt, '#20c8e0'); drawnTm.add(tmPort); }
+      addAnimPath(tmPt, lissy1Pt, '#20c8e0');
     }
-    // TM1 → LISSY2
     if(placedConnections.has(connKey(tmPort,'lissy2-gss-out')) && isPowered('lissy2')){
-      if(!tmHit){ addAnimPath(dssMalePt, tm1Pt, '#20c8e0'); tmHit=true; }
-      addAnimPath(tm1Pt, lissy2Pt, '#20c8e0');
+      if(!drawnTm.has(tmPort)){ addAnimPath(dssMalePt, tmPt, '#20c8e0'); drawnTm.add(tmPort); }
+      addAnimPath(tmPt, lissy2Pt, '#20c8e0');
     }
   });
 
