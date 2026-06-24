@@ -423,6 +423,12 @@ svg text { font-weight: 600; }
     </p>
     <div style="background:#07090d;border:1px solid #1a2433;border-radius:6px;padding:14px 18px;margin-bottom:24px;text-align:left;">
       <div style="font-family:'IBM Plex Mono',monospace;font-size:9px;font-weight:600;letter-spacing:.12em;color:#d29922;margin-bottom:8px;">YOUR TASK</div>
+      <p style="font-size:12px;color:#6a7a8a;line-height:1.75;margin:0;">
+        Wire all crates with the right components.
+        <br><br>
+        <span style="color:#f06060;">Get it wrong and the detector burns.</span>
+        <span style="color:#3ddc6e;"> Get it right and you save the ITk!</span>
+      </p>
 
     </div>
     <button onclick="document.getElementById('intro-ov').classList.remove('active')"
@@ -1369,7 +1375,26 @@ function updateHVMLogic(){
 
 function explainBeamPermit(){
   const btn = document.getElementById('lhc-btn');
-  if(btn && btn.classList.contains('permit-on')) return;
+  if(btn && btn.classList.contains('permit-on')){
+    setStatus('Beam injection permit sent to LHC.','ok');
+    // Glow beam stable button for 5s, then announce beam stable
+    setTimeout(()=>{
+      const bsBtn = document.getElementById('beam-stable-btn');
+      if(bsBtn){ bsBtn.classList.add('active'); bsBtn.style.boxShadow='0 0 18px rgba(61,220,110,.5)'; }
+      setStatus('Beam stable declared by LHC — it is safe to ramp up HV now.','ok');
+      hvEnabled = true;
+      // Update HV button borders to signal they are unlocked
+      ['power-on-hv-a','power-on-hv-b'].forEach(id=>{
+        const b=document.getElementById(id);
+        if(b){ b.style.borderColor='#f0b030'; b.style.color='#f0b030'; }
+      });
+      // Fade glow after 5s
+      setTimeout(()=>{
+        if(bsBtn){ bsBtn.style.boxShadow=''; }
+      }, 5000);
+    }, 1200);
+    return;
+  }
 
   const warnings = []; // show fire overlay for these
   const errors   = []; // show in status bar for these
@@ -1441,6 +1466,10 @@ function triggerInterlock(){
     if(st){ st.textContent='● INTERLOCK FIRED'; st.setAttribute('fill','#3ddc6e'); }
     setStatus('T-HI fired! ILK-FPGA cut LV and HV. Detector safe. ✦','ok');
     setTimeout(()=>{
+      // Clear heat overlay before showing success screen
+      const heatEl=document.getElementById('det-heat-overlay');
+      if(heatEl){ heatEl.style.transition='opacity 0.8s'; heatEl.style.opacity=0;
+        setTimeout(()=>{ heatEl.style.background=''; heatEl.style.transition=''; }, 800); }
       document.getElementById('ok-body').innerHTML =
         '<strong style="color:#3ddc6e;font-size:15px">You saved the ITk!</strong><br><br>' +
         'Temperature reached 40°C. T2I fired T-HI, ILK-FPGA evaluated the matrix, OUT modules cut LV and HV. The full interlock chain worked correctly.';
@@ -1468,11 +1497,11 @@ function evaluateBeamPermit(){
 
   // Prerequisites
   const hmvWired = placedConnections.has(connKey('mic-hvm-lemo','p-bis-out'));
-  const anyCrateOn = isPowered('lissy1')||isPowered('lissy2')||isPowered('mic');
+  const allCratesOn = isPowered('lissy1')&&isPowered('lissy2')&&isPowered('mic');
   const activeRows = hvpActive.map((on,i)=>on?i:-1).filter(i=>i>=0);
   const anyHVPActive = activeRows.length > 0;
 
-  if(!anyCrateOn||!anyHVPActive||!hmvWired){
+  if(!allCratesOn||!anyHVPActive||!hmvWired){
     btn.className=''; // neutral — no message until clicked
     return;
   }
@@ -1786,11 +1815,9 @@ function setSupplyLED(type,region,on){
 let beamStableActive = false;
 
 function triggerBeamStable(){
-  // Check all conditions for beam stable signal
   const bisWired   = placedConnections.has(connKey('p-bis-in','mic-bis-lemo'));
   const hmvWired   = placedConnections.has(connKey('mic-hvm-lemo','p-bis-out'));
   const permitOn   = document.getElementById('lhc-btn').classList.contains('permit-on');
-  const allCratesOn= isPowered('lissy1')&&isPowered('lissy2')&&isPowered('mic');
 
   if(!bisWired){
     setStatus('BIS "From LHC" must be connected to MIC BIS for beam stable signal.','warn'); return;
@@ -1799,7 +1826,10 @@ function triggerBeamStable(){
     setStatus('HVM must be connected to BIS "To LHC" before beam stable can be triggered.','warn'); return;
   }
   if(!permitOn){
-    setStatus('Beam injection permit must be active before beam stable can be triggered.','warn'); return;
+    setStatus('Click "Beam Injection Permit" first to send the permit, then trigger beam stable.','warn'); return;
+  }
+  if(!hvEnabled){
+    setStatus('Wait for the beam stable declaration before ramping HV.','warn'); return;
   }
 
   // Trigger beam stable
@@ -1830,6 +1860,39 @@ function triggerBeamStable(){
   });
 
   setStatus('Beam stable! HV may now be powered on safely.','ok');
+}
+
+function burnDetector(title, detail){
+  // Flash heat overlay
+  const heat=document.getElementById('det-heat-overlay');
+  if(heat){ heat.style.background='radial-gradient(ellipse,#ff220099,transparent)'; heat.style.opacity=1; }
+  const st=document.getElementById('det-status-txt');
+  if(st){ st.textContent='● DETECTOR DAMAGED'; st.setAttribute('fill','#f06060'); }
+
+  // Show fire overlay with Try again → revert HV state
+  document.getElementById('fire-title').textContent='🔥 '+title;
+  document.getElementById('fire-body').textContent=detail;
+  const btn=document.querySelector('#fire-ov .ov-btn');
+  if(btn){
+    btn.textContent='Try again';
+    btn.onclick=()=>{
+      document.getElementById('fire-ov').classList.remove('active');
+      // Revert heat overlay
+      if(heat){ heat.style.transition='opacity 0.6s'; heat.style.opacity=0;
+        setTimeout(()=>{ heat.style.background=''; heat.style.transition=''; }, 600); }
+      if(st){ st.textContent=''; st.setAttribute('fill','#445566'); }
+      // Switch off HV supplies that were just turned on (they were never truly on)
+      ['a','b'].forEach(r=>{
+        if(supplyOn.hv[r]){
+          supplyOn.hv[r]=false;
+          setSupplyLED('hv',r,false);
+          const b=document.getElementById('power-on-hv-'+r);
+          if(b){ b.textContent='⏻  HV '+r.toUpperCase(); b.classList.remove('ready'); b.style.cursor='pointer'; }
+        }
+      });
+    };
+  }
+  document.getElementById('fire-ov').classList.add('active');
 }
 
 function checkHVSafe(){
@@ -1872,11 +1935,37 @@ function checkHVSafe(){
 function powerOnSupply(type,region){
   if(supplyOn[type][region]) return;
   if(type==='hv'){
+    if(!hvEnabled){
+      // HV on before beam stable = detector burns
+      burnDetector(
+        'Unstable beam — too many hits on silicon — it burns.',
+        'The detector was exposed to beam before stable conditions were declared. ' +
+        'Wait for the beam injection permit to be sent and beam stable to be confirmed before ramping HV.'
+      );
+      return;
+    }
     const safe = checkHVSafe();
     if(!safe.ok){
       setStatus('HV cannot be powered on: '+safe.reason,'warn');
       return;
     }
+  }
+  if(type==='lv'){
+    // LV only needs: all crates on AND LV of this region wired to a LISSY OUT
+    if(!isPowered('lissy1')||!isPowered('lissy2')||!isPowered('mic')){
+      setStatus('All crates must be powered on before ramping LV.','warn'); return;
+    }
+    const isOut=k=>(k.includes('lissy1-out-ilk')||k.includes('lissy1-out2-ilk')||k.includes('lissy2-out-ilk')||k.includes('lissy2-out2-ilk'));
+    const lvPort = region==='a'?'lv-a-conn':'lv-b-conn';
+    const lvWired = Array.from(placedConnections).some(k=>k.includes(lvPort)&&isOut(k));
+    if(!lvWired){
+      setStatus('LV '+region.toUpperCase()+' Interlock must be connected to a LISSY OUT port before powering on.','warn'); return;
+    }
+    // DSS must be correctly wired
+    const dssIn  = placedConnections.has(connKey('p-dss-in','mic-dss-male'));
+    const dssOut = placedConnections.has(connKey('p-global-dss','mic-dss-female'));
+    if(!dssIn)  { setStatus('DSS "From ENV" must be connected to MIC DSS male before powering LV.','warn'); return; }
+    if(!dssOut) { setStatus('DSS "To ENV" must be connected to MIC DSS female before powering LV.','warn'); return; }
   }
   const check = getRegionConsistency();
   if(!check.ok){
@@ -2159,6 +2248,15 @@ function placeWire(fromId,toId){
   checkComplete();
   checkNTCCrossRegion();
   checkSupplyCrossRegion();
+  const hvpPairDup = checkHVPPairConflict(fromId, toId);
+  if(hvpPairDup){
+    placedConnections.delete(connKey(fromId,toId));
+    usedPorts.delete(fromId); usedPorts.delete(toId);
+    const pw=document.getElementById('placed-wires');
+    if(pw && pw.lastChild) pw.removeChild(pw.lastChild);
+    showError('Invalid connection', hvpPairDup);
+    return;
+  }
   const ntcDup = checkDuplicateNTCLISSY(fromId, toId);
   if(ntcDup){
     placedConnections.delete(connKey(fromId,toId));
@@ -2181,6 +2279,47 @@ function placeWire(fromId,toId){
   drawBISSignalTrace();
   updateEthLeds();
   evaluateBeamPermit();
+}
+
+function checkHVPPairConflict(fromId, toId){
+  // HV crate status and HV status of different regions must not share the same HVP row pair
+  // e.g. hv-a-crate on row 3 left AND hv-b-crate on row 3 left = conflict
+  // Also: hv-a-crate on row 3 left and hv-b-hv on row 3 right = conflict (same pair)
+  const isHVPLeft  = p=>p.match(/^mic-hvp-(\d+)-l1$/);
+  const isHVPRight = p=>p.match(/^mic-hvp-(\d+)-l2$/);
+  const hvpRowOf   = p=>{ const m=p.match(/mic-hvp-(\d+)-l[12]/); return m?m[1]:null; };
+
+  const newHVP = isHVPLeft(toId)||isHVPRight(toId) ? toId : isHVPLeft(fromId)||isHVPRight(fromId) ? fromId : null;
+  const newSup = newHVP===toId ? fromId : toId;
+  if(!newHVP || !newSup) return null;
+
+  const newRow = hvpRowOf(newHVP);
+  const regionOf = p=>{
+    if(p==='hv-a-crate'||p==='hv-a-hv') return 'A';
+    if(p==='hv-b-crate'||p==='hv-b-hv') return 'B';
+    return null;
+  };
+  const newRegion = regionOf(newSup);
+  if(!newRegion) return null;
+
+  // Check: is the paired lemo (other side of same row) already used by a different region?
+  const pairedLemo = newHVP.endsWith('-l1')
+    ? newHVP.replace('-l1','-l2')
+    : newHVP.replace('-l2','-l1');
+
+  for(const key of placedConnections){
+    if(key===connKey(fromId,toId)) continue;
+    const [p1,p2]=key.split('|');
+    // Check if this key involves the same row (either lemo)
+    const otherHVP = hvpRowOf(p1)===newRow ? p1 : hvpRowOf(p2)===newRow ? p2 : null;
+    if(!otherHVP) continue;
+    const otherSup = otherHVP===p1?p2:p1;
+    const otherRegion = regionOf(otherSup);
+    if(otherRegion && otherRegion!==newRegion){
+      return 'Are you sure you want to do that? HVP row '+(parseInt(newRow)+1)+' is already used by Region '+otherRegion+'. HV from one region should be controlled by the same pair — Region '+newRegion+' must use a different HVP channel pair.';
+    }
+  }
+  return null;
 }
 
 function checkDuplicateNTCLISSY(fromId, toId){
@@ -2639,5 +2778,8 @@ const resizeObs = new ResizeObserver(()=>{
 resizeObs.observe(document.getElementById('det-panel'));
 resizeObs.observe(document.getElementById('rack-panel'));
 </script>
+<div style="position:fixed;bottom:10px;right:14px;font-family:'IBM Plex Mono',monospace;font-size:18px;color:#4a6a8a;letter-spacing:.08em;pointer-events:none;z-index:5;user-select:none;text-shadow:0 0 12px rgba(72,152,240,0.3);">
+  Developed by Alex, Tania &amp; Shalini
+</div>
 </body>
 </html>
