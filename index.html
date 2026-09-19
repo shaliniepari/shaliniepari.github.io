@@ -6,68 +6,39 @@
 <title>Shalini Epari</title>
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
-html, body { height: 100%; max-height: 100%; overflow: hidden !important; background: #000; color: #fff; font-family: 'Segoe UI', system-ui, sans-serif; }
-html { position: fixed; width: 100%; }
+html, body { height: 100%; overflow: hidden; background: #000; font-family: 'Segoe UI', system-ui, sans-serif; }
 canvas { display: block; width: 100%; height: 100%; position: fixed; inset: 0; }
 
-#intro-overlay {
-  position: fixed; inset: 0;
-  display: flex; flex-direction: column; align-items: center; justify-content: center;
-  padding: 24px; pointer-events: none; opacity: 0;
-}
-.big-hi {
-  font-size: 68px; font-weight: 200; letter-spacing: -0.04em;
-  line-height: 1.05; color: #fff; margin-bottom: 8px; text-align: center;
-  white-space: nowrap;
-}
-.big-hi em { font-style: normal; font-weight: 500; color: #5aadff; }
-.role {
-  font-size: 13px; letter-spacing: 0.08em;
-  color: rgba(255,255,255,0.28); margin-bottom: 28px; text-align: center;
-}
-.intro-p {
-  font-size: 15px; color: rgba(255,255,255,0.42); line-height: 1.85;
-  max-width: 400px; text-align: justify; font-weight: 300;
-}
 #top-nav {
   position: fixed; top: 28px; right: 36px;
-  display: flex; gap: 24px; z-index: 10;
+  display: flex; gap: 28px; z-index: 10;
   pointer-events: none; opacity: 0;
+  transition: opacity 1.6s ease;
 }
+#top-nav.visible { opacity: 1; pointer-events: auto; }
 #top-nav a {
-  font-size: 12px; letter-spacing: 0.04em; color: #5aadff;
+  font-size: 13px; letter-spacing: 0.04em; color: #5aadff;
   text-decoration: none; transition: opacity 0.15s;
 }
-#top-nav a:hover { opacity: 0.7; }
+#top-nav a:hover { opacity: 0.6; }
 </style>
 </head>
 <body>
-
 <canvas id="c"></canvas>
 
 <nav id="top-nav">
   <a href="cv.pdf">CV</a>
   <a href="research.html">Research</a>
   <a href="students.html">Student Projects</a>
+  <a href="gallery.html">Gallery</a>
   <a href="blog.html">Blog</a>
   <a href="mailto:shalini.epari@cern.ch">Contact</a>
 </nav>
 
-<div id="intro-overlay">
-  <div class="big-hi">Hi, I'm <em>Shalini Epari.</em></div>
-  <div class="role">Experimental Particle Physicist</div>
-  <p class="intro-p">
-    I work for the ATLAS Experiment at CERN. My research focuses on searching
-    for new fundamental particles using machine learning,
-    upgrading the detector for the next generation of collisions, and scientific outreach.
-  </p>
-</div>
-
 <script>
-const canvas  = document.getElementById('c');
-const ctx     = canvas.getContext('2d');
-const overlay = document.getElementById('intro-overlay');
-const topNav  = document.getElementById('top-nav');
+const canvas = document.getElementById('c');
+const ctx    = canvas.getContext('2d');
+const topNav = document.getElementById('top-nav');
 let W, H;
 function resize() { W = canvas.width = window.innerWidth; H = canvas.height = window.innerHeight; }
 resize();
@@ -75,58 +46,41 @@ window.addEventListener('resize', resize);
 
 function band(p,a,b){ return Math.max(0,Math.min(1,(p-a)/(b-a))); }
 function ease(t){ return t<0.5?2*t*t:-1+(4-2*t)*t; }
+function tband(ms,a,b){ return Math.max(0,Math.min(1,(ms-a)/(b-a))); }
 
-// Total duration of the full animation in ms
-const TOTAL = 8000;
 const T = {
-  tubeIn:   [800,  2800],   // cylinder fades in slowly
-  travel:   [800,  4200],   // particles drift, then accelerate
-  waltz:    [3000, 4800],   // waltz — tightening spiral
-  boom:     [4800, 8000],   // collision + text
+  tubeIn:  [800,  2800],
+  travel:  [800,  4200],
+  waltz:   [3000, 4800],
+  boom:    [4800, 7200],
+  fadeOut: [6400, 7800],
 };
 
-function tband(ms, a, b){ return Math.max(0, Math.min(1, (ms-a)/(b-a))); }
-
-// ── 3D cylinder ──
 function project(wx,wy,wz){
   const f=H*0.88;
   return {x:W*0.5+(wx/wz)*f, y:H*0.5+(wy/wz)*f};
 }
-const R=1.0,NSEGS=36,Lx=-0.6,Ly=-0.8;
-function drawCylinder(camZ,alpha){
-  if(alpha<=0)return;
-  const spacing = 0.12;  // world units between rings
-  const zNear   = 0.15;  // closest ring to draw
-  const zFar    = 4.0;   // furthest ring to draw
+const R=1.0, NSEGS=36, Lx=-0.6, Ly=-0.8;
 
-  // Find which ring indices are currently visible
-  // Ring i sits at world position i*spacing
-  // In camera space: wz = i*spacing - camZ
-  // Visible when zNear <= wz <= zFar
-  // So i ranges from ceil((camZ+zNear)/spacing) to floor((camZ+zFar)/spacing)
-  const iMin = Math.ceil((camZ + zNear) / spacing);
-  const iMax = Math.floor((camZ + zFar) / spacing);
-
-  // Draw back to front
-  for(let i=iMax; i>=iMin; i--){
-    const wz = i * spacing - camZ;  // camera-relative depth, always smooth
-    if(wz < zNear || wz > zFar) continue;
-
-    const depthT = 1 - (wz - zNear) / (zFar - zNear);
-    const fogA   = Math.pow(depthT, 0.5);
-
-    // fade near/far edges
-    const fadeIn  = Math.min(1, (wz - zNear) / (spacing * 3));
-    const fadeOut = Math.min(1, (zFar - wz)  / (spacing * 3));
-    const ringA   = fadeIn * fadeOut;
-    if(ringA < 0.005) continue;
-
-    const wz2 = Math.max(0.05, wz - spacing);
-
+function drawCylinder(camZ, alpha){
+  if(alpha<=0) return;
+  const spacing=0.12, zNear=0.15, zFar=4.0;
+  const iMin=Math.ceil((camZ+zNear)/spacing);
+  const iMax=Math.floor((camZ+zFar)/spacing);
+  for(let i=iMax;i>=iMin;i--){
+    const wz=i*spacing-camZ;
+    if(wz<zNear||wz>zFar) continue;
+    const depthT=1-(wz-zNear)/(zFar-zNear);
+    const fogA=Math.pow(depthT,0.5);
+    const fadeIn=Math.min(1,(wz-zNear)/(spacing*3));
+    const fadeOut=Math.min(1,(zFar-wz)/(spacing*3));
+    const ringA=fadeIn*fadeOut;
+    if(ringA<0.005) continue;
+    const wz2=Math.max(0.05,wz-spacing);
     for(let ai=0;ai<NSEGS;ai++){
       const a0=(ai/NSEGS)*Math.PI*2, a1=((ai+1)/NSEGS)*Math.PI*2, aMid=(a0+a1)*0.5;
       const nx=-Math.cos(aMid), ny=-Math.sin(aMid);
-      const diffuse=Math.max(0, nx*Lx + ny*Ly);
+      const diffuse=Math.max(0,nx*Lx+ny*Ly);
       const l=0.04+diffuse*0.28+fogA*0.05;
       const rr=Math.round(l*15+fogA*4), gg=Math.round(l*55+fogA*10), bb=Math.round(l*220+fogA*30);
       const p00=project(Math.cos(a0)*R,Math.sin(a0)*R,wz);
@@ -149,132 +103,107 @@ function drawCylinder(camZ,alpha){
   vg.addColorStop(0,`rgba(8,35,130,${alpha*0.6})`);
   vg.addColorStop(0.6,`rgba(3,12,50,${alpha*0.25})`);
   vg.addColorStop(1,'rgba(0,0,0,0)');
-  ctx.fillStyle=vg;ctx.beginPath();ctx.arc(W*.5,H*.5,H*0.25,0,Math.PI*2);ctx.fill();
+  ctx.fillStyle=vg; ctx.beginPath(); ctx.arc(W*.5,H*.5,H*0.25,0,Math.PI*2); ctx.fill();
 }
 
 function drawParticle(x,y,alpha){
-  if(alpha<=0)return;
+  if(alpha<=0) return;
   const g=ctx.createRadialGradient(x,y,0,x,y,22);
   g.addColorStop(0,`rgba(100,180,255,${alpha*0.65})`);
   g.addColorStop(0.45,`rgba(40,100,220,${alpha*0.25})`);
   g.addColorStop(1,'rgba(0,0,0,0)');
-  ctx.fillStyle=g;ctx.beginPath();ctx.arc(x,y,22,0,Math.PI*2);ctx.fill();
-  ctx.beginPath();ctx.arc(x,y,3,0,Math.PI*2);
-  ctx.fillStyle=`rgba(190,220,255,${alpha})`;ctx.fill();
+  ctx.fillStyle=g; ctx.beginPath(); ctx.arc(x,y,22,0,Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.arc(x,y,3,0,Math.PI*2);
+  ctx.fillStyle=`rgba(190,220,255,${alpha})`; ctx.fill();
 }
 
 const TRACK_ANGLES=Array.from({length:12},(_,i)=>(i/12)*Math.PI*2+i*0.4);
 const TRACK_LENS  =Array.from({length:12},(_,i)=>0.55+((i*5)%6)*0.08);
 
 const dust=Array.from({length:35},()=>({
-  x:Math.random(),y:Math.random(),r:0.35+Math.random()*0.9,
-  vy:0.00007+Math.random()*0.00011,vx:(Math.random()-.5)*0.00004,
+  x:Math.random(), y:Math.random(), r:0.35+Math.random()*0.9,
+  vy:0.00007+Math.random()*0.00011, vx:(Math.random()-.5)*0.00004,
 }));
 function stepDust(dt){
   for(const d of dust){
-    d.x+=d.vx*dt;d.y+=d.vy*dt;
+    d.x+=d.vx*dt; d.y+=d.vy*dt;
     if(d.y>1.05){d.y=-0.05;d.x=Math.random();}
-    if(d.x<0)d.x+=1;if(d.x>1)d.x-=1;
+    if(d.x<0)d.x+=1; if(d.x>1)d.x-=1;
   }
 }
 
-let startTime=null;
-let lastT=0;
+let startTime=null, lastT=0, navShown=false;
 
 function draw(ts){
   if(!startTime) startTime=ts;
-  const ms  = ts - startTime;
-  const dt  = ts - lastT; lastT=ts;
+  const ms=ts-startTime;
+  const dt=ts-lastT; lastT=ts;
   stepDust(dt);
 
   ctx.clearRect(0,0,W,H);
   const cx=W*0.5, cy=H*0.5;
 
-  const phTube   = ease(tband(ms, T.tubeIn[0],  T.tubeIn[1]));
-  const phTravel = Math.pow(tband(ms, T.travel[0], T.travel[1]), 1.8); // accelerates
-  const phWaltz  = ease(tband(ms, T.waltz[0],   T.waltz[1]));
-  const phBoom   = tband(ms, T.boom[0], T.boom[1]);
+  const phTube   = ease(tband(ms,T.tubeIn[0],T.tubeIn[1]));
+  const phTravel = Math.pow(tband(ms,T.travel[0],T.travel[1]),1.8);
+  const phBoom   = tband(ms,T.boom[0],T.boom[1]);
+  const phFade   = ease(tband(ms,T.fadeOut[0],T.fadeOut[1]));
 
-  // Background
-  const postBoom=Math.min(1,phBoom*3);
-  const bgTube=phTube*(1-Math.min(phBoom*1.5,1));
-  ctx.fillStyle=`rgb(${Math.round(bgTube*4+postBoom*1)},${Math.round(bgTube*9+postBoom*10)},${Math.round(bgTube*22+postBoom*26)})`;
+  // Background: black → white
+  const bgWhite = phFade;
+  const bgDark  = phTube*(1-Math.min(phBoom*1.5,1))*(1-phFade);
+  const bgVal   = Math.round(bgWhite*255);
+  const bgBlue  = Math.round(bgDark*22);
+  ctx.fillStyle = phFade>0
+    ? `rgb(${bgVal},${bgVal},${bgVal})`
+    : `rgb(${Math.round(bgDark*4)},${Math.round(bgDark*9)},${bgBlue})`;
   ctx.fillRect(0,0,W,H);
 
-  // Dust — only at the very start
+  // Dust
   if(phBoom<0.15&&phTube<0.6){
     const da=0.055*(1-phTube*1.8)*(1-phBoom*6);
-    if(da>0)for(const d of dust){
-      ctx.beginPath();ctx.arc(d.x*W,d.y*H,d.r,0,Math.PI*2);
-      ctx.fillStyle=`rgba(80,130,255,${da})`;ctx.fill();
+    if(da>0) for(const d of dust){
+      ctx.beginPath(); ctx.arc(d.x*W,d.y*H,d.r,0,Math.PI*2);
+      ctx.fillStyle=`rgba(80,130,255,${da})`; ctx.fill();
     }
   }
 
   // Cylinder
-  drawCylinder(phTravel*2.0, phTube*(1-Math.max(0,phBoom*2.2)));
+  if(phFade<0.8) drawCylinder(phTravel*2.0, phTube*(1-Math.max(0,phBoom*2.2))*(1-phFade*1.5));
 
-  // Three phases — particles always separated until boom
-  // p1 starts left, p2 starts right. They never meet until the collision.
-
-  const startX  = W * 0.28;   // starting offset from centre
-  const circleR = W * 0.13;   // large orbit radius
-  const waltzR  = W * 0.04;   // tight waltz radius
-
-  const pStr  = tband(ms, T.travel[0], T.waltz[0]);       // straight travel
-  const pCirc = tband(ms, T.waltz[0],  T.waltz[0]+700);   // large circle
-  const pWltz = tband(ms, T.waltz[0]+700, T.boom[0]);     // tight waltz
-
-  let p1x, p1y, p2x, p2y;
-
-  if (pWltz > 0) {
-    // Tight waltz: orbit shrinks from waltzR → 0 at collision
-    const orbit = waltzR * (1 - ease(pWltz));
-    const ang   = pWltz * Math.PI * 2 * 3.0;
-    p1x = cx + Math.cos(ang)           * orbit;
-    p1y = cy + Math.sin(ang)           * orbit * 0.45;
-    p2x = cx + Math.cos(ang + Math.PI) * orbit;
-    p2y = cy + Math.sin(ang + Math.PI) * orbit * 0.45;
-
-  } else if (pCirc > 0) {
-    // Large circle: orbit grows from circleR (smooth in) stays at circleR
-    // At pCirc=0 the orbit is circleR — which matches where straight travel ends
-    const orbit = circleR;
-    const ang   = pCirc * Math.PI * 4; // two full rotations
-    p1x = cx + Math.cos(ang)           * orbit;
-    p1y = cy + Math.sin(ang)           * orbit * 0.45;
-    p2x = cx + Math.cos(ang + Math.PI) * orbit;
-    p2y = cy + Math.sin(ang + Math.PI) * orbit * 0.45;
-
+  // Particles
+  const startX=W*0.28, circleR=W*0.13, waltzR=W*0.04;
+  const pStr  = tband(ms,T.travel[0],T.waltz[0]);
+  const pCirc = tband(ms,T.waltz[0],T.waltz[0]+700);
+  const pWltz = tband(ms,T.waltz[0]+700,T.boom[0]);
+  let p1x,p1y,p2x,p2y;
+  if(pWltz>0){
+    const orbit=waltzR*(1-ease(pWltz));
+    const ang=pWltz*Math.PI*2*3.0;
+    p1x=cx+Math.cos(ang)*orbit;          p1y=cy+Math.sin(ang)*orbit*0.45;
+    p2x=cx+Math.cos(ang+Math.PI)*orbit;  p2y=cy+Math.sin(ang+Math.PI)*orbit*0.45;
+  } else if(pCirc>0){
+    const orbit=circleR;
+    const ang=pCirc*Math.PI*4;
+    p1x=cx+Math.cos(ang)*orbit;          p1y=cy+Math.sin(ang)*orbit*0.45;
+    p2x=cx+Math.cos(ang+Math.PI)*orbit;  p2y=cy+Math.sin(ang+Math.PI)*orbit*0.45;
   } else {
-    // Straight travel: p1 left→(cx-circleR), p2 right→(cx+circleR)
-    // They end at circleR apart — exactly where the circle phase starts
-    const t  = ease(pStr);
-    const ex = circleR; // end x offset from centre
-    p1x = cx - startX + t * (startX - ex);
-    p1y = cy;
-    p2x = cx + startX - t * (startX - ex);
-    p2y = cy;
+    const t=ease(pStr); const ex=circleR;
+    p1x=cx-startX+t*(startX-ex); p1y=cy;
+    p2x=cx+startX-t*(startX-ex); p2y=cy;
   }
 
-  const pAlpha = Math.min(1, tband(ms, T.travel[0], T.travel[0]+400)) * (1 - Math.min(1, phBoom * 7));
-  drawParticle(p1x,p1y,pAlpha);
-  drawParticle(p2x,p2y,pAlpha);
+  const pAlpha=Math.min(1,tband(ms,T.travel[0],T.travel[0]+400))*(1-Math.min(1,phBoom*7))*(1-phFade*3);
+  if(phFade<0.35){ drawParticle(p1x,p1y,pAlpha); drawParticle(p2x,p2y,pAlpha); }
 
   // Boom
-  if(phBoom>0){
-    const ring1a=Math.max(0,0.45-phBoom*0.45);
-    if(ring1a>0){
-      ctx.beginPath();ctx.arc(cx,cy,phBoom*200,0,Math.PI*2);
-      ctx.strokeStyle=`rgba(45,110,230,${ring1a})`;ctx.lineWidth=1.0;ctx.stroke();
-    }
-    const ring2a=Math.max(0,0.18-phBoom*0.18);
-    if(ring2a>0){
-      ctx.beginPath();ctx.arc(cx,cy,phBoom*340,0,Math.PI*2);
-      ctx.strokeStyle=`rgba(45,110,230,${ring2a})`;ctx.lineWidth=1.0;ctx.stroke();
-    }
-    const trkGrow=band(phBoom,0.0,0.38);
-    const trkFade=band(phBoom,0.50,0.80);
-    const trkAlpha=(1-trkFade)*0.55;
+  if(phBoom>0&&phFade<0.9){
+    const bf=1-phFade;
+    const ring1a=Math.max(0,0.45-phBoom*0.45)*bf;
+    if(ring1a>0){ ctx.beginPath();ctx.arc(cx,cy,phBoom*200,0,Math.PI*2);ctx.strokeStyle=`rgba(45,110,230,${ring1a})`;ctx.lineWidth=1.0;ctx.stroke(); }
+    const ring2a=Math.max(0,0.18-phBoom*0.18)*bf;
+    if(ring2a>0){ ctx.beginPath();ctx.arc(cx,cy,phBoom*340,0,Math.PI*2);ctx.strokeStyle=`rgba(45,110,230,${ring2a})`;ctx.lineWidth=1.0;ctx.stroke(); }
+    const trkGrow=band(phBoom,0.0,0.38), trkFade=band(phBoom,0.50,0.80);
+    const trkAlpha=(1-trkFade)*0.55*bf;
     if(trkAlpha>0){
       const bR=Math.min(W,H)*0.28;
       for(let i=0;i<12;i++){
@@ -284,29 +213,21 @@ function draw(ts){
         ctx.strokeStyle=`rgba(55,120,240,${trkAlpha})`;ctx.lineWidth=0.8;ctx.stroke();
       }
     }
-    const glowA=Math.max(0,1-phBoom*2.0);
+    const glowA=Math.max(0,1-phBoom*2.0)*bf;
     if(glowA>0){
       const fg=ctx.createRadialGradient(cx,cy,0,cx,cy,Math.min(W,H)*0.26);
       fg.addColorStop(0,`rgba(55,125,255,${glowA*0.48})`);
       fg.addColorStop(0.4,`rgba(20,65,200,${glowA*0.2})`);
       fg.addColorStop(1,'rgba(0,0,0,0)');
-      ctx.fillStyle=fg;ctx.fillRect(0,0,W,H);
+      ctx.fillStyle=fg; ctx.fillRect(0,0,W,H);
     }
-    const textAlpha=ease(band(phBoom,0.32,0.65));
-    overlay.style.opacity=textAlpha;
-    overlay.style.pointerEvents=textAlpha>0.5?'auto':'none';
-    topNav.style.opacity=textAlpha;
-    topNav.style.pointerEvents=textAlpha>0.5?'auto':'none';
-  } else {
-    overlay.style.opacity='0';
-    overlay.style.pointerEvents='none';
-    topNav.style.opacity='0';
-    topNav.style.pointerEvents='none';
   }
+
+  // Nav fades in with white
+  if(phFade>0.5&&!navShown){ navShown=true; topNav.classList.add('visible'); }
 
   requestAnimationFrame(draw);
 }
-
 requestAnimationFrame(draw);
 </script>
 </body>
