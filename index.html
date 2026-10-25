@@ -2,233 +2,140 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Shalini Epari</title>
-<style>
-* { box-sizing: border-box; margin: 0; padding: 0; }
-html, body { height: 100%; overflow: hidden; background: #000; font-family: 'Segoe UI', system-ui, sans-serif; }
-canvas { display: block; width: 100%; height: 100%; position: fixed; inset: 0; }
-
-#top-nav {
-  position: fixed; top: 28px; right: 36px;
-  display: flex; gap: 28px; z-index: 10;
-  pointer-events: none; opacity: 0;
-  transition: opacity 1.6s ease;
-}
-#top-nav.visible { opacity: 1; pointer-events: auto; }
-#top-nav a {
-  font-size: 13px; letter-spacing: 0.04em; color: #5aadff;
-  text-decoration: none; transition: opacity 0.15s;
-}
-#top-nav a:hover { opacity: 0.6; }
-</style>
-</head>
-<body>
-<canvas id="c"></canvas>
-
-<nav id="top-nav">
-  <a href="cv.pdf">CV</a>
-  <a href="research.html">Research</a>
-  <a href="students.html">Student Projects</a>
-  <a href="gallery.html">Gallery</a>
-  <a href="blog.html">Blog</a>
-  <a href="mailto:shalini.epari@cern.ch">Contact</a>
-</nav>
-
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Shalini Epari — Experimental particle physicist, ATLAS, CERN</title>
+<meta name="description" content="Shalini Epari is an experimental particle physicist on the ATLAS Experiment at CERN, working on detector hardware for the High-Luminosity LHC and searches for new particles with machine learning.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='11' fill='none' stroke='%230a4fa3' stroke-width='3'/%3E%3Ccircle cx='16' cy='16' r='3.5' fill='%230a4fa3'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="site.css">
 <script>
-const canvas = document.getElementById('c');
-const ctx    = canvas.getContext('2d');
-const topNav = document.getElementById('top-nav');
-let W, H;
-function resize() { W = canvas.width = window.innerWidth; H = canvas.height = window.innerHeight; }
-resize();
-window.addEventListener('resize', resize);
+(function(){var p=new URLSearchParams(location.search),seen=false;try{seen=sessionStorage.getItem('introSeen')==='1'}catch(e){}
+var reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+var play=p.has('intro')||(!seen&&!p.has('skip')&&!reduce);
+document.documentElement.classList.add(play?'intro':'nointro');})();
+</script>
+<style>
+html.intro,html.intro body{background:#000;overflow:hidden}
+#tunnel,#skip{display:none}
+html.intro #tunnel{display:block;position:fixed;inset:0;z-index:1;width:100%;height:100%}
+html.intro #skip{display:block}
+.top,.content,.foot{position:relative;z-index:10}
+#skip{position:fixed;right:26px;bottom:22px;z-index:30;background:none;border:0;color:rgba(190,215,255,.65);font:500 12px var(--font);letter-spacing:.14em;text-transform:uppercase;cursor:pointer;opacity:0;transition:opacity .6s,color .2s;padding:8px}
+#skip.show{opacity:1} #skip:hover{color:#fff}
+</style>
+<noscript><style>.top,.content,.foot,.tabs a{opacity:1!important}</style></noscript>
+</head>
+<body class="">
+<canvas id="tunnel" aria-hidden="true"></canvas>
+<button id="skip" type="button">Skip</button>
+<header class="top">
+  <div class="nav-row">
+    <nav class="tabs" aria-label="Main"><a href="index.html" style="--i:0" aria-current="page">About me</a><a href="research.html" style="--i:1">Research</a><a href="projects.html" style="--i:2">Projects</a><a href="outreach.html" style="--i:3">Outreach</a><a href="gallery.html" style="--i:4">Gallery</a></nav>
+    <a class="me" href="index.html">Shalini Epari</a>
+  </div>
+</header>
+<main class="content">
+<h1 class="sr-only">About me</h1>
+<div class="about">
+  <div class="photo"><span class="mono">SE</span><img src="photos/shalini.jpg" alt="Shalini Epari" onerror="this.remove()"></div>
+  <div>
+    <p class="who">Shalini Epari</p>
+    <p class="role">Experimental particle physicist<br>Postdoctoral researcher, ATLAS Experiment, CERN · University of Montreal</p>
+    <p class="txt">I work for the ATLAS Experiment at CERN. My research focuses on searching for new fundamental particles using machine learning, upgrading the detector for the next generation of collisions, and scientific outreach.</p>
+  </div>
+</div>
+</main>
+<footer class="foot"><span>Write to me at: <a href="mailto:shalini.epari@cern.ch">shalini.epari@cern.ch</a></span><a href="cv.pdf">Download CV</a></footer>
+<script>
+(function(){
+  const root=document.documentElement, body=document.body;
+  if(!root.classList.contains('intro')){ body.classList.add('ready'); return; }
+  const canvas=document.getElementById('tunnel'), skipBtn=document.getElementById('skip');
+  let offset=0;
+  const ctx=canvas.getContext('2d'); let W,H;
+  function size(){W=canvas.width=window.innerWidth;H=canvas.height=window.innerHeight;}
+  size(); window.addEventListener('resize',size);
+  const ease=t=>t<0.5?2*t*t:-1+(4-2*t)*t;
+  const band=(p,a,b)=>Math.max(0,Math.min(1,(p-a)/(b-a)));
+  const T={tubeIn:[800,2800],travel:[800,4200],waltz:[3000,4800],boom:[4800,7200],fadeOut:[6800,8800]};
+  const R=1.0,NSEGS=36,Lx=-0.6,Ly=-0.8;
+  const project=(wx,wy,wz)=>{const f=H*0.88;return{x:W*.5+(wx/wz)*f,y:H*.5+(wy/wz)*f};};
 
-function band(p,a,b){ return Math.max(0,Math.min(1,(p-a)/(b-a))); }
-function ease(t){ return t<0.5?2*t*t:-1+(4-2*t)*t; }
-function tband(ms,a,b){ return Math.max(0,Math.min(1,(ms-a)/(b-a))); }
-
-const T = {
-  tubeIn:  [800,  2800],
-  travel:  [800,  4200],
-  waltz:   [3000, 4800],
-  boom:    [4800, 7200],
-  fadeOut: [6400, 7800],
-};
-
-function project(wx,wy,wz){
-  const f=H*0.88;
-  return {x:W*0.5+(wx/wz)*f, y:H*0.5+(wy/wz)*f};
-}
-const R=1.0, NSEGS=36, Lx=-0.6, Ly=-0.8;
-
-function drawCylinder(camZ, alpha){
-  if(alpha<=0) return;
-  const spacing=0.12, zNear=0.15, zFar=4.0;
-  const iMin=Math.ceil((camZ+zNear)/spacing);
-  const iMax=Math.floor((camZ+zFar)/spacing);
-  for(let i=iMax;i>=iMin;i--){
-    const wz=i*spacing-camZ;
-    if(wz<zNear||wz>zFar) continue;
-    const depthT=1-(wz-zNear)/(zFar-zNear);
-    const fogA=Math.pow(depthT,0.5);
-    const fadeIn=Math.min(1,(wz-zNear)/(spacing*3));
-    const fadeOut=Math.min(1,(zFar-wz)/(spacing*3));
-    const ringA=fadeIn*fadeOut;
-    if(ringA<0.005) continue;
-    const wz2=Math.max(0.05,wz-spacing);
-    for(let ai=0;ai<NSEGS;ai++){
-      const a0=(ai/NSEGS)*Math.PI*2, a1=((ai+1)/NSEGS)*Math.PI*2, aMid=(a0+a1)*0.5;
-      const nx=-Math.cos(aMid), ny=-Math.sin(aMid);
-      const diffuse=Math.max(0,nx*Lx+ny*Ly);
-      const l=0.04+diffuse*0.28+fogA*0.05;
-      const rr=Math.round(l*15+fogA*4), gg=Math.round(l*55+fogA*10), bb=Math.round(l*220+fogA*30);
-      const p00=project(Math.cos(a0)*R,Math.sin(a0)*R,wz);
-      const p10=project(Math.cos(a1)*R,Math.sin(a1)*R,wz);
-      const p01=project(Math.cos(a0)*R,Math.sin(a0)*R,wz2);
-      const p11=project(Math.cos(a1)*R,Math.sin(a1)*R,wz2);
-      ctx.beginPath();
-      ctx.moveTo(p00.x,p00.y); ctx.lineTo(p10.x,p10.y);
-      ctx.lineTo(p11.x,p11.y); ctx.lineTo(p01.x,p01.y);
-      ctx.closePath();
-      ctx.fillStyle=`rgba(${rr},${gg},${bb},${alpha*(0.6+fogA*0.35)*ringA})`;
-      ctx.fill();
-      if(i%8===0){
-        ctx.beginPath(); ctx.moveTo(p00.x,p00.y); ctx.lineTo(p10.x,p10.y);
-        ctx.strokeStyle=`rgba(60,120,255,${alpha*fogA*0.18*ringA})`; ctx.lineWidth=0.6; ctx.stroke();
+  function cylinder(camZ,alpha){
+    if(alpha<=0) return;
+    const spacing=0.12,zNear=0.15,zFar=4.0;
+    const iMin=Math.ceil((camZ+zNear)/spacing), iMax=Math.floor((camZ+zFar)/spacing);
+    for(let i=iMax;i>=iMin;i--){
+      const wz=i*spacing-camZ; if(wz<zNear||wz>zFar) continue;
+      const depthT=1-(wz-zNear)/(zFar-zNear), fogA=Math.pow(depthT,0.5);
+      const ringA=Math.min(1,(wz-zNear)/(spacing*3))*Math.min(1,(zFar-wz)/(spacing*3)); if(ringA<0.005) continue;
+      const wz2=Math.max(0.05,wz-spacing);
+      for(let ai=0;ai<NSEGS;ai++){
+        const a0=(ai/NSEGS)*Math.PI*2,a1=((ai+1)/NSEGS)*Math.PI*2,aMid=(a0+a1)*0.5;
+        const diffuse=Math.max(0,-Math.cos(aMid)*Lx-Math.sin(aMid)*Ly);
+        const l=0.04+diffuse*0.28+fogA*0.05;
+        const rr=Math.round(l*15+fogA*4),gg=Math.round(l*55+fogA*10),bb=Math.round(l*220+fogA*30);
+        const p00=project(Math.cos(a0)*R,Math.sin(a0)*R,wz),p10=project(Math.cos(a1)*R,Math.sin(a1)*R,wz);
+        const p01=project(Math.cos(a0)*R,Math.sin(a0)*R,wz2),p11=project(Math.cos(a1)*R,Math.sin(a1)*R,wz2);
+        ctx.beginPath();ctx.moveTo(p00.x,p00.y);ctx.lineTo(p10.x,p10.y);ctx.lineTo(p11.x,p11.y);ctx.lineTo(p01.x,p01.y);ctx.closePath();
+        ctx.fillStyle=`rgba(${rr},${gg},${bb},${alpha*(0.6+fogA*0.35)*ringA})`;ctx.fill();
+        if(i%8===0){ctx.beginPath();ctx.moveTo(p00.x,p00.y);ctx.lineTo(p10.x,p10.y);ctx.strokeStyle=`rgba(60,120,255,${alpha*fogA*0.18*ringA})`;ctx.lineWidth=0.6;ctx.stroke();}
       }
     }
+    const vg=ctx.createRadialGradient(W*.5,H*.5,0,W*.5,H*.5,H*0.25);
+    vg.addColorStop(0,`rgba(8,35,130,${alpha*0.6})`);vg.addColorStop(0.6,`rgba(3,12,50,${alpha*0.25})`);vg.addColorStop(1,'rgba(0,0,0,0)');
+    ctx.fillStyle=vg;ctx.beginPath();ctx.arc(W*.5,H*.5,H*0.25,0,Math.PI*2);ctx.fill();
   }
-  const vg=ctx.createRadialGradient(W*.5,H*.5,0,W*.5,H*.5,H*0.25);
-  vg.addColorStop(0,`rgba(8,35,130,${alpha*0.6})`);
-  vg.addColorStop(0.6,`rgba(3,12,50,${alpha*0.25})`);
-  vg.addColorStop(1,'rgba(0,0,0,0)');
-  ctx.fillStyle=vg; ctx.beginPath(); ctx.arc(W*.5,H*.5,H*0.25,0,Math.PI*2); ctx.fill();
-}
-
-function drawParticle(x,y,alpha){
-  if(alpha<=0) return;
-  const g=ctx.createRadialGradient(x,y,0,x,y,22);
-  g.addColorStop(0,`rgba(100,180,255,${alpha*0.65})`);
-  g.addColorStop(0.45,`rgba(40,100,220,${alpha*0.25})`);
-  g.addColorStop(1,'rgba(0,0,0,0)');
-  ctx.fillStyle=g; ctx.beginPath(); ctx.arc(x,y,22,0,Math.PI*2); ctx.fill();
-  ctx.beginPath(); ctx.arc(x,y,3,0,Math.PI*2);
-  ctx.fillStyle=`rgba(190,220,255,${alpha})`; ctx.fill();
-}
-
-const TRACK_ANGLES=Array.from({length:12},(_,i)=>(i/12)*Math.PI*2+i*0.4);
-const TRACK_LENS  =Array.from({length:12},(_,i)=>0.55+((i*5)%6)*0.08);
-
-const dust=Array.from({length:35},()=>({
-  x:Math.random(), y:Math.random(), r:0.35+Math.random()*0.9,
-  vy:0.00007+Math.random()*0.00011, vx:(Math.random()-.5)*0.00004,
-}));
-function stepDust(dt){
-  for(const d of dust){
-    d.x+=d.vx*dt; d.y+=d.vy*dt;
-    if(d.y>1.05){d.y=-0.05;d.x=Math.random();}
-    if(d.x<0)d.x+=1; if(d.x>1)d.x-=1;
+  function particle(x,y,alpha){
+    if(alpha<=0) return;
+    const g=ctx.createRadialGradient(x,y,0,x,y,22);
+    g.addColorStop(0,`rgba(100,180,255,${alpha*0.65})`);g.addColorStop(0.45,`rgba(40,100,220,${alpha*0.25})`);g.addColorStop(1,'rgba(0,0,0,0)');
+    ctx.fillStyle=g;ctx.beginPath();ctx.arc(x,y,22,0,Math.PI*2);ctx.fill();
+    ctx.beginPath();ctx.arc(x,y,3,0,Math.PI*2);ctx.fillStyle=`rgba(190,220,255,${alpha})`;ctx.fill();
   }
-}
+  const TA=Array.from({length:12},(_,i)=>(i/12)*Math.PI*2+i*0.4), TL=Array.from({length:12},(_,i)=>0.55+((i*5)%6)*0.08);
+  const dust=Array.from({length:35},()=>({x:Math.random(),y:Math.random(),r:0.35+Math.random()*0.9,vy:0.00007+Math.random()*0.00011,vx:(Math.random()-.5)*0.00004}));
 
-let startTime=null, lastT=0, navShown=false;
+  let start=null,last=0,readyShown=false;
+  skipBtn.addEventListener('click',()=>{ if(start!==null){ const now=performance.now(); const ms=now-start+offset; if(ms<T.fadeOut[0]) offset=T.fadeOut[0]-(now-start); } });
+  setTimeout(()=>skipBtn.classList.add('show'),700);
 
-function draw(ts){
-  if(!startTime) startTime=ts;
-  const ms=ts-startTime;
-  const dt=ts-lastT; lastT=ts;
-  stepDust(dt);
-
-  ctx.clearRect(0,0,W,H);
-  const cx=W*0.5, cy=H*0.5;
-
-  const phTube   = ease(tband(ms,T.tubeIn[0],T.tubeIn[1]));
-  const phTravel = Math.pow(tband(ms,T.travel[0],T.travel[1]),1.8);
-  const phBoom   = tband(ms,T.boom[0],T.boom[1]);
-  const phFade   = ease(tband(ms,T.fadeOut[0],T.fadeOut[1]));
-
-  // Background: black → white
-  const bgWhite = phFade;
-  const bgDark  = phTube*(1-Math.min(phBoom*1.5,1))*(1-phFade);
-  const bgVal   = Math.round(bgWhite*255);
-  const bgBlue  = Math.round(bgDark*22);
-  ctx.fillStyle = phFade>0
-    ? `rgb(${bgVal},${bgVal},${bgVal})`
-    : `rgb(${Math.round(bgDark*4)},${Math.round(bgDark*9)},${bgBlue})`;
-  ctx.fillRect(0,0,W,H);
-
-  // Dust
-  if(phBoom<0.15&&phTube<0.6){
-    const da=0.055*(1-phTube*1.8)*(1-phBoom*6);
-    if(da>0) for(const d of dust){
-      ctx.beginPath(); ctx.arc(d.x*W,d.y*H,d.r,0,Math.PI*2);
-      ctx.fillStyle=`rgba(80,130,255,${da})`; ctx.fill();
+  function frame(ts){
+    if(start===null) start=ts;
+    const ms=ts-start+offset, dt=ts-last; last=ts;
+    for(const d of dust){d.x+=d.vx*dt;d.y+=d.vy*dt;if(d.y>1.05){d.y=-0.05;d.x=Math.random();}if(d.x<0)d.x+=1;if(d.x>1)d.x-=1;}
+    ctx.clearRect(0,0,W,H);
+    const cx=W*.5,cy=H*.5, tb=(a,b)=>band(ms,a,b);
+    const phTube=ease(tb(T.tubeIn[0],T.tubeIn[1])), phTravel=Math.pow(tb(T.travel[0],T.travel[1]),1.8), phBoom=tb(T.boom[0],T.boom[1]), phFade=ease(tb(T.fadeOut[0],T.fadeOut[1]));
+    const bgB=phTube*(1-Math.min(phBoom*1.5,1)), v=Math.round(255*phFade);
+    ctx.fillStyle=phFade>0?`rgb(${v},${v},${v})`:`rgb(${Math.round(bgB*4)},${Math.round(bgB*9)},${Math.round(bgB*22)})`; ctx.fillRect(0,0,W,H);
+    if(phBoom<0.15&&phTube<0.6){const da=0.055*(1-phTube*1.8)*(1-phBoom*6);if(da>0)for(const d of dust){ctx.beginPath();ctx.arc(d.x*W,d.y*H,d.r,0,Math.PI*2);ctx.fillStyle=`rgba(80,130,255,${da})`;ctx.fill();}}
+    if(phFade<0.8) cylinder(phTravel*2.0, phTube*(1-Math.max(0,phBoom*2.2))*(1-phFade*1.5));
+    const startX=W*0.28,circleR=W*0.13,waltzR=W*0.04;
+    const pStr=tb(T.travel[0],T.waltz[0]),pCirc=tb(T.waltz[0],T.waltz[0]+700),pWltz=tb(T.waltz[0]+700,T.boom[0]);
+    let p1x,p1y,p2x,p2y;
+    if(pWltz>0){const o=waltzR*(1-ease(pWltz)),a=pWltz*Math.PI*2*3;p1x=cx+Math.cos(a)*o;p1y=cy+Math.sin(a)*o*0.45;p2x=cx+Math.cos(a+Math.PI)*o;p2y=cy+Math.sin(a+Math.PI)*o*0.45;}
+    else if(pCirc>0){const o=circleR,a=pCirc*Math.PI*4;p1x=cx+Math.cos(a)*o;p1y=cy+Math.sin(a)*o*0.45;p2x=cx+Math.cos(a+Math.PI)*o;p2y=cy+Math.sin(a+Math.PI)*o*0.45;}
+    else{const t=ease(pStr);p1x=cx-startX+t*(startX-circleR);p1y=cy;p2x=cx+startX-t*(startX-circleR);p2y=cy;}
+    const pA=Math.min(1,tb(T.travel[0],T.travel[0]+400))*(1-Math.min(1,phBoom*7))*(1-phFade*3);
+    if(phFade<0.35){particle(p1x,p1y,pA);particle(p2x,p2y,pA);}
+    if(phBoom>0&&phFade<0.9){
+      const bf=1-phFade, early=1-band(phBoom,0.35,0.7);
+      const r1=Math.max(0,0.45-phBoom*0.45)*bf*early; if(r1>0){ctx.beginPath();ctx.arc(cx,cy,phBoom*200,0,Math.PI*2);ctx.strokeStyle=`rgba(45,110,230,${r1})`;ctx.lineWidth=1;ctx.stroke();}
+      const r2=Math.max(0,0.18-phBoom*0.18)*bf*early; if(r2>0){ctx.beginPath();ctx.arc(cx,cy,phBoom*340,0,Math.PI*2);ctx.strokeStyle=`rgba(45,110,230,${r2})`;ctx.lineWidth=1;ctx.stroke();}
+      const tg=band(phBoom,0,0.38),tf=band(phBoom,0.5,0.8),ta=(1-tf)*0.55*bf;
+      if(ta>0){const bR=Math.min(W,H)*0.28;for(let i=0;i<12;i++){const len=bR*TL[i]*tg;ctx.beginPath();ctx.moveTo(cx,cy);ctx.lineTo(cx+Math.cos(TA[i])*len,cy+Math.sin(TA[i])*len);ctx.strokeStyle=`rgba(55,120,240,${ta})`;ctx.lineWidth=0.8;ctx.stroke();}}
+      const gA=Math.max(0,1-phBoom*2)*bf;
+      if(gA>0){const fg=ctx.createRadialGradient(cx,cy,0,cx,cy,Math.min(W,H)*0.26);fg.addColorStop(0,`rgba(55,125,255,${gA*0.48})`);fg.addColorStop(0.4,`rgba(20,65,200,${gA*0.2})`);fg.addColorStop(1,'rgba(0,0,0,0)');ctx.fillStyle=fg;ctx.fillRect(0,0,W,H);}
     }
-  }
-
-  // Cylinder
-  if(phFade<0.8) drawCylinder(phTravel*2.0, phTube*(1-Math.max(0,phBoom*2.2))*(1-phFade*1.5));
-
-  // Particles
-  const startX=W*0.28, circleR=W*0.13, waltzR=W*0.04;
-  const pStr  = tband(ms,T.travel[0],T.waltz[0]);
-  const pCirc = tband(ms,T.waltz[0],T.waltz[0]+700);
-  const pWltz = tband(ms,T.waltz[0]+700,T.boom[0]);
-  let p1x,p1y,p2x,p2y;
-  if(pWltz>0){
-    const orbit=waltzR*(1-ease(pWltz));
-    const ang=pWltz*Math.PI*2*3.0;
-    p1x=cx+Math.cos(ang)*orbit;          p1y=cy+Math.sin(ang)*orbit*0.45;
-    p2x=cx+Math.cos(ang+Math.PI)*orbit;  p2y=cy+Math.sin(ang+Math.PI)*orbit*0.45;
-  } else if(pCirc>0){
-    const orbit=circleR;
-    const ang=pCirc*Math.PI*4;
-    p1x=cx+Math.cos(ang)*orbit;          p1y=cy+Math.sin(ang)*orbit*0.45;
-    p2x=cx+Math.cos(ang+Math.PI)*orbit;  p2y=cy+Math.sin(ang+Math.PI)*orbit*0.45;
-  } else {
-    const t=ease(pStr); const ex=circleR;
-    p1x=cx-startX+t*(startX-ex); p1y=cy;
-    p2x=cx+startX-t*(startX-ex); p2y=cy;
-  }
-
-  const pAlpha=Math.min(1,tband(ms,T.travel[0],T.travel[0]+400))*(1-Math.min(1,phBoom*7))*(1-phFade*3);
-  if(phFade<0.35){ drawParticle(p1x,p1y,pAlpha); drawParticle(p2x,p2y,pAlpha); }
-
-  // Boom
-  if(phBoom>0&&phFade<0.9){
-    const bf=1-phFade;
-    const ring1a=Math.max(0,0.45-phBoom*0.45)*bf;
-    if(ring1a>0){ ctx.beginPath();ctx.arc(cx,cy,phBoom*200,0,Math.PI*2);ctx.strokeStyle=`rgba(45,110,230,${ring1a})`;ctx.lineWidth=1.0;ctx.stroke(); }
-    const ring2a=Math.max(0,0.18-phBoom*0.18)*bf;
-    if(ring2a>0){ ctx.beginPath();ctx.arc(cx,cy,phBoom*340,0,Math.PI*2);ctx.strokeStyle=`rgba(45,110,230,${ring2a})`;ctx.lineWidth=1.0;ctx.stroke(); }
-    const trkGrow=band(phBoom,0.0,0.38), trkFade=band(phBoom,0.50,0.80);
-    const trkAlpha=(1-trkFade)*0.55*bf;
-    if(trkAlpha>0){
-      const bR=Math.min(W,H)*0.28;
-      for(let i=0;i<12;i++){
-        const len=bR*TRACK_LENS[i]*trkGrow;
-        ctx.beginPath();ctx.moveTo(cx,cy);
-        ctx.lineTo(cx+Math.cos(TRACK_ANGLES[i])*len,cy+Math.sin(TRACK_ANGLES[i])*len);
-        ctx.strokeStyle=`rgba(55,120,240,${trkAlpha})`;ctx.lineWidth=0.8;ctx.stroke();
-      }
+    if(phFade>0.5&&!readyShown){
+      readyShown=true; body.classList.add('ready'); skipBtn.style.display='none';
+      try{ sessionStorage.setItem('introSeen','1'); }catch(e){}
     }
-    const glowA=Math.max(0,1-phBoom*2.0)*bf;
-    if(glowA>0){
-      const fg=ctx.createRadialGradient(cx,cy,0,cx,cy,Math.min(W,H)*0.26);
-      fg.addColorStop(0,`rgba(55,125,255,${glowA*0.48})`);
-      fg.addColorStop(0.4,`rgba(20,65,200,${glowA*0.2})`);
-      fg.addColorStop(1,'rgba(0,0,0,0)');
-      ctx.fillStyle=fg; ctx.fillRect(0,0,W,H);
-    }
+    if(phFade<0.999) requestAnimationFrame(frame);
+    else { root.classList.remove('intro'); }
   }
-
-  // Nav fades in with white
-  if(phFade>0.5&&!navShown){ navShown=true; topNav.classList.add('visible'); }
-
-  requestAnimationFrame(draw);
-}
-requestAnimationFrame(draw);
+  requestAnimationFrame(frame);
+})();
 </script>
 </body>
 </html>
