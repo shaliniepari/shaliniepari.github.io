@@ -68,10 +68,9 @@ a:focus-visible{outline:2px solid var(--blue);outline-offset:4px;border-radius:3
 .foot a:hover{text-decoration:underline}
 
 /* gentle entrance */
-.top,.content,.foot,.tabs a{opacity:0}
-body.ready .top,body.ready .content,body.ready .foot,body.ready .tabs a{opacity:1}
+.top,.content,.foot{opacity:0}
+body.ready .top,body.ready .content,body.ready .foot{opacity:1}
 body.ready .top{animation:rise .8s ease backwards}
-body.ready .tabs a{animation:rise .8s ease backwards;animation-delay:calc(var(--i)*90ms + 120ms)}
 body.ready .content{animation:rise .9s ease .25s backwards}
 body.ready .foot{animation:rise .9s ease .45s backwards}
 @keyframes rise{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
