@@ -68,10 +68,9 @@ a:focus-visible{outline:2px solid var(--blue);outline-offset:4px;border-radius:3
 .foot a:hover{text-decoration:underline}
 
 /* gentle entrance */
-.top,.content,.foot,.tabs a{opacity:0}
-body.ready .top,body.ready .content,body.ready .foot,body.ready .tabs a{opacity:1}
+.top,.content,.foot{opacity:0}
+body.ready .top,body.ready .content,body.ready .foot{opacity:1}
 body.ready .top{animation:rise .8s ease backwards}
-body.ready .tabs a{animation:rise .8s ease backwards;animation-delay:calc(var(--i)*90ms + 120ms)}
 body.ready .content{animation:rise .9s ease .25s backwards}
 body.ready .foot{animation:rise .9s ease .45s backwards}
 @keyframes rise{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
@@ -196,7 +195,8 @@ html.intro .top,html.intro .content,html.intro .foot{visibility:hidden}
     const bgB=phTube*(1-Math.min(phBoom*1.5,1)), v=Math.round(255*phFade);
     ctx.fillStyle=phFade>0?`rgb(${v},${v},${v})`:`rgb(${Math.round(bgB*4)},${Math.round(bgB*9)},${Math.round(bgB*22)})`; ctx.fillRect(0,0,W,H);
     if(phBoom<0.15&&phTube<0.6){const da=0.055*(1-phTube*1.8)*(1-phBoom*6);if(da>0)for(const d of dust){ctx.beginPath();ctx.arc(d.x*W,d.y*H,d.r,0,Math.PI*2);ctx.fillStyle=`rgba(80,130,255,${da})`;ctx.fill();}}
-    if(phFade<0.8) cylinder(phTravel*2.0, phTube*(1-Math.max(0,phBoom*2.2))*(1-phFade*1.5));
+    const cylA=phTube*Math.max(0,1-phBoom*2.2)*Math.max(0,1-phFade*1.5);
+    if(cylA>0) cylinder(phTravel*2.0, cylA);
     const startX=W*0.28,circleR=W*0.13,waltzR=W*0.04;
     const pStr=tb(T.travel[0],T.waltz[0]),pCirc=tb(T.waltz[0],T.waltz[0]+700),pWltz=tb(T.waltz[0]+700,T.boom[0]);
     let p1x,p1y,p2x,p2y;
